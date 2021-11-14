@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center">
+
+    <com.github.gcacace.signaturepad.views.SignaturePad
+        android:id="@+id/signaturePad"
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        android:background="#9A9A9A" />
+
+    <Button
+        android:id="@+id/button_start"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="기록 시작"
+        android:visibility="visible"
+        android:onClick="onClick"/>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center">
+
+        <Button
+            android:id="@+id/button_save"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:layout_marginLeft="60dp"
+            android:layout_marginRight="20dp"
+            android:visibility="invisible"
+            android:text="기록 저장"
+            android:onClick="onClick"/>
+
+        <Button
+            android:id="@+id/button_clear"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginLeft="20dp"
+            android:layout_marginRight="60dp"
+            android:layout_weight="1"
+            android:onClick="onClick"
+            android:text="초기화"
+            android:visibility="invisible" />
+
+
+    </LinearLayout>
+
+</LinearLayout>

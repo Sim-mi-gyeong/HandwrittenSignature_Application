@@ -16,6 +16,16 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
+
+        <activity android:name="InputName" />
+        <activity android:name=".SelectMode"/>
+        <activity android:name=".SelectStatus"/>
+        <activity android:name=".RealSign"/>
+        <activity android:name=".ForgerySign_Unskilled"/>
+        <activity android:name=".ForgerySign_Skilled"/>
+
     </application>
+
+
 
 </manifest>
