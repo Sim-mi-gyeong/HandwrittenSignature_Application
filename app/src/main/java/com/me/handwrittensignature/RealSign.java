@@ -210,10 +210,6 @@ public class RealSign extends AppCompatActivity {
 
                     break;
 
-
-
-
-
             }
 
 
