@@ -1,88 +1,180 @@
 <?xml version="1.0" encoding="utf-8"?>
+
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:gravity="center">
+    android:orientation="vertical">
 
     <TextView
-        android:id="@+id/countText"
+        android:id="@+id/timerText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:ems="3"
-        android:text="0/5"
-        android:textSize="20dp"
-        android:layout_marginBottom="10dp"
-        android:gravity="center"/>
-
-    <FrameLayout
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content" >
-
-        <com.github.gcacace.signaturepad.views.SignaturePad
-            android:id="@+id/signaturePad"
-            android:layout_width="match_parent"
-            android:layout_height="200dp"
-            android:background="#9A9A9A"
-            android:layout_marginBottom="10dp"/>
-
-        <TextView
-            android:id="@+id/finishText"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="서명 등록이 완료되었습니다."
-            android:layout_gravity="center"
-            android:textSize="20dp"
-            android:visibility="invisible"/>
-
-    </FrameLayout>
-
-<!--    <com.github.gcacace.signaturepad.views.SignaturePad-->
-<!--        android:id="@+id/signaturePad"-->
-<!--        android:layout_width="match_parent"-->
-<!--        android:layout_height="200dp"-->
-<!--        android:background="#9A9A9A"-->
-<!--        android:layout_marginBottom="10dp"/>-->
-
-    <Button
-        android:id="@+id/button_start"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="기록 시작"
-        android:visibility="visible"
-        android:onClick="onClick"/>
+        android:layout_gravity="right"
+        android:text="제한 시간 : "
+        android:textSize="15dp" />
 
     <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center">
+        android:layout_width="wrap_content"
+        android:layout_height="690dp"
+        android:gravity="center"
+        android:orientation="vertical">
 
-        <Button
-            android:id="@+id/button_save"
+        <TextView
+            android:id="@+id/countText"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:layout_marginLeft="60dp"
-            android:layout_marginRight="20dp"
-            android:visibility="invisible"
-            android:text="기록 저장"
-            android:onClick="onClick"/>
+            android:layout_marginBottom="10dp"
+            android:ems="3"
+            android:gravity="center"
+            android:text="0/5"
+            android:textSize="20dp" />
+
+        <FrameLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <com.github.gcacace.signaturepad.views.SignaturePad
+                android:id="@+id/signaturePad"
+                android:layout_width="match_parent"
+                android:layout_height="200dp"
+                android:layout_marginBottom="10dp"
+                android:background="#9A9A9A" />
+
+            <TextView
+                android:id="@+id/finishText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:text="서명 등록이 완료되었습니다."
+                android:textSize="20dp"
+                android:visibility="invisible" />
+
+        </FrameLayout>
 
         <Button
-            android:id="@+id/button_clear"
+            android:id="@+id/button_start"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="20dp"
-            android:layout_marginRight="60dp"
-            android:layout_weight="1"
             android:onClick="onClick"
-            android:text="초기화"
-            android:visibility="invisible" />
+            android:text="기록 시작"
+            android:visibility="visible" />
 
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:orientation="horizontal">
+
+            <Button
+                android:id="@+id/button_save"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="60dp"
+                android:layout_marginRight="20dp"
+                android:layout_weight="1"
+                android:onClick="onClick"
+                android:text="기록 저장"
+                android:visibility="invisible" />
+
+            <Button
+                android:id="@+id/button_clear"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="20dp"
+                android:layout_marginRight="60dp"
+                android:layout_weight="1"
+                android:onClick="onClick"
+                android:text="초기화"
+                android:visibility="invisible" />
+
+        </LinearLayout>
 
     </LinearLayout>
 
+
+        <!--    <TextView-->
+        <!--        android:id="@+id/textView2"-->
+        <!--        android:layout_width="wrap_content"-->
+        <!--        android:layout_height="wrap_content"-->
+        <!--        android:layout_gravity="right"-->
+
+        <!--        android:text="제한 시간 : "-->
+        <!--        android:textSize="15dp"/>-->
+
+        <!--    <TextView-->
+        <!--        android:id="@+id/countText"-->
+        <!--        android:layout_width="wrap_content"-->
+        <!--        android:layout_height="wrap_content"-->
+        <!--        android:ems="3"-->
+        <!--        android:text="0/5"-->
+        <!--        android:textSize="20dp"-->
+        <!--        android:layout_marginBottom="10dp"-->
+        <!--        android:gravity="center"/>-->
+
+        <!--    <FrameLayout-->
+        <!--        android:layout_width="wrap_content"-->
+        <!--        android:layout_height="wrap_content" >-->
+
+        <!--        <com.github.gcacace.signaturepad.views.SignaturePad-->
+        <!--            android:id="@+id/signaturePad"-->
+        <!--            android:layout_width="match_parent"-->
+        <!--            android:layout_height="200dp"-->
+        <!--            android:background="#9A9A9A"-->
+        <!--            android:layout_marginBottom="10dp"/>-->
+
+        <!--        <TextView-->
+        <!--            android:id="@+id/finishText"-->
+        <!--            android:layout_width="wrap_content"-->
+        <!--            android:layout_height="wrap_content"-->
+        <!--            android:text="서명 등록이 완료되었습니다."-->
+        <!--            android:layout_gravity="center"-->
+        <!--            android:textSize="20dp"-->
+        <!--            android:visibility="invisible"/>-->
+
+        <!--    </FrameLayout>-->
+
+        <!--&lt;!&ndash;    <com.github.gcacace.signaturepad.views.SignaturePad&ndash;&gt;-->
+        <!--&lt;!&ndash;        android:id="@+id/signaturePad"&ndash;&gt;-->
+        <!--&lt;!&ndash;        android:layout_width="match_parent"&ndash;&gt;-->
+        <!--&lt;!&ndash;        android:layout_height="200dp"&ndash;&gt;-->
+        <!--&lt;!&ndash;        android:background="#9A9A9A"&ndash;&gt;-->
+        <!--&lt;!&ndash;        android:layout_marginBottom="10dp"/>&ndash;&gt;-->
+
+        <!--    <Button-->
+        <!--        android:id="@+id/button_start"-->
+        <!--        android:layout_width="wrap_content"-->
+        <!--        android:layout_height="wrap_content"-->
+        <!--        android:text="기록 시작"-->
+        <!--        android:visibility="visible"-->
+        <!--        android:onClick="onClick"/>-->
+
+        <!--    <LinearLayout-->
+        <!--        android:layout_width="match_parent"-->
+        <!--        android:layout_height="wrap_content"-->
+        <!--        android:orientation="horizontal"-->
+        <!--        android:gravity="center">-->
+
+        <!--        <Button-->
+        <!--            android:id="@+id/button_save"-->
+        <!--            android:layout_width="wrap_content"-->
+        <!--            android:layout_height="wrap_content"-->
+        <!--            android:layout_weight="1"-->
+        <!--            android:layout_marginLeft="60dp"-->
+        <!--            android:layout_marginRight="20dp"-->
+        <!--            android:visibility="invisible"-->
+        <!--            android:text="기록 저장"-->
+        <!--            android:onClick="onClick"/>-->
+
+        <!--        <Button-->
+        <!--            android:id="@+id/button_clear"-->
+        <!--            android:layout_width="wrap_content"-->
+        <!--            android:layout_height="wrap_content"-->
+        <!--            android:layout_marginLeft="20dp"-->
+        <!--            android:layout_marginRight="60dp"-->
+        <!--            android:layout_weight="1"-->
+        <!--            android:onClick="onClick"-->
+        <!--            android:text="초기화"-->
+        <!--            android:visibility="invisible" />-->
 
 </LinearLayout>

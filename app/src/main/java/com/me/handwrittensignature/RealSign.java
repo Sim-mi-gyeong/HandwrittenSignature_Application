@@ -5,20 +5,33 @@ import android.content.Intent;
 import android.content.pm.ActivityInfo;
 //import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.github.gcacace.signaturepad.views.SignaturePad;
+
+import java.util.Timer;
+import java.util.TimerTask;
 
 public class RealSign extends AppCompatActivity {
     private SignaturePad signaturePad;
     private int countNum = 0;   // 등록된 사용자 서명 횟수
     private int countComplete = 5;   // 실제 서명으로 등록할 횟수
+
+//    TimerTask timerTask;
+//    Timer timer = new Timer();
+
+    // 타이머 관련 변수
+    private int timeLimit = 10;   // 제한 시간 설정
+    private int status = 0;   // o: 정지/초기화(기록 시작 전 상태, 기록 시작 -> 초기화 상태) , 1: 시작(기록 시작 후 상태) , 2: 일시 정지(기록 시작 -> 기록 저장 상태)
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,6 +44,11 @@ public class RealSign extends AppCompatActivity {
 
         TextView countText = (TextView)findViewById(R.id.countText);
         TextView finishText = (TextView)findViewById(R.id.finishText);
+        TextView timerText = (TextView)findViewById(R.id.timerText);
+
+        // 타이머를 위한 핸들러 인스턴스 변수
+        TimerHandler timer = new TimerHandler();
+
 
 //        saveButton.setEnabled(false)
 //        clearButton.setEnabled(false);
@@ -66,12 +84,20 @@ public class RealSign extends AppCompatActivity {
         startButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                signaturePad.setEnabled(true);
-                startButton.setVisibility(View.GONE);
-                clearButton.setVisibility(View.VISIBLE);
-                saveButton.setVisibility(View.VISIBLE);
 
-                startButton.setEnabled(false);
+                signaturePad.setEnabled(true);   // 서명 패드 활성화
+
+                startButton.setVisibility(View.GONE);   // 시작 버튼 숨기기
+                clearButton.setVisibility(View.VISIBLE);   // 초기화 버튼 나타나게
+                saveButton.setVisibility(View.VISIBLE);   // 저장 버튼 나타나게
+                startButton.setEnabled(false);   // 시작 버튼 비활성화
+
+                // 시작 버튼 클릭 시 CountDown Timer 실행
+                if (status == 0) {
+                   status = 1;   // 정지 상태를 -> 시작 상태로
+                    timer.sendEmptyMessage(0);
+                }
+
             }
         });
 
@@ -111,6 +137,11 @@ public class RealSign extends AppCompatActivity {
                     });
                 }
 
+                // 타이머 멈추도록 설정(일시 정지)
+                if (status == 1) {
+                    status = 0;   // 타이머 동작 중 상태를 -> 일시 정지 상태로
+                    timer.sendEmptyMessage(1);   // 1번 메세지(타이머 일시정지)
+                }
 
             }
         });
@@ -121,9 +152,42 @@ public class RealSign extends AppCompatActivity {
                 signaturePad.clear();
                 saveButton.setEnabled(true);
                 clearButton.setEnabled(true);
+
+                // 타이머 초기화
+                if (status == 1) {
+                    status = 0;
+                    timer.sendEmptyMessage(2);   // 2번 메세지(정지 후 타이머 초기화)
+                }
+
             }
         });
 
     }
 
+    // 타이머 핸들러 클래스
+    class TimerHandler extends Handler {
+
+        int timeLimit = 10;   // 제한 시간 설정
+
+        @Override
+        public void handleMessage(@NonNull Message msg) {
+            super.handleMessage(msg);
+
+//            this.removeMessages(0);
+//            Boolean Timer_state = false;
+//            if(Timer_state == true) {
+//                this.sendEmptyMessageDelayed(0, 1000);
+//
+//            }
+
+            switch (msg.what) {
+                case 0:
+
+
+
+            }
+
+
+        }
+    }
 }
