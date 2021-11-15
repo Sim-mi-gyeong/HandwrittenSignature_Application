@@ -126,9 +126,4 @@ public class RealSign extends AppCompatActivity {
 
     }
 
-//    public void onClick(View view) {
-//        button1.setText("초기화")
-//    }
-
-
 }
