@@ -1,7 +1,6 @@
 package com.me.handwrittensignature;
 // RealSign
 
-import android.content.Intent;
 import android.content.pm.ActivityInfo;
 //import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -15,22 +14,21 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.github.gcacace.signaturepad.views.SignaturePad;
 
-public class RealSign extends AppCompatActivity {
+public class ForgerySign_Skilled_Practice extends AppCompatActivity {
     private SignaturePad signaturePad;
     private int countNum = 0;   // 등록된 사용자 서명 횟수
-    private int countComplete = 5;   // 실제 서명으로 등록할 횟수
+    private int countComplete = 20;   // 실제 서명으로 등록할 횟수
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.real_sign);
+        setContentView(R.layout.skilled_forgery_sign_practice);
 
         Button startButton = (Button)findViewById(R.id.button_start);
-        Button saveButton = (Button)findViewById(R.id.button_save);
-        Button clearButton = (Button)findViewById(R.id.button_clear);
+        Button saveButton = (Button)findViewById(R.id.button_restart);
+        Button clearButton = (Button)findViewById(R.id.button_end);
 
         TextView countText = (TextView)findViewById(R.id.countText);
-        TextView finishText = (TextView)findViewById(R.id.finishText);
 
 //        saveButton.setEnabled(false)
 //        clearButton.setEnabled(false);
@@ -85,7 +83,7 @@ public class RealSign extends AppCompatActivity {
                 countNum += 1;
 
                 countText.setText((countNum + "/" + countComplete).toString());
-                Toast.makeText(RealSign.this, "Signature Saved", Toast.LENGTH_SHORT).show();
+                Toast.makeText(ForgerySign_Skilled_Practice.this, "Signature Saved", Toast.LENGTH_SHORT).show();
 
                 // 기록 저장 후에도 초기화 실행
                 signaturePad.clear();
@@ -97,19 +95,6 @@ public class RealSign extends AppCompatActivity {
                 saveButton.setVisibility(View.GONE);
 
                 startButton.setEnabled(true);
-
-                if(countNum == countComplete) {
-                    finishText.setVisibility(View.VISIBLE);
-//                    Toast.makeText(RealSign.this, "Complete Signature Saved", Toast.LENGTH_SHORT).show();
-                    startButton.setText("등록 완료");
-                    startButton.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            Intent intent = new Intent(getApplicationContext(), SelectStatus.class);
-                            startActivity(intent);
-                        }
-                    });
-                }
 
 
             }
