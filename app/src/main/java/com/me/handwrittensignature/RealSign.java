@@ -6,6 +6,8 @@ import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
@@ -14,6 +16,8 @@ import com.github.gcacace.signaturepad.views.SignaturePad;
 
 public class RealSign extends AppCompatActivity {
     private SignaturePad signaturePad;
+    private int countNum = 0;   // 등록된 사용자 서명 횟수
+    private int countComplete = 20;   // 실제 서명으로 등록할 횟수
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -23,7 +27,8 @@ public class RealSign extends AppCompatActivity {
         Button startButton = (Button)findViewById(R.id.button_start);
         Button saveButton = (Button)findViewById(R.id.button_save);
         Button clearButton = (Button)findViewById(R.id.button_clear);
-        int countNum = 20;   // 실제 서명으로 등록할 횟수
+
+        TextView countText = (TextView)findViewById(R.id.countText);
 
 //        saveButton.setEnabled(false)
 //        clearButton.setEnabled(false);
@@ -72,7 +77,26 @@ public class RealSign extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 //write code for saving the signature here
+
+                // 사용자 이름 + autoIncre + 서명 녹화 영상 저장
+
+                countNum += 1;
+
+                countText.setText((countNum + "/" + countComplete).toString());
                 Toast.makeText(RealSign.this, "Signature Saved", Toast.LENGTH_SHORT).show();
+
+                // 기록 저장 후에도 초기화 실행
+                signaturePad.clear();
+
+                // 또 다시 시작 버튼 누르고 -> 기록 저장 / 초기화 버튼으로 구분할 것인지?
+                signaturePad.setEnabled(false);
+                startButton.setVisibility(View.VISIBLE);
+                clearButton.setVisibility(View.GONE);
+                saveButton.setVisibility(View.GONE);
+
+                startButton.setEnabled(true);
+
+
             }
         });
 
