@@ -2,6 +2,8 @@ package com.me.handwrittensignature;
 // ForgerySign_Unskilled
 import android.content.Intent;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
@@ -11,6 +13,9 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.github.gcacace.signaturepad.views.SignaturePad;
+
+import java.util.Timer;
+import java.util.TimerTask;
 
 import static android.os.SystemClock.sleep;
 
@@ -84,10 +89,33 @@ public class ForgerySign_Unskilled extends AppCompatActivity {
                 startButton.setEnabled(false);
 
                 // 시작 버튼 클릭 시 CountDown Timer 실행   ->   어플 종료되는 현상 발생
-//                if (status == 0) {
-//                    status = 1;   // 종료 상태를 -> 시작 상태로
-//                    timer.sendEmptyMessage(0);
-//                }
+                final Timer ssmmss = new Timer();
+                final Handler timerhandler = new Handler() {
+                    public void handleMessage(Message msg) {
+//                        timeLimit = 10;
+                        timeLimit --;
+                        if (timeLimit == 0) {
+                            ssmmss.cancel();
+                        }
+                        timerText.setText("제한 시간 : " + timeLimit + " 초");
+
+                    }
+                };
+
+                final TimerTask outputtime = new TimerTask() {
+                    @Override
+                    public void run() {
+                        Message msg = timerhandler.obtainMessage() ;
+                        timerhandler.sendMessage(msg);
+                    }
+
+                };
+                ssmmss.schedule(outputtime, 0, 1000);
+
+                if (timeLimit == 0) {
+                    outputtime.cancel();
+                    timerText.setText("제한 시간 : " + timeLimit + " 초");
+                }
             }
         });
 
