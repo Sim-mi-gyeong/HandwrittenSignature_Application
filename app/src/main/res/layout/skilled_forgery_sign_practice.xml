@@ -11,7 +11,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:padding="10dp"
-        android:background="@drawable/backgroud"
+        android:background="@drawable/background"
         android:text="Practice Mode"
         android:textSize="15dp"
         android:layout_marginBottom="10dp"
@@ -65,7 +65,6 @@
                 android:onClick="onClick"
                 android:text="연습 종료"
                 android:visibility="invisible" />
-
 
         </LinearLayout>
 

@@ -23,10 +23,10 @@ import java.util.TimerTask;
 import static android.os.SystemClock.sleep;
 
 public class ForgerySign_Skilled extends AppCompatActivity {
+    private TextView modeText;
     private SignaturePad signaturePad;
     private int countNum = 0;   // 등록된 사용자 서명 횟수
     private int countComplete = 5;   // 실제 서명으로 등록할 횟수
-
 
     private int timeLimit = 10;   // 제한 시간 설정
 
@@ -44,7 +44,7 @@ public class ForgerySign_Skilled extends AppCompatActivity {
         TextView finishText = (TextView)findViewById(R.id.finishText);
         TextView timerText = (TextView)findViewById(R.id.timerText);
 
-
+        modeText.setVisibility(View.VISIBLE);
 //        saveButton.setEnabled(false)
 //        clearButton.setEnabled(false);
 

@@ -10,6 +10,7 @@
         android:layout_height="wrap_content"
         android:layout_gravity="right"
         android:text="제한 시간 : 10 초"
+        android:layout_marginRight="10px"
         android:textSize="15dp" />
 
     <LinearLayout

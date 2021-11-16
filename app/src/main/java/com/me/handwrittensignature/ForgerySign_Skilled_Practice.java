@@ -13,6 +13,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.github.gcacace.signaturepad.views.SignaturePad;
 
 public class ForgerySign_Skilled_Practice extends AppCompatActivity {
+    private TextView modeText;
     private SignaturePad signaturePad;
 
     @Override
@@ -24,6 +25,8 @@ public class ForgerySign_Skilled_Practice extends AppCompatActivity {
         Button startButton = (Button)findViewById(R.id.button_start);
         Button restartButton = (Button)findViewById(R.id.button_restart);
         Button endButton = (Button)findViewById(R.id.button_end);
+
+        modeText.setVisibility(View.VISIBLE);
 
 //        saveButton.setVisibility(false)
 //        clearButton.setVisibility(false);
@@ -47,7 +50,6 @@ public class ForgerySign_Skilled_Practice extends AppCompatActivity {
                 endButton.setEnabled(true);
             }
 
-
             public void onClear() {
                 //Event triggered when the pad is cleared
                 restartButton.setEnabled(false);
@@ -57,7 +59,7 @@ public class ForgerySign_Skilled_Practice extends AppCompatActivity {
 
         startButton.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v) {
+            public void onClick(View view) {
                 signaturePad.setEnabled(true);   // 서명 패드 활성화
 
                 startButton.setVisibility(View.GONE);   // 시작 버튼 숨기기
@@ -69,7 +71,7 @@ public class ForgerySign_Skilled_Practice extends AppCompatActivity {
 
         restartButton.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v) {
+            public void onClick(View view) {
                 signaturePad.clear();
                 restartButton.setEnabled(true);
                 endButton.setEnabled(true);
@@ -78,7 +80,7 @@ public class ForgerySign_Skilled_Practice extends AppCompatActivity {
 
         endButton.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v) {
+            public void onClick(View view) {
                 // Skilled 연습 페이지 종료 시  skilled 위조 서명  등록 화면으로
                 Intent intent = new Intent(getApplicationContext(), ForgerySign_Skilled.class);
                 startActivity(intent);

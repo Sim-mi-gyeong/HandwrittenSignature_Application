@@ -17,7 +17,7 @@
             </intent-filter>
         </activity>
 
-        <activity android:name="InputName" />
+        <activity android:name=".InputName" />
         <activity android:name=".SelectMode"/>
         <activity android:name=".SelectStatus"/>
         <activity android:name=".RealSign"/>
