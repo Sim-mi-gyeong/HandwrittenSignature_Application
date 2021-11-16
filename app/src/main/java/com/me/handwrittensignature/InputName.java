@@ -23,6 +23,11 @@ public class InputName extends AppCompatActivity {
 //        String[] nameArray = new String[1000000];
         EditText nameText = (EditText) findViewById(R.id.nameText);
 
+        if (nameText.getText().toString().length() == 0) {
+            Toast.makeText(InputName.this, "이름을 입력하세요.", Toast.LENGTH_SHORT).show();
+            nameText.requestFocus();
+        }
+
         confirm_button.setOnClickListener(new View.OnClickListener() {
 
             // 버튼 클릭 시 기존 사용자 데이터와 확인
