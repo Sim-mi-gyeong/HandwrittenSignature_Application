@@ -28,7 +28,7 @@ public class SelectStatus extends AppCompatActivity {
         button2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(getApplicationContext(), ForgerySign_Skilled_Practice.class);
+                Intent intent = new Intent(getApplicationContext(), ForgerySign_Skilled.class);
                 startActivity(intent);
             }
         });

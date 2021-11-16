@@ -198,6 +198,7 @@ public class RealSign extends AppCompatActivity {
                     startButton.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
+                            // 일정 횟수 채울 시작 버튼 -> 완료 버튼 -> 위조 서명 중 skilled/unskilled 선택 페이지로
                             Intent intent = new Intent(getApplicationContext(), SelectStatus.class);
                             startActivity(intent);
                         }

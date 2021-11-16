@@ -1,40 +1,34 @@
 package com.me.handwrittensignature;
-// RealSign
+// ForgerySign_Skilled
 
-import android.content.pm.ActivityInfo;
-//import android.support.v7.app.AppCompatActivity;
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.TextView;
-import android.widget.Toast;
 
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.github.gcacace.signaturepad.views.SignaturePad;
 
 public class ForgerySign_Skilled_Practice extends AppCompatActivity {
     private SignaturePad signaturePad;
-    private int countNum = 0;   // 등록된 사용자 서명 횟수
-    private int countComplete = 20;   // 실제 서명으로 등록할 횟수
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.skilled_forgery_sign_practice);
 
+        TextView modeText = (TextView)findViewById(R.id.modeText);
         Button startButton = (Button)findViewById(R.id.button_start);
-        Button saveButton = (Button)findViewById(R.id.button_restart);
-        Button clearButton = (Button)findViewById(R.id.button_end);
+        Button restartButton = (Button)findViewById(R.id.button_restart);
+        Button endButton = (Button)findViewById(R.id.button_end);
 
-        TextView countText = (TextView)findViewById(R.id.countText);
-
-//        saveButton.setEnabled(false)
-//        clearButton.setEnabled(false);
+//        saveButton.setVisibility(false)
+//        clearButton.setVisibility(false);
 
         signaturePad = (SignaturePad) findViewById(R.id.signaturePad);
-        signaturePad.setEnabled(false);
 
         signaturePad.setOnSignedListener(new SignaturePad.OnSignedListener() {
 
@@ -49,71 +43,48 @@ public class ForgerySign_Skilled_Practice extends AppCompatActivity {
             @Override
             public void onSigned() {
                 //Event triggered when the pad is signed
-                clearButton.setEnabled(true);
-                saveButton.setEnabled(true);
+                restartButton.setEnabled(true);
+                endButton.setEnabled(true);
             }
 
-            @Override
+
             public void onClear() {
                 //Event triggered when the pad is cleared
-                clearButton.setEnabled(false);
-                saveButton.setEnabled(false);
+                restartButton.setEnabled(false);
+                endButton.setEnabled(false);
             }
         });
 
         startButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                signaturePad.setEnabled(true);
-                startButton.setVisibility(View.GONE);
-                clearButton.setVisibility(View.VISIBLE);
-                saveButton.setVisibility(View.VISIBLE);
+                signaturePad.setEnabled(true);   // 서명 패드 활성화
 
-                startButton.setEnabled(false);
+                startButton.setVisibility(View.GONE);   // 시작 버튼 숨기기
+                restartButton.setVisibility(View.VISIBLE);   // 초기화 버튼 나타나게
+                endButton.setVisibility(View.VISIBLE);   // 종료 버튼 나타나게
+                startButton.setEnabled(false);   // 시작 버튼 비활성화
             }
         });
 
-        saveButton.setOnClickListener(new View.OnClickListener() {
+        restartButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //write code for saving the signature here
-
-                // 사용자 이름 + autoIncre + 서명 녹화 영상 저장
-
-                countNum += 1;
-
-                countText.setText((countNum + "/" + countComplete).toString());
-                Toast.makeText(ForgerySign_Skilled_Practice.this, "Signature Saved", Toast.LENGTH_SHORT).show();
-
-                // 기록 저장 후에도 초기화 실행
                 signaturePad.clear();
-
-                // 또 다시 시작 버튼 누르고 -> 기록 저장 / 초기화 버튼으로 구분할 것인지?
-                signaturePad.setEnabled(false);
-                startButton.setVisibility(View.VISIBLE);
-                clearButton.setVisibility(View.GONE);
-                saveButton.setVisibility(View.GONE);
-
-                startButton.setEnabled(true);
-
-
+                restartButton.setEnabled(true);
+                endButton.setEnabled(true);
             }
         });
 
-        clearButton.setOnClickListener(new View.OnClickListener() {
+        endButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                signaturePad.clear();
-                saveButton.setEnabled(true);
-                clearButton.setEnabled(true);
+                // Skilled 연습 페이지 종료 시  skilled 위조 서명  등록 화면으로
+                Intent intent = new Intent(getApplicationContext(), ForgerySign_Skilled.class);
+                startActivity(intent);
             }
         });
 
     }
-
-//    public void onClick(View view) {
-//        button1.setText("초기화")
-//    }
-
 
 }

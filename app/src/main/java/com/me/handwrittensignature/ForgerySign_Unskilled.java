@@ -108,7 +108,7 @@ public class ForgerySign_Unskilled extends AppCompatActivity {
                 // 또 다시 시작 버튼 누르고 -> 기록 저장 / 초기화 버튼으로 구분할 것인지?
                 signaturePad.setEnabled(false);
 
-//                sleep(1000);
+                sleep(1000);
 
                 startButton.setVisibility(View.VISIBLE);
                 clearButton.setVisibility(View.GONE);
@@ -131,12 +131,6 @@ public class ForgerySign_Unskilled extends AppCompatActivity {
                 }
                 // 타이머 멈추도록 설정(일시 정지 후 초기화)
                 // 시작 상태 -> 일시 정지(2번) -> sleep -> 초기화(0번)
-//                if (status == 1) {
-//                    status = 2;   // 타이머 동작 중 상태를 -> 일시 정지 상태로
-//                    sleep(1000);
-//                    status = 0;
-//                    timer.sendEmptyMessage(1);   // 1번 메세지(타이머 일시정지)
-//                }
 
 //                    //write code for saving the signature here
 //                Toast.makeText(ForgerySign_Unskilled.this, "Signature Saved", Toast.LENGTH_SHORT).show();
@@ -152,18 +146,10 @@ public class ForgerySign_Unskilled extends AppCompatActivity {
                 clearButton.setEnabled(true);
 
                 // 타이머 초기화
-//                if (status == 1) {
-//                    status = 0;
-//                    timer.sendEmptyMessage(2);   // 2번 메세지(정지 후 타이머 초기화)
-//                }
 
             }
         });
 
     }
-
-//    public void onClick(View view) {
-//        button1.setText("초기화")
-//    }
 
 }

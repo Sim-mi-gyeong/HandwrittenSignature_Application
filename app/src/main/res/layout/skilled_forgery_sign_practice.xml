@@ -6,61 +6,69 @@
     android:orientation="vertical"
     android:gravity="center">
 
-<!--    <TextView-->
-<!--        android:id="@+id/countText"-->
-<!--        android:layout_width="wrap_content"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        android:ems="3"-->
-<!--        android:text="0/20"-->
-<!--        android:textSize="20dp"-->
-<!--        android:layout_marginBottom="10dp"-->
-<!--        android:gravity="center"/>-->
-
-    <com.github.gcacace.signaturepad.views.SignaturePad
-        android:id="@+id/signaturePad"
-        android:layout_width="match_parent"
-        android:layout_height="200dp"
-        android:background="#9A9A9A"
-        android:layout_marginBottom="10dp"/>
-
-    <Button
-        android:id="@+id/button_start"
+    <TextView
+        android:id="@+id/modeText"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="연습 시작"
-        android:visibility="visible"
-        android:onClick="onClick"/>
+        android:padding="10dp"
+        android:background="@drawable/backgroud"
+        android:text="Practice Mode"
+        android:textSize="15dp"
+        android:layout_marginBottom="10dp"
+        android:gravity="center"/>
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center">
+        android:layout_height="670dp"
+        android:gravity="center"
+        android:orientation="vertical">
+
+        <com.github.gcacace.signaturepad.views.SignaturePad
+            android:id="@+id/signaturePad"
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:background="#9A9A9A"
+            android:layout_marginBottom="10dp"/>
 
         <Button
-            android:id="@+id/button_restart"
+            android:id="@+id/button_start"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:layout_marginLeft="60dp"
-            android:layout_marginRight="20dp"
-            android:visibility="invisible"
-            android:text="반복"
+            android:text="연습 시작"
+            android:visibility="visible"
             android:onClick="onClick"/>
 
-        <Button
-            android:id="@+id/button_end"
-            android:layout_width="wrap_content"
+        <LinearLayout
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_marginLeft="20dp"
-            android:layout_marginRight="60dp"
-            android:layout_weight="1"
-            android:onClick="onClick"
-            android:text="연습 종료"
-            android:visibility="invisible" />
+            android:orientation="horizontal"
+            android:gravity="center">
 
+            <Button
+                android:id="@+id/button_restart"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:layout_marginLeft="60dp"
+                android:layout_marginRight="20dp"
+                android:visibility="invisible"
+                android:text="초기화"
+                android:onClick="onClick"/>
+
+            <Button
+                android:id="@+id/button_end"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="20dp"
+                android:layout_marginRight="60dp"
+                android:layout_weight="1"
+                android:onClick="onClick"
+                android:text="연습 종료"
+                android:visibility="invisible" />
+
+
+        </LinearLayout>
 
     </LinearLayout>
-
 
 </LinearLayout>
