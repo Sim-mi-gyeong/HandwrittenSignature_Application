@@ -23,11 +23,6 @@ public class InputName extends AppCompatActivity {
 //        String[] nameArray = new String[1000000];
         EditText nameText = (EditText) findViewById(R.id.nameText);
 
-        if (nameText.getText().toString().length() == 0) {
-            Toast.makeText(InputName.this, "이름을 입력하세요.", Toast.LENGTH_SHORT).show();
-            nameText.requestFocus();
-        }
-
         confirm_button.setOnClickListener(new View.OnClickListener() {
 
             // 버튼 클릭 시 기존 사용자 데이터와 확인
@@ -35,6 +30,12 @@ public class InputName extends AppCompatActivity {
             // (실제 서명이) 등록되지 않은 사용자이면 -> Toast Message로 '등록되지 않은 사용자입니다'를 알리고 "등록 시작" 버튼 클릭 시 -> SetMode 페이지로
             @Override
             public void onClick(View v) {
+
+                if (nameText.getText().toString().length() == 0) {
+                    Toast.makeText(InputName.this, "이름을 입력하세요.", Toast.LENGTH_SHORT).show();
+                    nameText.requestFocus();
+                }
+
                 // 이미 등록된 사용자인 경우
                 Toast.makeText(getApplicationContext(), "이미 등록된 사용자입니다.", Toast.LENGTH_SHORT).show();
 
@@ -47,6 +48,16 @@ public class InputName extends AppCompatActivity {
         start_button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
+//                while (nameText.getText().toString().length() == 0) {
+//                    Toast.makeText(InputName.this, "이름을 입력하세요.", Toast.LENGTH_SHORT).show();
+//                    nameText.requestFocus();
+//                }
+
+                if (nameText.getText().toString().length() == 0) {
+                    Toast.makeText(InputName.this, "이름을 입력하세요.", Toast.LENGTH_SHORT).show();
+                    nameText.requestFocus();
+                }
 //                // 이미 등록된 사용자인 경우
 //                Intent intent1 = new Intent(getApplicationContext(), SelectStatus.class);
 //                startActivity(intent1);
@@ -60,9 +71,3 @@ public class InputName extends AppCompatActivity {
     }
 
 }
-
-//public class SavedSharedPreference {
-////    static final String UserName =
-//}
-//
-//
