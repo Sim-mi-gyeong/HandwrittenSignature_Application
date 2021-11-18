@@ -34,6 +34,7 @@ public class InputName extends AppCompatActivity {
                 if (nameText.getText().toString().length() == 0) {
                     Toast.makeText(InputName.this, "이름을 입력하세요.", Toast.LENGTH_SHORT).show();
                     nameText.requestFocus();
+//                    confirm_button.setEnabled(false);
                 }
 
                 // 이미 등록된 사용자인 경우
@@ -57,13 +58,16 @@ public class InputName extends AppCompatActivity {
                 if (nameText.getText().toString().length() == 0) {
                     Toast.makeText(InputName.this, "이름을 입력하세요.", Toast.LENGTH_SHORT).show();
                     nameText.requestFocus();
+//                    start_button.setEnabled(false);
                 }
 //                // 이미 등록된 사용자인 경우
+                  // 사용자 이름을 입력하지 않은 경우 인텐트 비활성화 하기
 //                Intent intent1 = new Intent(getApplicationContext(), SelectStatus.class);
 //                startActivity(intent1);
 
                 // 아직 등록되지 않은 사용자인 경우
                 // 우선 SelectMode로 연결되도록
+                // 사용자 이름을 입력하지 않은 경우 인텐트 비활성화 하기
                 Intent intent2 = new Intent(getApplicationContext(), SelectMode.class);
                 startActivity(intent2);
             }

@@ -59,7 +59,7 @@ public class ForgerySign_Skilled_Practice extends AppCompatActivity {
 
         startButton.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) {
+            public void onClick(View v) {
                 signaturePad.setEnabled(true);   // 서명 패드 활성화
 
                 startButton.setVisibility(View.GONE);   // 시작 버튼 숨기기
@@ -71,7 +71,7 @@ public class ForgerySign_Skilled_Practice extends AppCompatActivity {
 
         restartButton.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) {
+            public void onClick(View v) {
                 signaturePad.clear();
                 restartButton.setEnabled(true);
                 endButton.setEnabled(true);
@@ -80,7 +80,7 @@ public class ForgerySign_Skilled_Practice extends AppCompatActivity {
 
         endButton.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View view) {
+            public void onClick(View v) {
                 // Skilled 연습 페이지 종료 시  skilled 위조 서명  등록 화면으로
                 Intent intent = new Intent(getApplicationContext(), ForgerySign_Skilled.class);
                 startActivity(intent);
