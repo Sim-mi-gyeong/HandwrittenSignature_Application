@@ -36,7 +36,9 @@ public class ForgerySign_Unskilled extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.unskilled_forgery_sign);
 
-        Button startButton = (Button)findViewById(R.id.button_start);
+        Button
+
+                startButton = (Button)findViewById(R.id.button_start);
         Button saveButton = (Button)findViewById(R.id.button_save);
         Button clearButton = (Button)findViewById(R.id.button_clear);
 

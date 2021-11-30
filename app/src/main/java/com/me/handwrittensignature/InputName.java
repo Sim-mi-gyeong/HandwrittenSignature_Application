@@ -2,6 +2,8 @@ package com.me.handwrittensignature;
 
 import android.content.Intent;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -20,8 +22,35 @@ public class InputName extends AppCompatActivity {
 
         Button confirm_button = (Button) findViewById(R.id.confirm_button);
         Button start_button = (Button) findViewById(R.id.start_button);
-//        String[] nameArray = new String[1000000];
+
         EditText nameText = (EditText) findViewById(R.id.nameText);
+        String name = nameText.getText().toString();
+
+        confirm_button.setEnabled(false);
+        start_button.setEnabled(false);
+
+        nameText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                if(name.length() == 0) {
+                    confirm_button.setEnabled(false);
+                }
+                else {
+                    confirm_button.setEnabled(true);
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+
+            }
+        });
+
 
         confirm_button.setOnClickListener(new View.OnClickListener() {
 
@@ -31,7 +60,7 @@ public class InputName extends AppCompatActivity {
             @Override
             public void onClick(View v) {
 
-                if (nameText.getText().toString().length() == 0) {
+                if (name.length() == 0) {
                     Toast.makeText(InputName.this, "이름을 입력하세요.", Toast.LENGTH_SHORT).show();
                     nameText.requestFocus();
 //                    confirm_button.setEnabled(false);
@@ -55,7 +84,7 @@ public class InputName extends AppCompatActivity {
 //                    nameText.requestFocus();
 //                }
 
-                if (nameText.getText().toString().length() == 0) {
+                if (name.length() == 0) {
                     Toast.makeText(InputName.this, "이름을 입력하세요.", Toast.LENGTH_SHORT).show();
                     nameText.requestFocus();
 //                    start_button.setEnabled(false);
