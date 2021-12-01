@@ -26,31 +26,30 @@ public class InputName extends AppCompatActivity {
         EditText nameText = (EditText) findViewById(R.id.nameText);
         String name = nameText.getText().toString();
 
-        confirm_button.setEnabled(false);
-        start_button.setEnabled(false);
+//        confirm_button.setEnabled(false);
+//        start_button.setEnabled(false);
 
-        nameText.addTextChangedListener(new TextWatcher() {
-            @Override
-            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-
-            }
-
-            @Override
-            public void onTextChanged(CharSequence s, int start, int before, int count) {
-                if(name.length() == 0) {
-                    confirm_button.setEnabled(false);
-                }
-                else {
-                    confirm_button.setEnabled(true);
-                }
-            }
-
-            @Override
-            public void afterTextChanged(Editable s) {
-
-            }
-        });
-
+//        nameText.addTextChangedListener(new TextWatcher() {
+//            @Override
+//            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+//
+//            }
+//
+//            @Override
+//            public void onTextChanged(CharSequence s, int start, int before, int count) {
+//                if(name.length() == 0) {
+//                    confirm_button.setEnabled(false);
+//                }
+//                else {
+//                    confirm_button.setEnabled(true);
+//                }
+//            }
+//
+//            @Override
+//            public void afterTextChanged(Editable s) {
+//
+//            }
+//        });
 
         confirm_button.setOnClickListener(new View.OnClickListener() {
 
