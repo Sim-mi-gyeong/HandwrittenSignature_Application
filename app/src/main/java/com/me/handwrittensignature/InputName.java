@@ -24,80 +24,68 @@ public class InputName extends AppCompatActivity {
         Button start_button = (Button) findViewById(R.id.start_button);
 
         EditText nameText = (EditText) findViewById(R.id.nameText);
-        String name = nameText.getText().toString();
 
-//        confirm_button.setEnabled(false);
-//        start_button.setEnabled(false);
 
         nameText.addTextChangedListener(new TextWatcher() {
             @Override
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-                confirm_button.setEnabled(false);
+
                 start_button.setEnabled(false);
 
             }
 
             @Override
             public void onTextChanged(CharSequence s, int start, int before, int count) {
-                if(name.length() == 0) {
-                    confirm_button.setEnabled(false);
-                }
-                else {
-                    confirm_button.setEnabled(true);
-                }
+
             }
 
             @Override
             public void afterTextChanged(Editable s) {
-                if(name.length() == 0) {
+                String name = nameText.getText().toString();
+
+                if (name.length() == 0){
                     confirm_button.setEnabled(false);
+                    start_button.setEnabled(false);
                 }
                 else {
                     confirm_button.setEnabled(true);
+                    start_button.setEnabled(true);
+
                 }
 
             }
         });
 
         confirm_button.setOnClickListener(new View.OnClickListener() {
-
             // 버튼 클릭 시 기존 사용자 데이터와 확인
             // (실제 서명이) 이미 등록된 사용자이면 -> Toast Message로 '이미 등록된 사용자입니다'를 알리고 "등록 시작" 버튼 클릭 시 -> SetStatus 페이지로
             // (실제 서명이) 등록되지 않은 사용자이면 -> Toast Message로 '등록되지 않은 사용자입니다'를 알리고 "등록 시작" 버튼 클릭 시 -> SetMode 페이지로
             @Override
             public void onClick(View v) {
+                String name = nameText.getText().toString();
 
-                if (name.length() == 0) {
+                if(name.length() == 0) {
                     Toast.makeText(InputName.this, "이름을 입력하세요.", Toast.LENGTH_SHORT).show();
+                    start_button.setEnabled(false);
                     nameText.requestFocus();
-//                    confirm_button.setEnabled(false);
+                } else {
+                    // 이미 등록된 사용자인 경우
+                    Toast.makeText(getApplicationContext(), "이미 등록된 사용자입니다.", Toast.LENGTH_SHORT).show();
+
+                    // 아직 등록되지 않은 사용자인 경우
+                    Toast.makeText(getApplicationContext(), "아직 등록되지 않은 사용자입니다.", Toast.LENGTH_SHORT).show();
                 }
 
-                // 이미 등록된 사용자인 경우
-                Toast.makeText(getApplicationContext(), "이미 등록된 사용자입니다.", Toast.LENGTH_SHORT).show();
-
-                // 아직 등록되지 않은 사용자인 경우
-                Toast.makeText(getApplicationContext(), "아직 등록되지 않은 사용자입니다.", Toast.LENGTH_SHORT).show();
-
             }
+
         });
 
         start_button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
 
-//                while (nameText.getText().toString().length() == 0) {
-//                    Toast.makeText(InputName.this, "이름을 입력하세요.", Toast.LENGTH_SHORT).show();
-//                    nameText.requestFocus();
-//                }
-
-                if (name.length() == 0) {
-                    Toast.makeText(InputName.this, "이름을 입력하세요.", Toast.LENGTH_SHORT).show();
-                    nameText.requestFocus();
-//                    start_button.setEnabled(false);
-                }
-//                // 이미 등록된 사용자인 경우
-                  // 사용자 이름을 입력하지 않은 경우 인텐트 비활성화 하기
+                // 이미 등록된 사용자인 경우
+                // 사용자 이름을 입력하지 않은 경우 인텐트 비활성화 하기
 //                Intent intent1 = new Intent(getApplicationContext(), SelectStatus.class);
 //                startActivity(intent1);
 

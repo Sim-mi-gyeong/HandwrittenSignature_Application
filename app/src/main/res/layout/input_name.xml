@@ -29,8 +29,7 @@
             android:layout_weight="1"
             android:layout_marginLeft="60dp"
             android:layout_marginRight="20dp"
-            android:text="사용자 확인"
-            android:onClick="onClick"/>
+            android:text="사용자 확인" />
 
         <Button
             android:id="@+id/start_button"
@@ -40,7 +39,7 @@
             android:layout_marginLeft="20dp"
             android:layout_marginRight="60dp"
             android:text="등록 시작"
-            android:onClick="onClick"/>
+            />
 
     </LinearLayout>
 
