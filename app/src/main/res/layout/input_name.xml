@@ -12,7 +12,8 @@
         android:ems="8"
         android:hint="이름을 입력하세요."
         android:gravity="center"
-        android:inputType="textPersonName" />
+        android:inputType="textPersonName"
+        android:privateImeOptions="defaultInputmode=korean"/>
 
     <LinearLayout
         android:layout_width="match_parent"

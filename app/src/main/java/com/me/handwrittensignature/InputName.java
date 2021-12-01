@@ -29,27 +29,35 @@ public class InputName extends AppCompatActivity {
 //        confirm_button.setEnabled(false);
 //        start_button.setEnabled(false);
 
-//        nameText.addTextChangedListener(new TextWatcher() {
-//            @Override
-//            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-//
-//            }
-//
-//            @Override
-//            public void onTextChanged(CharSequence s, int start, int before, int count) {
-//                if(name.length() == 0) {
-//                    confirm_button.setEnabled(false);
-//                }
-//                else {
-//                    confirm_button.setEnabled(true);
-//                }
-//            }
-//
-//            @Override
-//            public void afterTextChanged(Editable s) {
-//
-//            }
-//        });
+        nameText.addTextChangedListener(new TextWatcher() {
+            @Override
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
+                confirm_button.setEnabled(false);
+                start_button.setEnabled(false);
+
+            }
+
+            @Override
+            public void onTextChanged(CharSequence s, int start, int before, int count) {
+                if(name.length() == 0) {
+                    confirm_button.setEnabled(false);
+                }
+                else {
+                    confirm_button.setEnabled(true);
+                }
+            }
+
+            @Override
+            public void afterTextChanged(Editable s) {
+                if(name.length() == 0) {
+                    confirm_button.setEnabled(false);
+                }
+                else {
+                    confirm_button.setEnabled(true);
+                }
+
+            }
+        });
 
         confirm_button.setOnClickListener(new View.OnClickListener() {
 
