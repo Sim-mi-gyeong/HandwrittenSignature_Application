@@ -42,11 +42,17 @@
                 android:layout_height="wrap_content"
                 android:orientation="horizontal">
 
-                <ImageView
-                    android:id="@+id/image1"
+<!--                <ImageView-->
+<!--                    android:id="@+id/image1"-->
+<!--                    android:layout_width="210dp"-->
+<!--                    android:layout_height="200dp"-->
+<!--                    android:layout_weight="1" />-->
+
+                <VideoView
+                    android:id="@+id/video1"
                     android:layout_width="210dp"
                     android:layout_height="200dp"
-                    android:layout_weight="1" />
+                    android:layout_weight="1"/>
 
                 <com.github.gcacace.signaturepad.views.SignaturePad
                     android:id="@+id/signaturePad"

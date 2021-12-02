@@ -31,6 +31,7 @@ public class InputName extends AppCompatActivity {
             public void beforeTextChanged(CharSequence s, int start, int count, int after) {
 
                 start_button.setEnabled(false);
+                start_button.setClickable(false);
 
             }
 

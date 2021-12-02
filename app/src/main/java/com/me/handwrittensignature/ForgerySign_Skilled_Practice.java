@@ -2,12 +2,16 @@ package com.me.handwrittensignature;
 // ForgerySign_Skilled
 
 import android.content.Intent;
+import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.MediaController;
 import android.widget.TextView;
+import android.widget.Toast;
+import android.widget.VideoView;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
@@ -22,6 +26,7 @@ public class ForgerySign_Skilled_Practice extends AppCompatActivity {
     private TextView modeText;
     private SignaturePad signaturePad;
     ImageView iv;
+    VideoView videoView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -37,6 +42,18 @@ public class ForgerySign_Skilled_Practice extends AppCompatActivity {
         modeText.setVisibility(View.VISIBLE);
 
         iv = findViewById(R.id.image1);
+        videoView = findViewById(R.id.video1);
+
+        MediaController mc = new MediaController(this);
+        //videoView에 미디어 컨트롤러 설정
+        videoView.setMediaController(mc);
+
+        //url 으로 지정하여 하는법
+        //videoView.setVideoURI(Uri.parse(VIDEO_URL));
+
+        //videoView 객체에 재생할 동영상 url 설정
+//        videoView.setVideoPath(filePath);
+//        videoView.requestFocus();
 
 
         signaturePad = (SignaturePad) findViewById(R.id.signaturePad);
@@ -86,18 +103,59 @@ public class ForgerySign_Skilled_Practice extends AppCompatActivity {
                 //Storage 내부의 images 폴더 안의 image.jpg 파일명을 가리키는 참조 생성
                 StorageReference pathReference = storageRef.child("images/image.jpg");
 
-                pathReference = storageRef.child("dog.jpg");
+//                pathReference = storageRef.child("dog.jpg");
+                pathReference = storageRef.child("sample1.mp4");
+                videoView.setVideoURI(Uri.parse(String.valueOf(pathReference.getDownloadUrl())));
 
                 if (pathReference != null) {
-                    // 참조 객체로부터 이미지 다운로드 url을 얻어오기
-                    pathReference.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                    //비디오 준비 완료 되면 호출 메소드
+                    videoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
                         @Override
-                        public void onSuccess(Uri uri) {
-                            // 다운로드 URL이 파라미터로 전달되어 옴.
-                            Glide.with(ForgerySign_Skilled_Practice.this).load(uri).into(iv);
-
+                        public void onPrepared(MediaPlayer mp) {
+                            Toast.makeText(ForgerySign_Skilled_Practice.this, "동영상준비완료 ", Toast.LENGTH_LONG).show();
                         }
                     });
+
+                    startButton.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            videoView.seekTo(0);
+                            videoView.start();
+                        }
+                    });
+
+                    restartButton.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            videoView.seekTo(0);
+                            videoView.start();
+                        }
+                    });
+
+//                    endButton.setOnClickListener();
+
+
+                    // 참조 객체로부터 이미지 다운로드 url을 얻어오기
+//                    pathReference.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+//                        @Override
+//                        public void onSuccess(Uri uri) {
+//                            //url 으로 지정하여 하는법
+//                            videoView.setVideoURI(Uri.parse(VIDEO_URL));
+//
+//                            //videoView 객체에 재생할 동영상 url 설정
+//                            //videoView.setVideoPath(filePath);
+//                            //videoView.requestFocus();
+//
+//                            videoView.setVideoPath(String.valueOf(uri));
+//                            videoView.requestFocus();
+//                            // 다운로드 URL이 파라미터로 전달되어 옴.
+////                            Glide.with(ForgerySign_Skilled_Practice.this).load(uri).into(iv);
+//                            Glide.with(ForgerySign_Skilled_Practice.this).load(videoView).into(videoView);
+//
+//
+//                        }
+//                    });
+
                 }
             }
         });
