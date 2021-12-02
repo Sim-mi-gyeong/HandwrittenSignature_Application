@@ -20,12 +20,15 @@ public class MainActivity extends AppCompatActivity {
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(getApplicationContext(), InputName.class);
+//                Intent intent = new Intent(getApplicationContext(), InputName.class);
+                Intent intent = new Intent(getApplicationContext(), TestActivity.class);
                 startActivity(intent);
 
             }
 
         });
+
+        // Cloud Storage 연결 설정 테스트
     }
 
 }
