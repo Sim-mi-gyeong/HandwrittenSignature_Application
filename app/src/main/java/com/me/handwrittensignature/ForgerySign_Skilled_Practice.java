@@ -38,8 +38,6 @@ public class ForgerySign_Skilled_Practice extends AppCompatActivity {
 
         iv = findViewById(R.id.image1);
 
-//        saveButton.setVisibility(false)
-//        clearButton.setVisibility(false);
 
         signaturePad = (SignaturePad) findViewById(R.id.signaturePad);
         signaturePad.setEnabled(false);

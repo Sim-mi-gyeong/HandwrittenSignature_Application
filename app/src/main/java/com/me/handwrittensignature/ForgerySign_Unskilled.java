@@ -1,18 +1,24 @@
 package com.me.handwrittensignature;
 // ForgerySign_Unskilled
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.bumptech.glide.Glide;
 import com.github.gcacace.signaturepad.views.SignaturePad;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.StorageReference;
 
 import java.util.Timer;
 import java.util.TimerTask;
@@ -30,21 +36,23 @@ public class ForgerySign_Unskilled extends AppCompatActivity {
     private int timeLimit = 10;   // 제한 시간 설정
     private int status = 0;   // o: 종료/초기화(기록 시작 전 상태, 기록 시작 -> 초기화 상태) , 1: 시작(기록 시작 후 상태) , 2: 일시 정지(기록 시작 -> 기록 저장 상태)
 
+    ImageView iv;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.unskilled_forgery_sign);
 
-        Button
-
-                startButton = (Button)findViewById(R.id.button_start);
+        Button loadButton = (Button)findViewById(R.id.loadButton);
+        Button startButton = (Button)findViewById(R.id.button_start);
         Button saveButton = (Button)findViewById(R.id.button_save);
         Button clearButton = (Button)findViewById(R.id.button_clear);
 
         TextView countText = (TextView)findViewById(R.id.countText);
         TextView finishText = (TextView)findViewById(R.id.finishText);
         TextView timerText = (TextView)findViewById(R.id.timerText);
+
+        iv = findViewById(R.id.image1);
 
         // 타이머를 위한 핸들러 인스턴스 변수
 //        RealSign.TimerHandler timer = new ForgerySign_Unskilled.TimerHandler();
@@ -80,10 +88,48 @@ public class ForgerySign_Unskilled extends AppCompatActivity {
             }
         });
 
+        loadButton.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                //불러오기 버튼 숨기기
+                loadButton.setEnabled(false);
+
+                // Cloud Storage 연결 설정 테스트!!
+                //firebaseStorage 인스턴스 생성
+                //하나의 Storage와 연동되어 있는 경우, getInstance()의 파라미터는 공백으로 두어도 됨
+                //하나의 앱이 두개 이상의 Storage와 연동이 되어있 경우, 원하는 저장소의 스킴을 입력
+                //getInstance()의 파라미터는 firebase console에서 확인 가능('gs:// ... ')
+                FirebaseStorage storage = FirebaseStorage.getInstance();
+
+                //생성된 FirebaseStorage를 참조하는 storage 생성
+                StorageReference storageRef = storage.getReference();
+
+                //Storage 내부의 images 폴더 안의 image.jpg 파일명을 가리키는 참조 생성
+                StorageReference pathReference = storageRef.child("images/image.jpg");
+
+                pathReference = storageRef.child("dog.jpg");
+
+                if (pathReference != null) {
+                    // 참조 객체로부터 이미지 다운로드 url을 얻어오기
+                    pathReference.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                        @Override
+                        public void onSuccess(Uri uri) {
+                            // 다운로드 URL이 파라미터로 전달되어 옴.
+                            Glide.with(ForgerySign_Unskilled.this).load(uri).into(iv);
+
+                        }
+                    });
+                }
+            }
+        });
+
         startButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 signaturePad.setEnabled(true);
+
+                loadButton.setVisibility(View.GONE);
                 startButton.setVisibility(View.GONE);
                 clearButton.setVisibility(View.VISIBLE);
                 saveButton.setVisibility(View.VISIBLE);
