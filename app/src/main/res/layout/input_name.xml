@@ -38,10 +38,8 @@
             android:layout_weight="1"
             android:layout_marginLeft="20dp"
             android:layout_marginRight="60dp"
-            android:text="등록 시작"
-            />
+            android:text="등록 시작"/>
 
     </LinearLayout>
-
 
 </LinearLayout>
