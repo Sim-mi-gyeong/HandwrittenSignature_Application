@@ -198,8 +198,7 @@ public class ForgerySign_Unskilled extends AppCompatActivity {
         saveButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-                // 사용자 이름 + autoIncre + 서명 녹화 영상 저장
+                captureView(signaturePad);
 
                 countNum += 1;
 
@@ -270,7 +269,7 @@ public class ForgerySign_Unskilled extends AppCompatActivity {
 //        String strFolderPath = Environment.getExternalStorageDirectory().getAbsolutePath() + CAPTURE_PATH;
         String strFolderPath = rootPath + CAPTURE_PATH;
 
-        String strFilePath = strFolderPath + "/" + "skilled_forgery_" + System.currentTimeMillis() + ".png";   // strFilePath: 이미지 저장 경로
+        String strFilePath = strFolderPath + "/" + "unskilled_forgery_" + System.currentTimeMillis() + ".png";   // strFilePath: 이미지 저장 경로
         File fileCacheItem = new File(strFilePath);
 
         try {
