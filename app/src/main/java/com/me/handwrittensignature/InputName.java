@@ -19,6 +19,7 @@ import com.google.firebase.storage.StorageReference;
 
 import org.w3c.dom.Text;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -38,7 +39,16 @@ public class InputName extends AppCompatActivity {
 
         start_button.setEnabled(false);
         List<Uri> uris_ = new ArrayList<>();
-        ArrayList<String> nameList = new ArrayList();
+
+        // 내부 저장소 영역
+        final String rootPath = "/storage/self/primary/Pictures/Signature/";
+        File directory = new File(rootPath);
+        File[] files = directory.listFiles();
+        List<String> filesDirList = new ArrayList<>();
+
+        for (int i=0; i< files.length; i++) {
+            filesDirList.add(files[i].getName());
+        }
 
 //        nameText.addTextChangedListener(new TextWatcher() {
 //            @Override
@@ -79,65 +89,47 @@ public class InputName extends AppCompatActivity {
             public void onClick(View v) {
                 String name = nameText.getText().toString();
 
-                FirebaseStorage storage = FirebaseStorage.getInstance();
-
-                //생성된 FirebaseStorage를 참조하는 storage 생성
-                StorageReference storageRef = storage.getReference();
-
-                //Storage 내부의 images 폴더 안의 image.jpg 파일명을 가리키는 참조 생성
-//                StorageReference pathReference = storageRef.child("dog.jpg");
-//                StorageReference pathReference = storageRef.child(name + '/');
-                StorageReference pathReference = storageRef.child("signature");
-
                 if(name.length() == 0) {
                     Toast.makeText(InputName.this, "이름을 입력하세요.", Toast.LENGTH_SHORT).show();
                     start_button.setEnabled(false);
                     nameText.requestFocus();
                 }
                 else {
-                    if (nameList.contains(name)) {
-                        // 이미 등록된 사용자인 경우
+                    if (filesDirList.contains(name)) {
                         Toast.makeText(getApplicationContext(), "이미 등록된 사용자입니다.", Toast.LENGTH_SHORT).show();
                         start_button.setEnabled(true);
+
                     } else {
                         // 아직 등록되지 않은 사용자인 경우
                         Toast.makeText(getApplicationContext(), "아직 등록되지 않은 사용자입니다.", Toast.LENGTH_SHORT).show();
-                        nameList.add(name);
+                        // 디렉토리 생성
+
+                        String strFolderPath = rootPath + name;
+                        File folder = new File(strFolderPath);
+                        try{
+                            folder.mkdir();   //폴더 생성
+                            Toast.makeText(getApplicationContext(), "새 폴더 생성", Toast.LENGTH_SHORT).show();
+                        }
+                        catch(Exception e){
+                            e.getStackTrace();
+                        }
+//                        if (!folder.exists()) {
+//                            try{
+//                                folder.mkdir();   //폴더 생성
+//                                Toast.makeText(getApplicationContext(), "새 폴더 생성", Toast.LENGTH_SHORT).show();
+//                            }
+//                            catch(Exception e){
+//                                e.getStackTrace();
+//                            }
+//                        } else {
+//                            Toast.makeText(getApplicationContext(), "이미 폴더가 생성되어 있습니다.", Toast.LENGTH_SHORT).show();
+//                        }
+
                         start_button.setEnabled(true);
                         Toast.makeText(getApplicationContext(), "등록되었습니다.", Toast.LENGTH_SHORT).show();
                     }
 
                 }
-
-//                    pathReference.listAll()
-//                            .addOnSuccessListener(new OnSuccessListener<ListResult>() {
-//                                @Override
-//                                public void onSuccess(ListResult listResult) {
-//                                    for (StorageReference prefix : listResult.getPrefixes()) {
-//                                        // All the prefixes under listRef.
-//                                        // You may call listAll() recursively on them.
-//                                        if (prefix.getName() == "signature/" + name){
-//                                            String pathName = prefix.getName();
-//                                            // 이미 등록된 사용자인 경우
-//                                            Toast.makeText(getApplicationContext(), "이미 등록된 사용자입니다.", Toast.LENGTH_SHORT).show();
-//                                        }
-//                                        else {
-//                                            pathReference.mkdirs();
-//                                            // 아직 등록되지 않은 사용자인 경우
-//                                            Toast.makeText(getApplicationContext(), "아직 등록되지 않은 사용자입니다.", Toast.LENGTH_SHORT).show();
-//                                        }
-//                                    }
-//
-//                                    for (StorageReference item : listResult.getItems()) {
-//                                        // All the items under listRef.
-//                                    }
-//                                }
-//                            });
-//                    // 이미 등록된 사용자인 경우
-//                    Toast.makeText(getApplicationContext(), "이미 등록된 사용자입니다.", Toast.LENGTH_SHORT).show();
-//                    // 아직 등록되지 않은 사용자인 경우
-//                    Toast.makeText(getApplicationContext(), "아직 등록되지 않은 사용자입니다.", Toast.LENGTH_SHORT).show();
-//                }
 
             }
 

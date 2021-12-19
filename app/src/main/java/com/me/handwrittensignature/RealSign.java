@@ -278,18 +278,18 @@ public class RealSign extends AppCompatActivity {
 
 //        String strFolderPath = Environment.getExternalStorageDirectory().getAbsolutePath() + CAPTURE_PATH;
         String strFolderPath = rootPath + CAPTURE_PATH;
-        File folder = new File(strFolderPath);
-        if (!folder.exists()) {
-            try{
-                folder.mkdir();   //폴더 생성
-                Toast.makeText(getApplicationContext(), "새 폴더 생성", Toast.LENGTH_SHORT).show();
-            }
-            catch(Exception e){
-                e.getStackTrace();
-            }
-        } else {
-            Toast.makeText(getApplicationContext(), "이미 폴더가 생성되어 있습니다.", Toast.LENGTH_SHORT).show();
-        }
+//        File folder = new File(strFolderPath);
+//        if (!folder.exists()) {
+//            try{
+//                folder.mkdir();   //폴더 생성
+//                Toast.makeText(getApplicationContext(), "새 폴더 생성", Toast.LENGTH_SHORT).show();
+//            }
+//            catch(Exception e){
+//                e.getStackTrace();
+//            }
+//        } else {
+//            Toast.makeText(getApplicationContext(), "이미 폴더가 생성되어 있습니다.", Toast.LENGTH_SHORT).show();
+//        }
 
         String strFilePath = strFolderPath + "/" + System.currentTimeMillis() + ".png";   // strFilePath: 이미지 저장 경로
         File fileCacheItem = new File(strFilePath);
