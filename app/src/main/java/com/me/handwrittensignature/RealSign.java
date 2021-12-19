@@ -200,14 +200,7 @@ public class RealSign extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 //write code for saving the signature here
-
-                // 사용자 이름 + auto + 서명 녹화 영상 저장
-//                final String rootPath = "/storage/self/primary/Pictures/Signature/";
-//                final String CAPTURE_PATH = name;
-//                String strFolderPath = rootPath + CAPTURE_PATH;
-
                 captureView(signaturePad);
-//                captureActivity((Activity) getApplicationContext());
 
                 countNum += 1;   // 파일 이름은 name + '_' + countNum
 
@@ -262,11 +255,8 @@ public class RealSign extends AppCompatActivity {
     public void captureView(View View) {
         Intent intent = getIntent(); // 전달한 데이터를 받을 Intent
         String name = intent.getStringExtra("text");
-        // 캡쳐가 저장될 외부 저장소
-//        final String CAPTURE_PATH = "/CAPTURE_TEST";
-//        final String CAPTURE_PATH = '/' + name;
 
-        // 내부 저장소 영역
+        // 저장소 영역
         final String rootPath = "/storage/self/primary/Pictures/Signature/";
         final String CAPTURE_PATH = name;
 //        Toast.makeText(getApplicationContext(), name + "의 새 폴더 생성 시도 ", Toast.LENGTH_SHORT).show();   // name null값 여부 확인
@@ -278,18 +268,6 @@ public class RealSign extends AppCompatActivity {
 
 //        String strFolderPath = Environment.getExternalStorageDirectory().getAbsolutePath() + CAPTURE_PATH;
         String strFolderPath = rootPath + CAPTURE_PATH;
-//        File folder = new File(strFolderPath);
-//        if (!folder.exists()) {
-//            try{
-//                folder.mkdir();   //폴더 생성
-//                Toast.makeText(getApplicationContext(), "새 폴더 생성", Toast.LENGTH_SHORT).show();
-//            }
-//            catch(Exception e){
-//                e.getStackTrace();
-//            }
-//        } else {
-//            Toast.makeText(getApplicationContext(), "이미 폴더가 생성되어 있습니다.", Toast.LENGTH_SHORT).show();
-//        }
 
         String strFilePath = strFolderPath + "/" + System.currentTimeMillis() + ".png";   // strFilePath: 이미지 저장 경로
         File fileCacheItem = new File(strFilePath);
@@ -300,7 +278,6 @@ public class RealSign extends AppCompatActivity {
             captureView.compress(Bitmap.CompressFormat.PNG, 100, fos);
             fos.flush();
             fos.close();
-
         } catch (IOException e) {
             e.printStackTrace();
             Toast.makeText(getApplicationContext(), "스크린샷 저장 실패", Toast.LENGTH_SHORT).show();
