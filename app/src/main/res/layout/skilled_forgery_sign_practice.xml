@@ -22,8 +22,7 @@
             android:text="Practice Mode"
             android:textSize="15dp"
             android:background="@drawable/background"
-            android:layout_gravity="center"
-            android:visibility="visible"/>
+            android:layout_gravity="center" />
 
     </LinearLayout>
 

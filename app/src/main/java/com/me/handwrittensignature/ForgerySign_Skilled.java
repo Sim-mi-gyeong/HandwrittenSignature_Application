@@ -3,6 +3,8 @@ package com.me.handwrittensignature;
 
 //import android.support.v7.app.AppCompatActivity;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -23,6 +25,10 @@ import com.google.firebase.storage.StorageReference;
 
 import org.w3c.dom.Text;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -34,6 +40,8 @@ public class ForgerySign_Skilled extends AppCompatActivity {
     private int countNum = 0;   // 등록된 사용자 서명 횟수
     private int countComplete = 5;   // 실제 서명으로 등록할 횟수
     public static String name;
+    public static String targetName;
+    public static String targetFile;
 
     private int timeLimit = 10;   // 제한 시간 설정
 
@@ -60,6 +68,8 @@ public class ForgerySign_Skilled extends AppCompatActivity {
 
         Intent intent = getIntent(); // 전달한 데이터를 받을 Intent
         String name = intent.getStringExtra("text");
+        String targetName = intent.getStringExtra("dirName");
+        String targetFile = intent.getStringExtra("fileName");
 
         signaturePad = (SignaturePad) findViewById(R.id.signaturePad);
         signaturePad.setEnabled(false);
@@ -95,33 +105,22 @@ public class ForgerySign_Skilled extends AppCompatActivity {
             public void onClick(View v) {
                 //불러오기 버튼 숨기기
                 loadButton.setEnabled(false);
+                // Practice 모드에서 랜덤으로 불러온 이미지를 띄우기
+                final String rootPath = "/storage/self/primary/Pictures/Signature/";
+                final String targetPath = "/storage/self/primary/Pictures/Signature/" + targetName;
 
-                // Cloud Storage 연결 설정 테스트!!
-                //firebaseStorage 인스턴스 생성
-                //하나의 Storage와 연동되어 있는 경우, getInstance()의 파라미터는 공백으로 두어도 됨
-                //하나의 앱이 두개 이상의 Storage와 연동이 되어있 경우, 원하는 저장소의 스킴을 입력
-                //getInstance()의 파라미터는 firebase console에서 확인 가능('gs:// ... ')
-                FirebaseStorage storage = FirebaseStorage.getInstance();
+                try {
+                    File storageDir = new File(targetPath);
+                    String loadImgName = targetFile;
+                    File file = new File(storageDir, loadImgName);
+                    Bitmap bitmap = BitmapFactory.decodeStream(new FileInputStream(file));
+                    iv.setImageBitmap(bitmap);
 
-                //생성된 FirebaseStorage를 참조하는 storage 생성
-                StorageReference storageRef = storage.getReference();
-
-                //Storage 내부의 images 폴더 안의 image.jpg 파일명을 가리키는 참조 생성
-                StorageReference pathReference = storageRef.child("images/image.jpg");
-
-                pathReference = storageRef.child("dog.jpg");
-
-                if (pathReference != null) {
-                    // 참조 객체로부터 이미지 다운로드 url을 얻어오기
-                    pathReference.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-                        @Override
-                        public void onSuccess(Uri uri) {
-                            // 다운로드 URL이 파라미터로 전달되어 옴.
-                            Glide.with(ForgerySign_Skilled.this).load(uri).into(iv);
-
-                        }
-                    });
+                } catch (Exception e) {
+                    Toast.makeText(getApplicationContext(), targetName + "   " + targetFile, Toast.LENGTH_SHORT).show();   // intent로 넘긴 값 확인용
+                    Toast.makeText(getApplicationContext(), "이미지 로드 실패", Toast.LENGTH_SHORT).show();
                 }
+
             }
         });
 
@@ -174,8 +173,7 @@ public class ForgerySign_Skilled extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 //write code for saving the signature here
-
-                // 사용자 이름 + autoIncre + 서명 녹화 영상 저장
+                captureView(signaturePad);
 
                 countNum += 1;
 
@@ -221,6 +219,40 @@ public class ForgerySign_Skilled extends AppCompatActivity {
                 clearButton.setEnabled(true);
             }
         });
+
+    }
+
+    public void captureView(View View) {
+        Intent intent = getIntent(); // 전달한 데이터를 받을 Intent
+        String name = intent.getStringExtra("text");
+
+        // 저장소 영역  ->  위조하는 대상의 디렉토리에 해당 서명 캡처 이미지 저장!!!
+        final String rootPath = "/storage/self/primary/Pictures/Signature/";
+        final String CAPTURE_PATH = targetName;   // -> name 대신 targetName으로
+//        Toast.makeText(getApplicationContext(), name + "의 새 폴더 생성 시도 ", Toast.LENGTH_SHORT).show();   // name null값 여부 확인
+        signaturePad.setDrawingCacheEnabled(true);
+        signaturePad.buildDrawingCache();
+        Bitmap captureView = signaturePad.getDrawingCache();   // Bitmap 가져오기
+
+        FileOutputStream fos;
+
+//        String strFolderPath = Environment.getExternalStorageDirectory().getAbsolutePath() + CAPTURE_PATH;
+        String strFolderPath = rootPath + CAPTURE_PATH;
+
+        String strFilePath = strFolderPath + "/" + "skilled_forgery_" + System.currentTimeMillis() + ".png";   // strFilePath: 이미지 저장 경로
+        File fileCacheItem = new File(strFilePath);
+
+        try {
+            fos = new FileOutputStream(fileCacheItem);
+            // 해당 Bitmap 으로 만든 이미지를 png 파일 형태로 만들기
+            captureView.compress(Bitmap.CompressFormat.PNG, 100, fos);
+            fos.flush();
+            fos.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+            Toast.makeText(getApplicationContext(), "스크린샷 저장 실패", Toast.LENGTH_SHORT).show();
+        }
+
 
     }
 

@@ -42,6 +42,10 @@ public class ForgerySign_Skilled_Practice extends AppCompatActivity {
     private SignaturePad signaturePad;
     ImageView iv;
     public static String name;
+    public static String targetName;
+    public static String targetFile;
+    private String pass_targetName;
+    private String pass_targetFile;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -85,6 +89,38 @@ public class ForgerySign_Skilled_Practice extends AppCompatActivity {
             }
         });
 
+        final String rootPath = "/storage/self/primary/Pictures/Signature/";
+        File directory = new File(rootPath);
+        File[] files = directory.listFiles();
+        List<String> filesDirList = new ArrayList<>();
+
+        for (int i=0; i< files.length; i++) {
+            filesDirList.add(files[i].getName());
+        }
+
+        filesDirList.remove(name);   // 본인의 디렉토리(서명은)는 위조 대상에서 제외
+
+        // 위조할 타겟 대상의 디렉토리 선택
+        int idx1 = new Random().nextInt(filesDirList.size());
+        String targetName = filesDirList.get(idx1);
+        String pass_targetName = targetName;
+
+        // 위조할 타켓 대상의 디렉토리 내 서명 선택
+        final String targetPath = "/storage/self/primary/Pictures/Signature/" + targetName;
+        File fileDirectory = new File(targetPath);
+        File[] targetFiles = fileDirectory.listFiles();
+        List<String> filesList = new ArrayList<>();
+
+        for (int i=0; i< targetFiles.length; i++) {
+            filesList.add(targetFiles[i].getName());
+        }
+
+        int idx2 = new Random().nextInt(filesList.size());
+        String targetFile = filesList.get(idx2);
+//                String targetFile = filesList.get(0);   // 임의의 파일 지정
+        String pass_targetFile = targetFile;
+
+
         loadButton.setOnClickListener(new View.OnClickListener() {
 
             @Override
@@ -92,34 +128,36 @@ public class ForgerySign_Skilled_Practice extends AppCompatActivity {
                 //불러오기 버튼 숨기기
                 loadButton.setEnabled(false);
 
-                final String rootPath = "/storage/self/primary/Pictures/Signature/";
-                File directory = new File(rootPath);
-                File[] files = directory.listFiles();
-                List<String> filesDirList = new ArrayList<>();
-
-                for (int i=0; i< files.length; i++) {
-                    filesDirList.add(files[i].getName());
-                }
-
-                filesDirList.remove(name);   // 본인의 디렉토리(서명은)는 위조 대상에서 제외
-
-                // 위조할 타겟 대상의 디렉토리 선택
-                int idx1 = new Random().nextInt(filesDirList.size());
-                String targetName = filesDirList.get(idx1);
-
-                // 위조할 타켓 대상의 디렉토리 내 서명 선택
-                final String targetPath = "/storage/self/primary/Pictures/Signature/" + targetName;
-                File fileDirectory = new File(targetPath);
-                File[] targetFiles = fileDirectory.listFiles();
-                List<String> filesList = new ArrayList<>();
-
-                for (int i=0; i< targetFiles.length; i++) {
-                    filesList.add(targetFiles[i].getName());
-                }
-
-                int idx2 = new Random().nextInt(filesList.size());
-                String targetFile = filesList.get(idx2);
-//                String targetFile = filesList.get(0);   // 임의의 파일 지정
+//                final String rootPath = "/storage/self/primary/Pictures/Signature/";
+//                File directory = new File(rootPath);
+//                File[] files = directory.listFiles();
+//                List<String> filesDirList = new ArrayList<>();
+//
+//                for (int i=0; i< files.length; i++) {
+//                    filesDirList.add(files[i].getName());
+//                }
+//
+//                filesDirList.remove(name);   // 본인의 디렉토리(서명은)는 위조 대상에서 제외
+//
+//                // 위조할 타겟 대상의 디렉토리 선택
+//                int idx1 = new Random().nextInt(filesDirList.size());
+//                String targetName = filesDirList.get(idx1);
+//                String pass_targetName = targetName;
+//
+//                // 위조할 타켓 대상의 디렉토리 내 서명 선택
+//                final String targetPath = "/storage/self/primary/Pictures/Signature/" + targetName;
+//                File fileDirectory = new File(targetPath);
+//                File[] targetFiles = fileDirectory.listFiles();
+//                List<String> filesList = new ArrayList<>();
+//
+//                for (int i=0; i< targetFiles.length; i++) {
+//                    filesList.add(targetFiles[i].getName());
+//                }
+//
+//                int idx2 = new Random().nextInt(filesList.size());
+//                String targetFile = filesList.get(idx2);
+////                String targetFile = filesList.get(0);   // 임의의 파일 지정
+//                String pass_targetFile = targetFile;
 
                 try {
                     File storageDir = new File(targetPath);
@@ -163,7 +201,9 @@ public class ForgerySign_Skilled_Practice extends AppCompatActivity {
                 // Skilled 연습 페이지 종료 시  skilled 위조 서명  등록 화면으로
                 Intent intent2 = new Intent(getApplicationContext(), ForgerySign_Skilled.class);
                 intent2.putExtra("text", name);
-                startActivity(intent);
+                intent2.putExtra("dirName", pass_targetName);
+                intent2.putExtra("fileName", pass_targetFile);
+                startActivity(intent2);
             }
         });
 
