@@ -277,12 +277,7 @@ public class RealSign extends AppCompatActivity {
         FileOutputStream fos;
 
 //        String strFolderPath = Environment.getExternalStorageDirectory().getAbsolutePath() + CAPTURE_PATH;
-//        String strFolderPath = Environment.getExternalStorageDirectory().toString() + CAPTURE_PATH;
         String strFolderPath = rootPath + CAPTURE_PATH;
-//        /storage/1020-2216/sim -> SD card
-//        /storage/self/primary/Pictures/simmigyeong -> 내부 저장공간
-//        String strFolderPath = getFilesDir() + CAPTURE_PATH;
-
         File folder = new File(strFolderPath);
         if (!folder.exists()) {
             try{
@@ -301,61 +296,10 @@ public class RealSign extends AppCompatActivity {
 
         try {
             fos = new FileOutputStream(fileCacheItem);
-            // 해당 Bitmap 으로 만든 이미지는 png 파일 형태로 만들기
+            // 해당 Bitmap 으로 만든 이미지를 png 파일 형태로 만들기
             captureView.compress(Bitmap.CompressFormat.PNG, 100, fos);
             fos.flush();
             fos.close();
-
-            // strFilePath에 저장된 이미지 스토리지에 업로드
-            if (strFilePath != null) {
-                // 업로드 진행 Dialog 나타내기
-                final ProgressDialog progressDialog = new ProgressDialog(this);
-                progressDialog.setTitle("현재 업로드 중");
-                progressDialog.show();
-
-                // 파이어베이스 스토리지
-                FirebaseStorage storage = FirebaseStorage.getInstance();
-                // 생성된 Firebase Storage를 참조하는 storage 생성
-                StorageReference storageRef = storage.getReference();
-
-                // Unique한 파일명을 만들기
-                SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMHH_mmss");
-                Date now = new Date();
-                String filename = name + formatter.format(now) + ".png";
-                // Storage 내부의 images 폴더 안의 image.jpg 파일명을 가리키는 참조 생성
-                // storage 주소와 폴더 파일명을 지정`
-                StorageReference pathReference = storageRef.child(name + '/' + filename);
-
-                pathReference.putFile(Uri.parse(strFilePath))
-                        .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                            @Override
-                            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                                progressDialog.dismiss(); // 업로드 진행 Dialog 상자 닫기
-                                Toast.makeText(getApplicationContext(), "업로드 완료!", Toast.LENGTH_SHORT).show();
-                            }
-
-                        })
-                        .addOnFailureListener(new OnFailureListener() {
-                            @Override
-                            public void onFailure(@NonNull Exception e) {
-                                progressDialog.dismiss();
-                                Toast.makeText(getApplicationContext(), "업로드 실패!", Toast.LENGTH_SHORT).show();
-                            }
-                        })
-                        .addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
-                            @Override
-                            public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
-                                @SuppressWarnings("VisibleForTests")
-                                double progress = (100 * taskSnapshot.getBytesTransferred()) /  taskSnapshot.getTotalByteCount();
-                                //dialog에 진행률을 퍼센트로 출력해 준다
-                                progressDialog.setMessage("Uploaded " + ((int) progress) + "% ...");
-                            }
-                        });
-
-            }
-            else {
-                Toast.makeText(getApplicationContext(), "파일을 먼저 선택하세요.", Toast.LENGTH_SHORT).show();
-            }
 
         } catch (IOException e) {
             e.printStackTrace();
