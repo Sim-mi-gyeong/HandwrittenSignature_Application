@@ -11,11 +11,13 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.bumptech.glide.Glide;
 import com.github.gcacace.signaturepad.views.SignaturePad;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
@@ -30,11 +32,12 @@ public class ForgerySign_Unskilled extends AppCompatActivity {
     private SignaturePad signaturePad;
     private int countNum = 0;   // 등록된 사용자 서명 횟수
     private int countComplete = 5;   // 실제 서명으로 등록할 횟수
+    public static String name;
 
     // 타이머 관련 변수
-    private TextView timerText;
-    private int timeLimit = 10;   // 제한 시간 설정
-    private int status = 0;   // o: 종료/초기화(기록 시작 전 상태, 기록 시작 -> 초기화 상태) , 1: 시작(기록 시작 후 상태) , 2: 일시 정지(기록 시작 -> 기록 저장 상태)
+//    private TextView timerText;
+//    private int timeLimit = 10;   // 제한 시간 설정
+//    private int status = 0;   // o: 종료/초기화(기록 시작 전 상태, 기록 시작 -> 초기화 상태) , 1: 시작(기록 시작 후 상태) , 2: 일시 정지(기록 시작 -> 기록 저장 상태)
 
     ImageView iv;
 
@@ -54,6 +57,9 @@ public class ForgerySign_Unskilled extends AppCompatActivity {
 
         iv = findViewById(R.id.image1);
 
+        Intent intent = getIntent(); // 전달한 데이터를 받을 Intent
+        String name = intent.getStringExtra("text");
+
         // 타이머를 위한 핸들러 인스턴스 변수
 //        RealSign.TimerHandler timer = new ForgerySign_Unskilled.TimerHandler();
 
@@ -67,10 +73,7 @@ public class ForgerySign_Unskilled extends AppCompatActivity {
 
             @Override
             public void onStartSigning() {
-                //Event triggered when the pad is touched
 
-//                clearButton.setVisibility(true);
-//                saveButton.setVisibility(true);
             }
 
             @Override
@@ -119,7 +122,13 @@ public class ForgerySign_Unskilled extends AppCompatActivity {
                             Glide.with(ForgerySign_Unskilled.this).load(uri).into(iv);
 
                         }
+                    }).addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Toast.makeText(getApplicationContext(), "다운로드 실패", Toast.LENGTH_SHORT).show();
+                        }
                     });
+
                 }
             }
         });
@@ -136,34 +145,34 @@ public class ForgerySign_Unskilled extends AppCompatActivity {
 
                 startButton.setEnabled(false);
 
-                // 시작 버튼 클릭 시 CountDown Timer 실행   ->   어플 종료되는 현상 발생
-                final Timer ssmmss = new Timer();
-                final Handler timerhandler = new Handler() {
-                    public void handleMessage(Message msg) {
-//                        timeLimit = 10;
-                        timeLimit --;
-                        if (timeLimit == 0) {
-                            ssmmss.cancel();
-                        }
-                        timerText.setText("제한 시간 : " + timeLimit + " 초");
-
-                    }
-                };
-
-                final TimerTask outputtime = new TimerTask() {
-                    @Override
-                    public void run() {
-                        Message msg = timerhandler.obtainMessage() ;
-                        timerhandler.sendMessage(msg);
-                    }
-
-                };
-                ssmmss.schedule(outputtime, 0, 1000);
-
-                if (timeLimit == 0) {
-                    outputtime.cancel();
-                    timerText.setText("제한 시간 : " + timeLimit + " 초");
-                }
+//                // 시작 버튼 클릭 시 CountDown Timer 실행   ->   어플 종료되는 현상 발생
+//                final Timer ssmmss = new Timer();
+//                final Handler timerhandler = new Handler() {
+//                    public void handleMessage(Message msg) {
+////                        timeLimit = 10;
+//                        timeLimit --;
+//                        if (timeLimit == 0) {
+//                            ssmmss.cancel();
+//                        }
+//                        timerText.setText("제한 시간 : " + timeLimit + " 초");
+//
+//                    }
+//                };
+//
+//                final TimerTask outputtime = new TimerTask() {
+//                    @Override
+//                    public void run() {
+//                        Message msg = timerhandler.obtainMessage() ;
+//                        timerhandler.sendMessage(msg);
+//                    }
+//
+//                };
+//                ssmmss.schedule(outputtime, 0, 1000);
+//
+//                if (timeLimit == 0) {
+//                    outputtime.cancel();
+//                    timerText.setText("제한 시간 : " + timeLimit + " 초");
+//                }
             }
         });
 

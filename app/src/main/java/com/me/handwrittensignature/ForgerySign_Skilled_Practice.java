@@ -13,11 +13,13 @@ import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.VideoView;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.bumptech.glide.Glide;
 import com.github.gcacace.signaturepad.views.SignaturePad;
+import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
@@ -26,7 +28,7 @@ public class ForgerySign_Skilled_Practice extends AppCompatActivity {
     private TextView modeText;
     private SignaturePad signaturePad;
     ImageView iv;
-    VideoView videoView;
+    public static String name;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,19 +44,9 @@ public class ForgerySign_Skilled_Practice extends AppCompatActivity {
         modeText.setVisibility(View.VISIBLE);
 
         iv = findViewById(R.id.image1);
-        videoView = findViewById(R.id.video1);
 
-        MediaController mc = new MediaController(this);
-        //videoView에 미디어 컨트롤러 설정
-        videoView.setMediaController(mc);
-
-        //url 으로 지정하여 하는법
-        //videoView.setVideoURI(Uri.parse(VIDEO_URL));
-
-        //videoView 객체에 재생할 동영상 url 설정
-//        videoView.setVideoPath(filePath);
-//        videoView.requestFocus();
-
+        Intent intent = getIntent(); // 전달한 데이터를 받을 Intent
+        String name = intent.getStringExtra("text");
 
         signaturePad = (SignaturePad) findViewById(R.id.signaturePad);
         signaturePad.setEnabled(false);
@@ -63,10 +55,7 @@ public class ForgerySign_Skilled_Practice extends AppCompatActivity {
 
             @Override
             public void onStartSigning() {
-                //Event triggered when the pad is touched
 
-//                clearButton.setVisibility(true);
-//                saveButton.setVisibility(true);
             }
 
             @Override
@@ -86,10 +75,7 @@ public class ForgerySign_Skilled_Practice extends AppCompatActivity {
         loadButton.setOnClickListener(new View.OnClickListener() {
 
             @Override
-            public void onClick(View v) {
-                //불러오기 버튼 숨기기
-                loadButton.setEnabled(false);
-
+            public void onClick(View view) {
                 // Cloud Storage 연결 설정 테스트!!
                 //firebaseStorage 인스턴스 생성
                 //하나의 Storage와 연동되어 있는 경우, getInstance()의 파라미터는 공백으로 두어도 됨
@@ -101,62 +87,27 @@ public class ForgerySign_Skilled_Practice extends AppCompatActivity {
                 StorageReference storageRef = storage.getReference();
 
                 //Storage 내부의 images 폴더 안의 image.jpg 파일명을 가리키는 참조 생성
-                StorageReference pathReference = storageRef.child("images/image.jpg");
-
-//                pathReference = storageRef.child("dog.jpg");
-                pathReference = storageRef.child("sample1.mp4");
-                videoView.setVideoURI(Uri.parse(String.valueOf(pathReference.getDownloadUrl())));
+//                StorageReference pathReference = storageRef.child("dog.jpg");
+                StorageReference pathReference = storageRef.child("sim/sim_1.jpeg");
 
                 if (pathReference != null) {
-                    //비디오 준비 완료 되면 호출 메소드
-                    videoView.setOnPreparedListener(new MediaPlayer.OnPreparedListener() {
-                        @Override
-                        public void onPrepared(MediaPlayer mp) {
-                            Toast.makeText(ForgerySign_Skilled_Practice.this, "동영상준비완료 ", Toast.LENGTH_LONG).show();
-                        }
-                    });
-
-                    startButton.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            videoView.seekTo(0);
-                            videoView.start();
-                        }
-                    });
-
-                    restartButton.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View v) {
-                            videoView.seekTo(0);
-                            videoView.start();
-                        }
-                    });
-
-//                    endButton.setOnClickListener();
-
-
                     // 참조 객체로부터 이미지 다운로드 url을 얻어오기
-//                    pathReference.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-//                        @Override
-//                        public void onSuccess(Uri uri) {
-//                            //url 으로 지정하여 하는법
-//                            videoView.setVideoURI(Uri.parse(VIDEO_URL));
-//
-//                            //videoView 객체에 재생할 동영상 url 설정
-//                            //videoView.setVideoPath(filePath);
-//                            //videoView.requestFocus();
-//
-//                            videoView.setVideoPath(String.valueOf(uri));
-//                            videoView.requestFocus();
-//                            // 다운로드 URL이 파라미터로 전달되어 옴.
-////                            Glide.with(ForgerySign_Skilled_Practice.this).load(uri).into(iv);
-//                            Glide.with(ForgerySign_Skilled_Practice.this).load(videoView).into(videoView);
-//
-//
-//                        }
-//                    });
+                    pathReference.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+                        @Override
+                        public void onSuccess(Uri uri) {
+                            // 다운로드 URL이 파라미터로 전달되어 옴.
+                            Glide.with(ForgerySign_Skilled_Practice.this).load(uri).into(iv);
+
+                        }
+                    }).addOnFailureListener(new OnFailureListener() {
+                        @Override
+                        public void onFailure(@NonNull Exception e) {
+                            Toast.makeText(getApplicationContext(), "다운로드 실패", Toast.LENGTH_SHORT).show();
+                        }
+                    });
 
                 }
+
             }
         });
 
@@ -186,40 +137,12 @@ public class ForgerySign_Skilled_Practice extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 // Skilled 연습 페이지 종료 시  skilled 위조 서명  등록 화면으로
-                Intent intent = new Intent(getApplicationContext(), ForgerySign_Skilled.class);
+                Intent intent2 = new Intent(getApplicationContext(), ForgerySign_Skilled.class);
+                intent2.putExtra("text", name);
                 startActivity(intent);
             }
         });
 
     }
-
-//    public void onClick(View view) {
-//        // Cloud Storage 연결 설정 테스트!!
-//        //firebaseStorage 인스턴스 생성
-//        //하나의 Storage와 연동되어 있는 경우, getInstance()의 파라미터는 공백으로 두어도 됨
-//        //하나의 앱이 두개 이상의 Storage와 연동이 되어있 경우, 원하는 저장소의 스킴을 입력
-//        //getInstance()의 파라미터는 firebase console에서 확인 가능('gs:// ... ')
-//        FirebaseStorage storage = FirebaseStorage.getInstance();
-//
-//        //생성된 FirebaseStorage를 참조하는 storage 생성
-//        StorageReference storageRef = storage.getReference();
-//
-//        //Storage 내부의 images 폴더 안의 image.jpg 파일명을 가리키는 참조 생성
-//        StorageReference pathReference = storageRef.child("images/image.jpg");
-//
-//        pathReference = storageRef.child("dog.jpg");
-//
-//        if (pathReference != null) {
-//            // 참조 객체로부터 이미지 다운로드 url을 얻어오기
-//            pathReference.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-//                @Override
-//                public void onSuccess(Uri uri) {
-//                    // 다운로드 URL이 파라미터로 전달되어 옴.
-//                    Glide.with(ForgerySign_Skilled_Practice.this).load(uri).into(iv);
-//
-//                }
-//            });
-//        }
-//    }
 
 }

@@ -14,12 +14,16 @@ public class SelectMode extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.select_mode);
 
+        Intent intent = getIntent(); // 전달한 데이터를 받을 Intent
+        String name = intent.getStringExtra("text");
+
         Button button1 = (Button) findViewById(R.id.button1);
         button1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(getApplicationContext(), RealSign.class);
-                startActivity(intent);
+                Intent intent2 = new Intent(getApplicationContext(), RealSign.class);
+                intent2.putExtra("text", name);
+                startActivity(intent2);
             }
         });
 
@@ -27,8 +31,9 @@ public class SelectMode extends AppCompatActivity {
         button2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(getApplicationContext(), SelectStatus.class);
-                startActivity(intent);
+                Intent intent3 = new Intent(getApplicationContext(), SelectStatus.class);
+                intent3.putExtra("text", name);
+                startActivity(intent3);
 
             }
 

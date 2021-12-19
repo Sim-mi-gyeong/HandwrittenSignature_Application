@@ -33,6 +33,7 @@ public class ForgerySign_Skilled extends AppCompatActivity {
     private SignaturePad signaturePad;
     private int countNum = 0;   // 등록된 사용자 서명 횟수
     private int countComplete = 5;   // 실제 서명으로 등록할 횟수
+    public static String name;
 
     private int timeLimit = 10;   // 제한 시간 설정
 
@@ -56,6 +57,9 @@ public class ForgerySign_Skilled extends AppCompatActivity {
         modeText.setVisibility(View.VISIBLE);
 
         iv = findViewById(R.id.image1);
+
+        Intent intent = getIntent(); // 전달한 데이터를 받을 Intent
+        String name = intent.getStringExtra("text");
 
         signaturePad = (SignaturePad) findViewById(R.id.signaturePad);
         signaturePad.setEnabled(false);

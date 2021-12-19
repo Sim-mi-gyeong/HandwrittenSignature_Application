@@ -14,22 +14,27 @@ public class SelectStatus extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.select_status);
 
+        Intent intent = getIntent(); // 전달한 데이터를 받을 Intent
+        String name = intent.getStringExtra("text");
+
         Button button1 = (Button)findViewById(R.id.button1);
         Button button2 = (Button)findViewById(R.id.button2);
 
         button1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(getApplicationContext(), ForgerySign_Unskilled.class);
-                startActivity(intent);
+                Intent intent2 = new Intent(getApplicationContext(), ForgerySign_Unskilled.class);
+                intent2.putExtra("text", name);
+                startActivity(intent2);
             }
         });
 
         button2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent = new Intent(getApplicationContext(), ForgerySign_Skilled_Practice.class);
-                startActivity(intent);
+                Intent intent3 = new Intent(getApplicationContext(), ForgerySign_Skilled_Practice.class);
+                intent3.putExtra("text", name);
+                startActivity(intent3);
             }
         });
 
