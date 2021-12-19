@@ -1,6 +1,8 @@
 package com.me.handwrittensignature;
 // ForgerySign_Unskilled
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
@@ -22,6 +24,12 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -98,38 +106,76 @@ public class ForgerySign_Unskilled extends AppCompatActivity {
                 //불러오기 버튼 숨기기
                 loadButton.setEnabled(false);
 
-                // Cloud Storage 연결 설정 테스트!!
-                //firebaseStorage 인스턴스 생성
-                //하나의 Storage와 연동되어 있는 경우, getInstance()의 파라미터는 공백으로 두어도 됨
-                //하나의 앱이 두개 이상의 Storage와 연동이 되어있 경우, 원하는 저장소의 스킴을 입력
-                //getInstance()의 파라미터는 firebase console에서 확인 가능('gs:// ... ')
-                FirebaseStorage storage = FirebaseStorage.getInstance();
+                final String rootPath = "/storage/self/primary/Pictures/Signature/";
+                File directory = new File(rootPath);
+                File[] files = directory.listFiles();
+                List<String> filesDirList = new ArrayList<>();
 
-                //생성된 FirebaseStorage를 참조하는 storage 생성
-                StorageReference storageRef = storage.getReference();
-
-                //Storage 내부의 images 폴더 안의 image.jpg 파일명을 가리키는 참조 생성
-                StorageReference pathReference = storageRef.child("images/image.jpg");
-
-                pathReference = storageRef.child("dog.jpg");
-
-                if (pathReference != null) {
-                    // 참조 객체로부터 이미지 다운로드 url을 얻어오기
-                    pathReference.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-                        @Override
-                        public void onSuccess(Uri uri) {
-                            // 다운로드 URL이 파라미터로 전달되어 옴.
-                            Glide.with(ForgerySign_Unskilled.this).load(uri).into(iv);
-
-                        }
-                    }).addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
-                            Toast.makeText(getApplicationContext(), "다운로드 실패", Toast.LENGTH_SHORT).show();
-                        }
-                    });
-
+                for (int i=0; i< files.length; i++) {
+                    filesDirList.add(files[i].getName());
                 }
+                // 위조할 타겟 대상의 디렉토리 선택
+                double randomValue = Math.random();
+                int ran1 = (int)(randomValue * filesDirList.size()) -1;
+                String targetName = filesDirList.get(ran1);
+
+                // 위조할 타켓 대상의 디렉토리 내 서명 선택
+                final String targetPath = "/storage/self/primary/Pictures/Signature/" + targetName;
+                File fileDirectory = new File(targetPath);
+                File[] targetFiles = fileDirectory.listFiles();
+                List<String> filesList = new ArrayList<>();
+
+                for (int i=0; i< files.length; i++) {
+                    filesList.add(targetFiles[i].getName());
+                }
+
+                int ran2 = (int)(randomValue * filesList.size()) -1;
+                String targetFile = filesList.get(ran2);
+
+                FileInputStream fis;   // 없어도 되는가?
+
+                try{
+                    String loadImgPath = targetPath + targetFile;
+                    Bitmap bm = BitmapFactory.decodeFile(loadImgPath);
+                    iv.setImageBitmap(bm);
+                    Toast.makeText(getApplicationContext(), "이미지 로드 성공", Toast.LENGTH_SHORT).show();
+                }
+                catch(Exception e){
+                    Toast.makeText(getApplicationContext(), "이미지 로드 실패", Toast.LENGTH_SHORT).show();
+                }
+
+//                // Cloud Storage 연결 설정 테스트!!
+//                //firebaseStorage 인스턴스 생성
+//                //하나의 Storage와 연동되어 있는 경우, getInstance()의 파라미터는 공백으로 두어도 됨
+//                //하나의 앱이 두개 이상의 Storage와 연동이 되어있 경우, 원하는 저장소의 스킴을 입력
+//                //getInstance()의 파라미터는 firebase console에서 확인 가능('gs:// ... ')
+//                FirebaseStorage storage = FirebaseStorage.getInstance();
+//
+//                //생성된 FirebaseStorage를 참조하는 storage 생성
+//                StorageReference storageRef = storage.getReference();
+//
+//                //Storage 내부의 images 폴더 안의 image.jpg 파일명을 가리키는 참조 생성
+//                StorageReference pathReference = storageRef.child("images/image.jpg");
+//
+//                pathReference = storageRef.child("dog.jpg");
+//
+//                if (pathReference != null) {
+//                    // 참조 객체로부터 이미지 다운로드 url을 얻어오기
+//                    pathReference.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
+//                        @Override
+//                        public void onSuccess(Uri uri) {
+//                            // 다운로드 URL이 파라미터로 전달되어 옴.
+//                            Glide.with(ForgerySign_Unskilled.this).load(uri).into(iv);
+//
+//                        }
+//                    }).addOnFailureListener(new OnFailureListener() {
+//                        @Override
+//                        public void onFailure(@NonNull Exception e) {
+//                            Toast.makeText(getApplicationContext(), "다운로드 실패", Toast.LENGTH_SHORT).show();
+//                        }
+//                    });
+//
+//                }
             }
         });
 

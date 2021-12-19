@@ -103,7 +103,6 @@ public class InputName extends AppCompatActivity {
                         // 아직 등록되지 않은 사용자인 경우
                         Toast.makeText(getApplicationContext(), "아직 등록되지 않은 사용자입니다.", Toast.LENGTH_SHORT).show();
                         // 디렉토리 생성
-
                         String strFolderPath = rootPath + name;
                         File folder = new File(strFolderPath);
                         try{
@@ -113,17 +112,6 @@ public class InputName extends AppCompatActivity {
                         catch(Exception e){
                             e.getStackTrace();
                         }
-//                        if (!folder.exists()) {
-//                            try{
-//                                folder.mkdir();   //폴더 생성
-//                                Toast.makeText(getApplicationContext(), "새 폴더 생성", Toast.LENGTH_SHORT).show();
-//                            }
-//                            catch(Exception e){
-//                                e.getStackTrace();
-//                            }
-//                        } else {
-//                            Toast.makeText(getApplicationContext(), "이미 폴더가 생성되어 있습니다.", Toast.LENGTH_SHORT).show();
-//                        }
 
                         start_button.setEnabled(true);
                         Toast.makeText(getApplicationContext(), "등록되었습니다.", Toast.LENGTH_SHORT).show();

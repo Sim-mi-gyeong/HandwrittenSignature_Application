@@ -2,9 +2,14 @@ package com.me.handwrittensignature;
 // ForgerySign_Skilled
 
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.ImageDecoder;
 import android.media.MediaPlayer;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -23,6 +28,14 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
+
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
 
 public class ForgerySign_Skilled_Practice extends AppCompatActivity {
     private TextView modeText;
@@ -76,36 +89,44 @@ public class ForgerySign_Skilled_Practice extends AppCompatActivity {
 
             @Override
             public void onClick(View view) {
-                // Cloud Storage 연결 설정 테스트!!
-                //firebaseStorage 인스턴스 생성
-                //하나의 Storage와 연동되어 있는 경우, getInstance()의 파라미터는 공백으로 두어도 됨
-                //하나의 앱이 두개 이상의 Storage와 연동이 되어있 경우, 원하는 저장소의 스킴을 입력
-                //getInstance()의 파라미터는 firebase console에서 확인 가능('gs:// ... ')
-                FirebaseStorage storage = FirebaseStorage.getInstance();
+                //불러오기 버튼 숨기기
+                loadButton.setEnabled(false);
 
-                //생성된 FirebaseStorage를 참조하는 storage 생성
-                StorageReference storageRef = storage.getReference();
+                final String rootPath = "/storage/self/primary/Pictures/Signature/";
+                File directory = new File(rootPath);
+                File[] files = directory.listFiles();
+                List<String> filesDirList = new ArrayList<>();
 
-                //Storage 내부의 images 폴더 안의 image.jpg 파일명을 가리키는 참조 생성
-//                StorageReference pathReference = storageRef.child("dog.jpg");
-                StorageReference pathReference = storageRef.child("sim/sim_1.jpeg");
+                for (int i=0; i< files.length; i++) {
+                    filesDirList.add(files[i].getName());
+                }
+                // 위조할 타겟 대상의 디렉토리 선택
+                int idx1 = new Random().nextInt(filesDirList.size());
+                String targetName = filesDirList.get(idx1);
 
-                if (pathReference != null) {
-                    // 참조 객체로부터 이미지 다운로드 url을 얻어오기
-                    pathReference.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-                        @Override
-                        public void onSuccess(Uri uri) {
-                            // 다운로드 URL이 파라미터로 전달되어 옴.
-                            Glide.with(ForgerySign_Skilled_Practice.this).load(uri).into(iv);
+                // 위조할 타켓 대상의 디렉토리 내 서명 선택
+                final String targetPath = "/storage/self/primary/Pictures/Signature/" + targetName;
+                File fileDirectory = new File(targetPath);
+                File[] targetFiles = fileDirectory.listFiles();
+                List<String> filesList = new ArrayList<>();
 
-                        }
-                    }).addOnFailureListener(new OnFailureListener() {
-                        @Override
-                        public void onFailure(@NonNull Exception e) {
-                            Toast.makeText(getApplicationContext(), "다운로드 실패", Toast.LENGTH_SHORT).show();
-                        }
-                    });
+                for (int i=0; i< targetFiles.length; i++) {
+                    filesList.add(targetFiles[i].getName());
+                }
 
+                int idx2 = new Random().nextInt(filesList.size());
+                String targetFile = filesList.get(idx2);
+//                String targetFile = filesList.get(0);   // 임의의 파일 지정
+
+                try {
+                    File storageDir = new File(targetPath);
+                    String loadImgName = targetFile;
+                    File file = new File(storageDir, loadImgName);
+                    Bitmap bitmap = BitmapFactory.decodeStream(new FileInputStream(file));
+                    iv.setImageBitmap(bitmap);
+
+                } catch (Exception e) {
+                    Toast.makeText(getApplicationContext(), "이미지 로드 실패", Toast.LENGTH_SHORT).show();
                 }
 
             }
