@@ -52,7 +52,8 @@ public class RealSign extends AppCompatActivity {
     private SignaturePad signaturePad;
     private int countNum = 0;   // 등록된 사용자 서명 횟수
     private int countComplete = 5;   // 실제 서명으로 등록할 횟수
-    public static String name;
+    private String name;
+    private TextView nameView;
     private Uri filePath;
 
     TimerTask timerTask;
@@ -201,6 +202,10 @@ public class RealSign extends AppCompatActivity {
                 //write code for saving the signature here
 
                 // 사용자 이름 + auto + 서명 녹화 영상 저장
+//                final String rootPath = "/storage/self/primary/Pictures/Signature/";
+//                final String CAPTURE_PATH = name;
+//                String strFolderPath = rootPath + CAPTURE_PATH;
+
                 captureView(signaturePad);
 //                captureActivity((Activity) getApplicationContext());
 
@@ -255,14 +260,16 @@ public class RealSign extends AppCompatActivity {
     }
 
     public void captureView(View View) {
+        Intent intent = getIntent(); // 전달한 데이터를 받을 Intent
+        String name = intent.getStringExtra("text");
         // 캡쳐가 저장될 외부 저장소
 //        final String CAPTURE_PATH = "/CAPTURE_TEST";
 //        final String CAPTURE_PATH = '/' + name;
 
         // 내부 저장소 영역
-        final String rootPath = "/storage/self/primary/Pictures/Signature";
-        final String CAPTURE_PATH = '/' + name;
-
+        final String rootPath = "/storage/self/primary/Pictures/Signature/";
+        final String CAPTURE_PATH = name;
+//        Toast.makeText(getApplicationContext(), name + "의 새 폴더 생성 시도 ", Toast.LENGTH_SHORT).show();   // name null값 여부 확인
         signaturePad.setDrawingCacheEnabled(true);
         signaturePad.buildDrawingCache();
         Bitmap captureView = signaturePad.getDrawingCache();   // Bitmap 가져오기
@@ -277,8 +284,16 @@ public class RealSign extends AppCompatActivity {
 //        String strFolderPath = getFilesDir() + CAPTURE_PATH;
 
         File folder = new File(strFolderPath);
-        if(!folder.exists()) {
-            folder.mkdirs();
+        if (!folder.exists()) {
+            try{
+                folder.mkdir();   //폴더 생성
+                Toast.makeText(getApplicationContext(), "새 폴더 생성", Toast.LENGTH_SHORT).show();
+            }
+            catch(Exception e){
+                e.getStackTrace();
+            }
+        } else {
+            Toast.makeText(getApplicationContext(), "이미 폴더가 생성되어 있습니다.", Toast.LENGTH_SHORT).show();
         }
 
         String strFilePath = strFolderPath + "/" + System.currentTimeMillis() + ".png";   // strFilePath: 이미지 저장 경로
