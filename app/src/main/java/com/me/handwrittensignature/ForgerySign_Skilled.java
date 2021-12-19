@@ -225,6 +225,8 @@ public class ForgerySign_Skilled extends AppCompatActivity {
     public void captureView(View View) {
         Intent intent = getIntent(); // 전달한 데이터를 받을 Intent
         String name = intent.getStringExtra("text");
+        String targetName = intent.getStringExtra("dirName");
+        String targetFile = intent.getStringExtra("fileName");
 
         // 저장소 영역  ->  위조하는 대상의 디렉토리에 해당 서명 캡처 이미지 저장!!!
         final String rootPath = "/storage/self/primary/Pictures/Signature/";

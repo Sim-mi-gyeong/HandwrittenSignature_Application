@@ -45,11 +45,6 @@ public class ForgerySign_Unskilled extends AppCompatActivity {
     private String targetName;
     private String targetFile;
 
-    // 타이머 관련 변수
-//    private TextView timerText;
-//    private int timeLimit = 10;   // 제한 시간 설정
-//    private int status = 0;   // o: 종료/초기화(기록 시작 전 상태, 기록 시작 -> 초기화 상태) , 1: 시작(기록 시작 후 상태) , 2: 일시 정지(기록 시작 -> 기록 저장 상태)
-
     ImageView iv;
 
     @Override
@@ -64,18 +59,11 @@ public class ForgerySign_Unskilled extends AppCompatActivity {
 
         TextView countText = (TextView)findViewById(R.id.countText);
         TextView finishText = (TextView)findViewById(R.id.finishText);
-        TextView timerText = (TextView)findViewById(R.id.timerText);
 
         iv = findViewById(R.id.image1);
 
         Intent intent = getIntent(); // 전달한 데이터를 받을 Intent
         String name = intent.getStringExtra("text");
-
-        // 타이머를 위한 핸들러 인스턴스 변수
-//        RealSign.TimerHandler timer = new ForgerySign_Unskilled.TimerHandler();
-
-//        saveButton.setEnabled(false)
-//        clearButton.setEnabled(false);
 
         signaturePad = (SignaturePad) findViewById(R.id.signaturePad);
         signaturePad.setEnabled(false);
@@ -164,34 +152,6 @@ public class ForgerySign_Unskilled extends AppCompatActivity {
 
                 startButton.setEnabled(false);
 
-//                // 시작 버튼 클릭 시 CountDown Timer 실행   ->   어플 종료되는 현상 발생
-//                final Timer ssmmss = new Timer();
-//                final Handler timerhandler = new Handler() {
-//                    public void handleMessage(Message msg) {
-////                        timeLimit = 10;
-//                        timeLimit --;
-//                        if (timeLimit == 0) {
-//                            ssmmss.cancel();
-//                        }
-//                        timerText.setText("제한 시간 : " + timeLimit + " 초");
-//
-//                    }
-//                };
-//
-//                final TimerTask outputtime = new TimerTask() {
-//                    @Override
-//                    public void run() {
-//                        Message msg = timerhandler.obtainMessage() ;
-//                        timerhandler.sendMessage(msg);
-//                    }
-//
-//                };
-//                ssmmss.schedule(outputtime, 0, 1000);
-//
-//                if (timeLimit == 0) {
-//                    outputtime.cancel();
-//                    timerText.setText("제한 시간 : " + timeLimit + " 초");
-//                }
             }
         });
 
@@ -230,13 +190,8 @@ public class ForgerySign_Unskilled extends AppCompatActivity {
                             startActivity(intent);
                         }
                     });
-
                 }
-                // 타이머 멈추도록 설정(일시 정지 후 초기화)
-                // 시작 상태 -> 일시 정지(2번) -> sleep -> 초기화(0번)
 
-//                    //write code for saving the signature here
-//                Toast.makeText(ForgerySign_Unskilled.this, "Signature Saved", Toast.LENGTH_SHORT).show();
             }
 
         });
