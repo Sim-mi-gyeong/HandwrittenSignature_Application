@@ -30,6 +30,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -41,6 +42,8 @@ public class ForgerySign_Unskilled extends AppCompatActivity {
     private int countNum = 0;   // 등록된 사용자 서명 횟수
     private int countComplete = 5;   // 실제 서명으로 등록할 횟수
     public static String name;
+    private String targetName;
+    private String targetFile;
 
     // 타이머 관련 변수
 //    private TextView timerText;
@@ -114,10 +117,12 @@ public class ForgerySign_Unskilled extends AppCompatActivity {
                 for (int i=0; i< files.length; i++) {
                     filesDirList.add(files[i].getName());
                 }
+
+                filesDirList.remove(name);   // 본인의 디렉토리(서명은)는 위조 대상에서 제외
+
                 // 위조할 타겟 대상의 디렉토리 선택
-                double randomValue = Math.random();
-                int ran1 = (int)(randomValue * filesDirList.size()) -1;
-                String targetName = filesDirList.get(ran1);
+                int idx1 = new Random().nextInt(filesDirList.size());
+                String targetName = filesDirList.get(idx1);
 
                 // 위조할 타켓 대상의 디렉토리 내 서명 선택
                 final String targetPath = "/storage/self/primary/Pictures/Signature/" + targetName;
@@ -125,57 +130,25 @@ public class ForgerySign_Unskilled extends AppCompatActivity {
                 File[] targetFiles = fileDirectory.listFiles();
                 List<String> filesList = new ArrayList<>();
 
-                for (int i=0; i< files.length; i++) {
+                for (int i=0; i< targetFiles.length; i++) {
                     filesList.add(targetFiles[i].getName());
                 }
 
-                int ran2 = (int)(randomValue * filesList.size()) -1;
-                String targetFile = filesList.get(ran2);
+                int idx2 = new Random().nextInt(filesList.size());
+                String targetFile = filesList.get(idx2);
+//                String targetFile = filesList.get(0);   // 임의의 파일 지정
 
-                FileInputStream fis;   // 없어도 되는가?
+                try {
+                    File storageDir = new File(targetPath);
+                    String loadImgName = targetFile;
+                    File file = new File(storageDir, loadImgName);
+                    Bitmap bitmap = BitmapFactory.decodeStream(new FileInputStream(file));
+                    iv.setImageBitmap(bitmap);
 
-                try{
-                    String loadImgPath = targetPath + targetFile;
-                    Bitmap bm = BitmapFactory.decodeFile(loadImgPath);
-                    iv.setImageBitmap(bm);
-                    Toast.makeText(getApplicationContext(), "이미지 로드 성공", Toast.LENGTH_SHORT).show();
-                }
-                catch(Exception e){
+                } catch (Exception e) {
                     Toast.makeText(getApplicationContext(), "이미지 로드 실패", Toast.LENGTH_SHORT).show();
                 }
 
-//                // Cloud Storage 연결 설정 테스트!!
-//                //firebaseStorage 인스턴스 생성
-//                //하나의 Storage와 연동되어 있는 경우, getInstance()의 파라미터는 공백으로 두어도 됨
-//                //하나의 앱이 두개 이상의 Storage와 연동이 되어있 경우, 원하는 저장소의 스킴을 입력
-//                //getInstance()의 파라미터는 firebase console에서 확인 가능('gs:// ... ')
-//                FirebaseStorage storage = FirebaseStorage.getInstance();
-//
-//                //생성된 FirebaseStorage를 참조하는 storage 생성
-//                StorageReference storageRef = storage.getReference();
-//
-//                //Storage 내부의 images 폴더 안의 image.jpg 파일명을 가리키는 참조 생성
-//                StorageReference pathReference = storageRef.child("images/image.jpg");
-//
-//                pathReference = storageRef.child("dog.jpg");
-//
-//                if (pathReference != null) {
-//                    // 참조 객체로부터 이미지 다운로드 url을 얻어오기
-//                    pathReference.getDownloadUrl().addOnSuccessListener(new OnSuccessListener<Uri>() {
-//                        @Override
-//                        public void onSuccess(Uri uri) {
-//                            // 다운로드 URL이 파라미터로 전달되어 옴.
-//                            Glide.with(ForgerySign_Unskilled.this).load(uri).into(iv);
-//
-//                        }
-//                    }).addOnFailureListener(new OnFailureListener() {
-//                        @Override
-//                        public void onFailure(@NonNull Exception e) {
-//                            Toast.makeText(getApplicationContext(), "다운로드 실패", Toast.LENGTH_SHORT).show();
-//                        }
-//                    });
-//
-//                }
             }
         });
 
@@ -275,11 +248,41 @@ public class ForgerySign_Unskilled extends AppCompatActivity {
                 signaturePad.clear();
                 saveButton.setEnabled(true);
                 clearButton.setEnabled(true);
-
-                // 타이머 초기화
-
             }
         });
+
+    }
+
+    public void captureView(View View) {
+        Intent intent = getIntent();   // 전달한 데이터를 받을 Intent
+        String name = intent.getStringExtra("text");
+
+        // 저장소 영역  ->  위조하는 대상의 디렉토리에 해당 서명 캡처 이미지 저장!!!
+        final String rootPath = "/storage/self/primary/Pictures/Signature/";
+        final String CAPTURE_PATH = targetName;   // 위조서명 저장 시에는 -> name 대신 targetName으로
+//        Toast.makeText(getApplicationContext(), name + "의 새 폴더 생성 시도 ", Toast.LENGTH_SHORT).show();   // name null값 여부 확인
+        signaturePad.setDrawingCacheEnabled(true);
+        signaturePad.buildDrawingCache();
+        Bitmap captureView = signaturePad.getDrawingCache();   // Bitmap 가져오기
+
+        FileOutputStream fos;
+
+//        String strFolderPath = Environment.getExternalStorageDirectory().getAbsolutePath() + CAPTURE_PATH;
+        String strFolderPath = rootPath + CAPTURE_PATH;
+
+        String strFilePath = strFolderPath + "/" + "skilled_forgery_" + System.currentTimeMillis() + ".png";   // strFilePath: 이미지 저장 경로
+        File fileCacheItem = new File(strFilePath);
+
+        try {
+            fos = new FileOutputStream(fileCacheItem);
+            // 해당 Bitmap 으로 만든 이미지를 png 파일 형태로 만들기
+            captureView.compress(Bitmap.CompressFormat.PNG, 100, fos);
+            fos.flush();
+            fos.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+            Toast.makeText(getApplicationContext(), "스크린샷 저장 실패", Toast.LENGTH_SHORT).show();
+        }
 
     }
 
