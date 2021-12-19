@@ -100,6 +100,9 @@ public class ForgerySign_Skilled_Practice extends AppCompatActivity {
                 for (int i=0; i< files.length; i++) {
                     filesDirList.add(files[i].getName());
                 }
+
+                filesDirList.remove(name);   // 본인의 디렉토리(서명은)는 위조 대상에서 제외
+
                 // 위조할 타겟 대상의 디렉토리 선택
                 int idx1 = new Random().nextInt(filesDirList.size());
                 String targetName = filesDirList.get(idx1);
