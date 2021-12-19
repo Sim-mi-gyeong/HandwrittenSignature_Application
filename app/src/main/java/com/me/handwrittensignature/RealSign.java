@@ -1,29 +1,59 @@
 package com.me.handwrittensignature;
 // RealSign
 
+import android.Manifest;
+import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Intent;
 //import android.support.v7.app.AppCompatActivity;
+import android.graphics.Bitmap;
+import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
 
 import com.github.gcacace.signaturepad.views.SignaturePad;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.OnProgressListener;
+import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.StorageTask;
+import com.google.firebase.storage.UploadTask;
 
+import org.w3c.dom.Text;
+
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
 
 import static android.os.SystemClock.sleep;
+import static java.nio.channels.Selector.open;
 
 public class RealSign extends AppCompatActivity {
+    public EditText nameText;
     private SignaturePad signaturePad;
     private int countNum = 0;   // 등록된 사용자 서명 횟수
     private int countComplete = 5;   // 실제 서명으로 등록할 횟수
+    public static String name;
+    private Uri filePath;
 
     TimerTask timerTask;
     Timer timer = new Timer();
@@ -51,6 +81,14 @@ public class RealSign extends AppCompatActivity {
         TextView countText = (TextView)findViewById(R.id.countText);
         TextView finishText = (TextView)findViewById(R.id.finishText);
         TextView timerText = (TextView)findViewById(R.id.timerText);
+        TextView nameView = (TextView)findViewById(R.id.nameView);
+
+        Intent intent = getIntent(); // 전달한 데이터를 받을 Intent
+        String name = intent.getStringExtra("text");
+
+        nameView.setText(name);
+
+        ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, MODE_PRIVATE);
 
         // 타이머를 위한 핸들러 인스턴스 변수
 //        TimerHandler timer = new TimerHandler();
@@ -76,10 +114,6 @@ public class RealSign extends AppCompatActivity {
 //        };
 //        ssmmss.schedule(outputtime, 0, 1000);
 
-
-//        saveButton.setEnabled(false)
-//        clearButton.setEnabled(false);
-
         signaturePad = (SignaturePad) findViewById(R.id.signaturePad);
         signaturePad.setEnabled(false);
 
@@ -87,22 +121,17 @@ public class RealSign extends AppCompatActivity {
 
             @Override
             public void onStartSigning() {
-                //Event triggered when the pad is touched
 
-//                clearButton.setVisibility(true);
-//                saveButton.setVisibility(true);
             }
 
             @Override
             public void onSigned() {
-                //Event triggered when the pad is signed
                 clearButton.setEnabled(true);
                 saveButton.setEnabled(true);
             }
 
             @Override
             public void onClear() {
-                //Event triggered when the pad is cleared
                 clearButton.setEnabled(false);
                 saveButton.setEnabled(false);
             }
@@ -165,14 +194,17 @@ public class RealSign extends AppCompatActivity {
             }
         });
 
+        // 기록 시작 버튼 누르고 -> 저장버튼 누르면 해당 영역 챕처 사진 저장
         saveButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 //write code for saving the signature here
 
-                // 사용자 이름 + autoIncre + 서명 녹화 영상 저장
+                // 사용자 이름 + auto + 서명 녹화 영상 저장
+                captureView(signaturePad);
+//                captureActivity((Activity) getApplicationContext());
 
-                countNum += 1;
+                countNum += 1;   // 파일 이름은 name + '_' + countNum
 
                 countText.setText((countNum + "/" + countComplete).toString());
                 Toast.makeText(RealSign.this, "Signature Saved", Toast.LENGTH_SHORT).show();
@@ -193,21 +225,19 @@ public class RealSign extends AppCompatActivity {
 
                 if(countNum == countComplete) {
                     finishText.setVisibility(View.VISIBLE);
-//                    Toast.makeText(RealSign.this, "Complete Signature Saved", Toast.LENGTH_SHORT).show();
                     startButton.setText("등록 완료");
                     startButton.setOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
                             // 일정 횟수 채울 시작 버튼 -> 완료 버튼 -> 위조 서명 중 skilled/unskilled 선택 페이지로
-                            Intent intent = new Intent(getApplicationContext(), SelectStatus.class);
-                            startActivity(intent);
+                            Intent intent2 = new Intent(getApplicationContext(), SelectStatus.class);
+                            startActivity(intent2);
                         }
                     });
                 }
 
                 // 타이머 멈추도록 설정(일시 정지 후 초기화)
                 // 시작 상태 -> 일시 정지(2번) -> sleep -> 초기화(0번)
-
 
             }
         });
@@ -219,10 +249,104 @@ public class RealSign extends AppCompatActivity {
                 saveButton.setEnabled(true);
                 clearButton.setEnabled(true);
 
-                // 타이머 초기화
-
             }
         });
+
+    }
+
+    public void captureView(View View) {
+        // 캡쳐가 저장될 외부 저장소
+//        final String CAPTURE_PATH = "/CAPTURE_TEST";
+//        final String CAPTURE_PATH = '/' + name;
+
+        // 내부 저장소 영역
+        final String rootPath = "/storage/self/primary/Pictures/Signature";
+        final String CAPTURE_PATH = '/' + name;
+
+        signaturePad.setDrawingCacheEnabled(true);
+        signaturePad.buildDrawingCache();
+        Bitmap captureView = signaturePad.getDrawingCache();   // Bitmap 가져오기
+
+        FileOutputStream fos;
+
+//        String strFolderPath = Environment.getExternalStorageDirectory().getAbsolutePath() + CAPTURE_PATH;
+//        String strFolderPath = Environment.getExternalStorageDirectory().toString() + CAPTURE_PATH;
+        String strFolderPath = rootPath + CAPTURE_PATH;
+//        /storage/1020-2216/sim -> SD card
+//        /storage/self/primary/Pictures/simmigyeong -> 내부 저장공간
+//        String strFolderPath = getFilesDir() + CAPTURE_PATH;
+
+        File folder = new File(strFolderPath);
+        if(!folder.exists()) {
+            folder.mkdirs();
+        }
+
+        String strFilePath = strFolderPath + "/" + System.currentTimeMillis() + ".png";   // strFilePath: 이미지 저장 경로
+        File fileCacheItem = new File(strFilePath);
+
+        try {
+            fos = new FileOutputStream(fileCacheItem);
+            // 해당 Bitmap 으로 만든 이미지는 png 파일 형태로 만들기
+            captureView.compress(Bitmap.CompressFormat.PNG, 100, fos);
+            fos.flush();
+            fos.close();
+
+            // strFilePath에 저장된 이미지 스토리지에 업로드
+            if (strFilePath != null) {
+                // 업로드 진행 Dialog 나타내기
+                final ProgressDialog progressDialog = new ProgressDialog(this);
+                progressDialog.setTitle("현재 업로드 중");
+                progressDialog.show();
+
+                // 파이어베이스 스토리지
+                FirebaseStorage storage = FirebaseStorage.getInstance();
+                // 생성된 Firebase Storage를 참조하는 storage 생성
+                StorageReference storageRef = storage.getReference();
+
+                // Unique한 파일명을 만들기
+                SimpleDateFormat formatter = new SimpleDateFormat("yyyyMMHH_mmss");
+                Date now = new Date();
+                String filename = name + formatter.format(now) + ".png";
+                // Storage 내부의 images 폴더 안의 image.jpg 파일명을 가리키는 참조 생성
+                // storage 주소와 폴더 파일명을 지정`
+                StorageReference pathReference = storageRef.child(name + '/' + filename);
+
+                pathReference.putFile(Uri.parse(strFilePath))
+                        .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                            @Override
+                            public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                                progressDialog.dismiss(); // 업로드 진행 Dialog 상자 닫기
+                                Toast.makeText(getApplicationContext(), "업로드 완료!", Toast.LENGTH_SHORT).show();
+                            }
+
+                        })
+                        .addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                progressDialog.dismiss();
+                                Toast.makeText(getApplicationContext(), "업로드 실패!", Toast.LENGTH_SHORT).show();
+                            }
+                        })
+                        .addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
+                            @Override
+                            public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
+                                @SuppressWarnings("VisibleForTests")
+                                double progress = (100 * taskSnapshot.getBytesTransferred()) /  taskSnapshot.getTotalByteCount();
+                                //dialog에 진행률을 퍼센트로 출력해 준다
+                                progressDialog.setMessage("Uploaded " + ((int) progress) + "% ...");
+                            }
+                        });
+
+            }
+            else {
+                Toast.makeText(getApplicationContext(), "파일을 먼저 선택하세요.", Toast.LENGTH_SHORT).show();
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+            Toast.makeText(getApplicationContext(), "스크린샷 저장 실패", Toast.LENGTH_SHORT).show();
+        }
+
 
     }
 
