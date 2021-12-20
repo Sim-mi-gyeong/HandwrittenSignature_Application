@@ -60,15 +60,7 @@ public class RealSign extends AppCompatActivity {
     Timer timer = new Timer();
 
     // 타이머 관련 변수
-//    private TextView timerText;
     private int timeLimit = 10;   // 제한 시간 설정
-    private int status = 0;   // o: 종료/초기화(기록 시작 전 상태, 기록 시작 -> 초기화 상태) , 1: 시작(기록 시작 후 상태) , 2: 일시 정지(기록 시작 -> 기록 저장 상태)
-
-//    public TextView timerText;
-//    public int timeLimit = 10;
-//    public int status = 0;
-    static TimerTask tt;
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -90,30 +82,6 @@ public class RealSign extends AppCompatActivity {
         nameView.setText(name);
 
         ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, MODE_PRIVATE);
-
-        // 타이머를 위한 핸들러 인스턴스 변수
-//        TimerHandler timer = new TimerHandler();
-
-////        final TextView timerText = (TextView)findViewById(R.id.timerText);
-//        final Timer ssmmss = new Timer();
-//        final Handler timerhandler = new Handler() {
-//            public void handleMessage(Message msg) {
-//                timeLimit = 10;
-//                timeLimit --;
-//                timerText.setText("제한 시간 : " + timeLimit + " 초");
-//
-//            }
-//        };
-//
-//        TimerTask outputtime = new TimerTask() {
-//            @Override
-//            public void run() {
-//                Message msg = timerhandler.obtainMessage() ;
-//                timerhandler.sendMessage(msg);
-//            }
-//
-//        };
-//        ssmmss.schedule(outputtime, 0, 1000);
 
         signaturePad = (SignaturePad) findViewById(R.id.signaturePad);
         signaturePad.setEnabled(false);
@@ -149,48 +117,33 @@ public class RealSign extends AppCompatActivity {
                 saveButton.setVisibility(View.VISIBLE);   // 저장 버튼 나타나게
                 startButton.setEnabled(false);   // 시작 버튼 비활성화
 
-                // 시작 버튼 클릭 시 CountDown Timer 실행   ->   어플 종료되는 현상 발생
-//                if (status == 0) {
-//                    status = 1;   // 종료 상태를 -> 시작 상태로
+//                final Timer ssmmss = new Timer();
+//                final Handler timerhandler = new Handler() {
+//                    public void handleMessage(Message msg) {
+////                        timeLimit = 10;
+//                        timeLimit --;
+//                        if (timeLimit == 0) {
+//                            ssmmss.cancel();
+//                        }
+//                        timerText.setText("제한 시간 : " + timeLimit + " 초");
 //
-//                    timer.sendEmptyMessage(0);
+//                    }
+//                };
+//
+//                final TimerTask outputtime = new TimerTask() {
+//                    @Override
+//                    public void run() {
+//                        Message msg = timerhandler.obtainMessage() ;
+//                        timerhandler.sendMessage(msg);
+//                    }
+//
+//                };
+//                ssmmss.schedule(outputtime, 0, 1000);
+//
+//                if (timeLimit == 0) {
+//                    outputtime.cancel();
+//                    timerText.setText("제한 시간 : " + timeLimit + " 초");
 //                }
-
-//                timeLimit = 10;
-//                timeLimit --;
-//                timerText.setText("제한 시간 : " + timeLimit + " 초");
-//                ssmmss.schedule(outputtime, 0, 1000);
-
-//                ssmmss.schedule(outputtime, 0, 1000);
-
-                //        final TextView timerText = (TextView)findViewById(R.id.timerText);
-                final Timer ssmmss = new Timer();
-                final Handler timerhandler = new Handler() {
-                    public void handleMessage(Message msg) {
-//                        timeLimit = 10;
-                        timeLimit --;
-                        if (timeLimit == 0) {
-                            ssmmss.cancel();
-                        }
-                        timerText.setText("제한 시간 : " + timeLimit + " 초");
-
-                    }
-                };
-
-                final TimerTask outputtime = new TimerTask() {
-                    @Override
-                    public void run() {
-                        Message msg = timerhandler.obtainMessage() ;
-                        timerhandler.sendMessage(msg);
-                    }
-
-                };
-                ssmmss.schedule(outputtime, 0, 1000);
-
-                if (timeLimit == 0) {
-                    outputtime.cancel();
-                    timerText.setText("제한 시간 : " + timeLimit + " 초");
-                }
 
             }
         });
@@ -233,9 +186,6 @@ public class RealSign extends AppCompatActivity {
                         }
                     });
                 }
-
-                // 타이머 멈추도록 설정(일시 정지 후 초기화)
-                // 시작 상태 -> 일시 정지(2번) -> sleep -> 초기화(0번)
 
             }
         });

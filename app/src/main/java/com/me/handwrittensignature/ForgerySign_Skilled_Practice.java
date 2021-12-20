@@ -128,37 +128,6 @@ public class ForgerySign_Skilled_Practice extends AppCompatActivity {
                 //불러오기 버튼 숨기기
                 loadButton.setEnabled(false);
 
-//                final String rootPath = "/storage/self/primary/Pictures/Signature/";
-//                File directory = new File(rootPath);
-//                File[] files = directory.listFiles();
-//                List<String> filesDirList = new ArrayList<>();
-//
-//                for (int i=0; i< files.length; i++) {
-//                    filesDirList.add(files[i].getName());
-//                }
-//
-//                filesDirList.remove(name);   // 본인의 디렉토리(서명은)는 위조 대상에서 제외
-//
-//                // 위조할 타겟 대상의 디렉토리 선택
-//                int idx1 = new Random().nextInt(filesDirList.size());
-//                String targetName = filesDirList.get(idx1);
-//                String pass_targetName = targetName;
-//
-//                // 위조할 타켓 대상의 디렉토리 내 서명 선택
-//                final String targetPath = "/storage/self/primary/Pictures/Signature/" + targetName;
-//                File fileDirectory = new File(targetPath);
-//                File[] targetFiles = fileDirectory.listFiles();
-//                List<String> filesList = new ArrayList<>();
-//
-//                for (int i=0; i< targetFiles.length; i++) {
-//                    filesList.add(targetFiles[i].getName());
-//                }
-//
-//                int idx2 = new Random().nextInt(filesList.size());
-//                String targetFile = filesList.get(idx2);
-////                String targetFile = filesList.get(0);   // 임의의 파일 지정
-//                String pass_targetFile = targetFile;
-
                 try {
                     File storageDir = new File(targetPath);
                     String loadImgName = targetFile;
