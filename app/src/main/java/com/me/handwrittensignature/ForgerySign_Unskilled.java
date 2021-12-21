@@ -42,8 +42,9 @@ public class ForgerySign_Unskilled extends AppCompatActivity {
     private int countNum = 0;   // 등록된 사용자 서명 횟수
     private int countComplete = 5;   // 실제 서명으로 등록할 횟수
     public static String name;
-    public static String targetName;
-    public static String targetFile;
+    private String targetName;
+    private String targetFile;
+    private String pass_targetName;
 
     ImageView iv;
 
@@ -105,7 +106,7 @@ public class ForgerySign_Unskilled extends AppCompatActivity {
 
         // 위조할 타겟 대상의 디렉토리 선택
         int idx1 = new Random().nextInt(filesDirList.size());
-        String targetName = filesDirList.get(idx1);
+        targetName = filesDirList.get(idx1);
 
         // 위조할 타켓 대상의 디렉토리 내 서명 선택
         final String targetPath = "/storage/self/primary/Pictures/Signature/" + targetName;
@@ -118,8 +119,8 @@ public class ForgerySign_Unskilled extends AppCompatActivity {
         }
 
         int idx2 = new Random().nextInt(filesList.size());
-        String targetFile = filesList.get(idx2);
-//        String targetFile = filesList.get(0);   // 임의의 파일 지정
+        targetFile = filesList.get(idx2);
+//       targetFile = filesList.get(0);   // 임의의 파일 지정
 
         loadButton.setOnClickListener(new View.OnClickListener() {
 
@@ -185,7 +186,6 @@ public class ForgerySign_Unskilled extends AppCompatActivity {
 
                 if(countNum == countComplete) {
                     finishText.setVisibility(View.VISIBLE);
-//                    Toast.makeText(RealSign.this, "Complete Signature Saved", Toast.LENGTH_SHORT).show();
                     startButton.setText("등록 완료");
                     startButton.setOnClickListener(new View.OnClickListener() {
                         @Override
