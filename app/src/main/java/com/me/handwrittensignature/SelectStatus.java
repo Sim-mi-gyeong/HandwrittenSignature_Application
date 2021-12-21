@@ -18,17 +18,16 @@ public class SelectStatus extends AppCompatActivity {
         String name = intent.getStringExtra("text");
 
         Button button1 = (Button)findViewById(R.id.button1);
-        Button button2 = (Button)findViewById(R.id.button2);
-
         button1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 Intent intent2 = new Intent(getApplicationContext(), ForgerySign_Unskilled.class);
+//                Intent intent2 = new Intent(getApplicationContext(), SubActivity.class);
                 intent2.putExtra("text", name);
                 startActivity(intent2);
             }
         });
-
+        Button button2 = (Button)findViewById(R.id.button2);
         button2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
