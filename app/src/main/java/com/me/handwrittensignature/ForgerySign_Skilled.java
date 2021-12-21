@@ -54,13 +54,13 @@ public class ForgerySign_Skilled extends AppCompatActivity {
 
         Button loadButton = (Button)findViewById(R.id.loadButton);
         Button startButton = (Button)findViewById(R.id.button_start);
-        Button saveButton = (Button)findViewById(R.id.button_restart);
-        Button clearButton = (Button)findViewById(R.id.button_end);
+        Button saveButton = (Button)findViewById(R.id.button_save);
+        Button clearButton = (Button)findViewById(R.id.button_restart);
 
         TextView modeText = (TextView)findViewById(R.id.modeText);
         TextView countText = (TextView)findViewById(R.id.countText);
         TextView finishText = (TextView)findViewById(R.id.finishText);
-        TextView timerText = (TextView)findViewById(R.id.timerText);
+//        TextView timerText = (TextView)findViewById(R.id.timerText);
 
         modeText.setVisibility(View.VISIBLE);
 
@@ -137,33 +137,33 @@ public class ForgerySign_Skilled extends AppCompatActivity {
                 startButton.setEnabled(false);
 
                 // 시작 버튼 클릭 시 CountDown Timer 실행
-                final Timer ssmmss = new Timer();
-                final Handler timerhandler = new Handler() {
-                    public void handleMessage(Message msg) {
-//                        timeLimit = 10;
-                        timeLimit --;
-                        if (timeLimit == 0) {
-                            ssmmss.cancel();
-                        }
-                        timerText.setText("제한 시간 : " + timeLimit + " 초");
-
-                    }
-                };
-
-                final TimerTask outputtime = new TimerTask() {
-                    @Override
-                    public void run() {
-                        Message msg = timerhandler.obtainMessage() ;
-                        timerhandler.sendMessage(msg);
-                    }
-
-                };
-                ssmmss.schedule(outputtime, 0, 1000);
-
-                if (timeLimit == 0) {
-                    outputtime.cancel();
-                    timerText.setText("제한 시간 : " + timeLimit + " 초");
-                }
+//                final Timer ssmmss = new Timer();
+//                final Handler timerhandler = new Handler() {
+//                    public void handleMessage(Message msg) {
+////                        timeLimit = 10;
+//                        timeLimit --;
+//                        if (timeLimit == 0) {
+//                            ssmmss.cancel();
+//                        }
+//                        timerText.setText("제한 시간 : " + timeLimit + " 초");
+//
+//                    }
+//                };
+//
+//                final TimerTask outputtime = new TimerTask() {
+//                    @Override
+//                    public void run() {
+//                        Message msg = timerhandler.obtainMessage() ;
+//                        timerhandler.sendMessage(msg);
+//                    }
+//
+//                };
+//                ssmmss.schedule(outputtime, 0, 1000);
+//
+//                if (timeLimit == 0) {
+//                    outputtime.cancel();
+//                    timerText.setText("제한 시간 : " + timeLimit + " 초");
+//                }
 
             }
 
@@ -241,7 +241,7 @@ public class ForgerySign_Skilled extends AppCompatActivity {
 //        String strFolderPath = Environment.getExternalStorageDirectory().getAbsolutePath() + CAPTURE_PATH;
         String strFolderPath = rootPath + CAPTURE_PATH;
 
-        String strFilePath = strFolderPath + "/" + "skilled_forgery_" + System.currentTimeMillis() + ".png";   // strFilePath: 이미지 저장 경로
+        String strFilePath = strFolderPath + "/" + targetName + '_' +"skilled_forgery_" + System.currentTimeMillis() + ".png";   // strFilePath: 이미지 저장 경로
         File fileCacheItem = new File(strFilePath);
 
         try {

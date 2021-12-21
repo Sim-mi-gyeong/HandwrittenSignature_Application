@@ -73,7 +73,7 @@ public class RealSign extends AppCompatActivity {
 
         TextView countText = (TextView)findViewById(R.id.countText);
         TextView finishText = (TextView)findViewById(R.id.finishText);
-        TextView timerText = (TextView)findViewById(R.id.timerText);
+//        TextView timerText = (TextView)findViewById(R.id.timerText);
         TextView nameView = (TextView)findViewById(R.id.nameView);
 
         Intent intent = getIntent(); // 전달한 데이터를 받을 Intent
@@ -219,7 +219,7 @@ public class RealSign extends AppCompatActivity {
 //        String strFolderPath = Environment.getExternalStorageDirectory().getAbsolutePath() + CAPTURE_PATH;
         String strFolderPath = rootPath + CAPTURE_PATH;
 
-        String strFilePath = strFolderPath + "/" + System.currentTimeMillis() + ".png";   // strFilePath: 이미지 저장 경로
+        String strFilePath = strFolderPath + "/" + name + '_' + System.currentTimeMillis() + ".png";   // strFilePath: 이미지 저장 경로
         File fileCacheItem = new File(strFilePath);
 
         try {
@@ -232,7 +232,6 @@ public class RealSign extends AppCompatActivity {
             e.printStackTrace();
             Toast.makeText(getApplicationContext(), "스크린샷 저장 실패", Toast.LENGTH_SHORT).show();
         }
-
 
     }
 

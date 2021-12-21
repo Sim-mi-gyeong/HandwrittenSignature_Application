@@ -5,14 +5,14 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <TextView
-        android:id="@+id/timerText"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="right"
-        android:layout_marginRight="10px"
-        android:text="제한 시간 : 10 초"
-        android:textSize="15dp" />
+<!--    <TextView-->
+<!--        android:id="@+id/timerText"-->
+<!--        android:layout_width="wrap_content"-->
+<!--        android:layout_height="wrap_content"-->
+<!--        android:layout_gravity="right"-->
+<!--        android:layout_marginRight="10px"-->
+<!--        android:text="제한 시간 : 10 초"-->
+<!--        android:textSize="15dp" />-->
 
     <LinearLayout
         android:layout_width="wrap_content"

@@ -42,8 +42,8 @@ public class ForgerySign_Unskilled extends AppCompatActivity {
     private int countNum = 0;   // 등록된 사용자 서명 횟수
     private int countComplete = 5;   // 실제 서명으로 등록할 횟수
     public static String name;
-    private String targetName;
-    private String targetFile;
+    public static String targetName;
+    public static String targetFile;
 
     ImageView iv;
 
@@ -72,7 +72,9 @@ public class ForgerySign_Unskilled extends AppCompatActivity {
 
             @Override
             public void onStartSigning() {
-
+                //Event triggered when the pad is touched
+//                clearButton.setVisibility(true);
+//                saveButton.setVisibility(true);
             }
 
             @Override
@@ -117,7 +119,7 @@ public class ForgerySign_Unskilled extends AppCompatActivity {
 
         int idx2 = new Random().nextInt(filesList.size());
         String targetFile = filesList.get(idx2);
-//                String targetFile = filesList.get(0);   // 임의의 파일 지정
+//        String targetFile = filesList.get(0);   // 임의의 파일 지정
 
         loadButton.setOnClickListener(new View.OnClickListener() {
 
@@ -147,12 +149,14 @@ public class ForgerySign_Unskilled extends AppCompatActivity {
 
                 loadButton.setVisibility(View.GONE);
                 startButton.setVisibility(View.GONE);
+                startButton.setVisibility(View.GONE);
                 clearButton.setVisibility(View.VISIBLE);
                 saveButton.setVisibility(View.VISIBLE);
 
                 startButton.setEnabled(false);
 
             }
+
         });
 
         saveButton.setOnClickListener(new View.OnClickListener() {
@@ -224,7 +228,7 @@ public class ForgerySign_Unskilled extends AppCompatActivity {
 //        String strFolderPath = Environment.getExternalStorageDirectory().getAbsolutePath() + CAPTURE_PATH;
         String strFolderPath = rootPath + CAPTURE_PATH;
 
-        String strFilePath = strFolderPath + "/" + "unskilled_forgery_" + System.currentTimeMillis() + ".png";   // strFilePath: 이미지 저장 경로
+        String strFilePath = strFolderPath + "/" + targetName + '_' + "unskilled_forgery_" + System.currentTimeMillis() + ".png";   // strFilePath: 이미지 저장 경로
         File fileCacheItem = new File(strFilePath);
 
         try {
