@@ -102,7 +102,7 @@ public class ForgerySign_Skilled_Practice extends AppCompatActivity {
 
         // 위조할 타겟 대상의 디렉토리 선택
         int idx1 = new Random().nextInt(filesDirList.size());
-        String targetName = filesDirList.get(idx1);
+        targetName = filesDirList.get(idx1);
         String pass_targetName = targetName;
 
         // 위조할 타켓 대상의 디렉토리 내 서명 선택
@@ -117,7 +117,7 @@ public class ForgerySign_Skilled_Practice extends AppCompatActivity {
 
 //        int idx2 = new Random().nextInt(filesList.size());
 //        String targetFile = filesList.get(idx2);
-          String targetFile = filesList.get(0);   // 임의의 파일 지정
+        targetFile = filesList.get(0);   // 임의의 파일 지정
         String pass_targetFile = targetFile;
 
 
