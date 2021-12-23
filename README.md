@@ -12,7 +12,7 @@ Local 환경 세팅
 
 • Gradle Version: 6.7.1
 
-• Virtual Device: Pixel 2 API 29 -> 변경
+• Virtual Device: Pixel 2 API 29
 
 • Test Device
 
@@ -21,9 +21,10 @@ Local 환경 세팅
 Library
 
 Signature-pad: 1.2.1
+
 기존 업로드된 프로젝트
 
 다양한 화면 크기에 따른 앱의 유연한 레이아웃을 위해 ConstraintLayout으로 변경 -> X
 
-기존: LinearLayout으로 설정 -> 유지 고려
+기존: LinearLayout으로 설정 -> 유지
 
