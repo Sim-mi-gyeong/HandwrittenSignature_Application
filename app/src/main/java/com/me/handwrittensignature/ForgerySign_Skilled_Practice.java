@@ -115,9 +115,9 @@ public class ForgerySign_Skilled_Practice extends AppCompatActivity {
             filesList.add(targetFiles[i].getName());
         }
 
-        int idx2 = new Random().nextInt(filesList.size());
-        String targetFile = filesList.get(idx2);
-//                String targetFile = filesList.get(0);   // 임의의 파일 지정
+//        int idx2 = new Random().nextInt(filesList.size());
+//        String targetFile = filesList.get(idx2);
+          String targetFile = filesList.get(0);   // 임의의 파일 지정
         String pass_targetFile = targetFile;
 
 

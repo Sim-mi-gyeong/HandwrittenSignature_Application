@@ -118,9 +118,9 @@ public class ForgerySign_Unskilled extends AppCompatActivity {
             filesList.add(targetFiles[i].getName());
         }
 
-        int idx2 = new Random().nextInt(filesList.size());
-        targetFile = filesList.get(idx2);
-//       targetFile = filesList.get(0);   // 임의의 파일 지정
+//        int idx2 = new Random().nextInt(filesList.size());
+//        targetFile = filesList.get(idx2);
+       targetFile = filesList.get(0);   // 임의의 파일 지정
 
         loadButton.setOnClickListener(new View.OnClickListener() {
 
