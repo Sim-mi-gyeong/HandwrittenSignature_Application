@@ -38,7 +38,7 @@ public class ForgerySign_Skilled extends AppCompatActivity {
     private TextView modeText;
     private SignaturePad signaturePad;
     private int countNum = 0;   // 등록된 사용자 서명 횟수
-    private int countComplete = 5;   // 실제 서명으로 등록할 횟수
+    private int countComplete = 20;   // 실제 서명으로 등록할 횟수
     public static String name;
     public static String targetName;
     public static String targetFile;

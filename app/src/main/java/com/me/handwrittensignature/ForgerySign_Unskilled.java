@@ -40,7 +40,7 @@ public class ForgerySign_Unskilled extends AppCompatActivity {
 
     private SignaturePad signaturePad;
     private int countNum = 0;   // 등록된 사용자 서명 횟수
-    private int countComplete = 5;   // 실제 서명으로 등록할 횟수
+    private int countComplete = 20;   // 실제 서명으로 등록할 횟수
     public static String name;
     private String targetName;
     private String targetFile;
