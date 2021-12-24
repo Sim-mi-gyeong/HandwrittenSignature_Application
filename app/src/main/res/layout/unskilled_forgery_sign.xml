@@ -6,15 +6,6 @@
     android:orientation="vertical"
     android:gravity="center" >
 
-<!--    <TextView-->
-<!--        android:id="@+id/timerText"-->
-<!--        android:layout_width="wrap_content"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        android:layout_gravity="right"-->
-<!--        android:text="제한 시간 : 10 초"-->
-<!--        android:layout_marginRight="10px"-->
-<!--        android:textSize="15dp" />-->
-
     <TextView
         android:id="@+id/countText"
         android:layout_width="wrap_content"
@@ -22,7 +13,7 @@
         android:layout_marginBottom="10dp"
         android:ems="3"
         android:gravity="center"
-        android:text="0/5"
+        android:text="0/20"
         android:textSize="20dp" />
 
     <FrameLayout

@@ -59,7 +59,7 @@
             android:layout_marginBottom="10dp"
             android:ems="3"
             android:gravity="center"
-            android:text="0/5"
+            android:text="0/20"
             android:textSize="20dp" />
 
         <FrameLayout

@@ -24,8 +24,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class InputName extends AppCompatActivity {
-    public EditText nameText;
-    public String pathName;
+    private EditText nameText;
+    private String pathName;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
