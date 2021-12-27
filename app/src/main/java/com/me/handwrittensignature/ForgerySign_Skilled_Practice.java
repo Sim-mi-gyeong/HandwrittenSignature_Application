@@ -9,6 +9,7 @@ import android.media.MediaPlayer;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.MediaStore;
 import android.view.View;
 import android.widget.Button;
@@ -89,7 +90,8 @@ public class ForgerySign_Skilled_Practice extends AppCompatActivity {
             }
         });
 
-        final String rootPath = "/storage/self/primary/Pictures/Signature/";
+//        final String rootPath = "/storage/self/primary/Pictures/Signature/";
+        final String rootPath = Environment.getExternalStorageDirectory() + "/Pictures/Signature/";
         File directory = new File(rootPath);
         File[] files = directory.listFiles();
         List<String> filesDirList = new ArrayList<>();
@@ -106,7 +108,7 @@ public class ForgerySign_Skilled_Practice extends AppCompatActivity {
         String pass_targetName = targetName;
 
         // 위조할 타켓 대상의 디렉토리 내 서명 선택
-        final String targetPath = "/storage/self/primary/Pictures/Signature/" + targetName;
+        final String targetPath = rootPath + targetName;
         File fileDirectory = new File(targetPath);
         File[] targetFiles = fileDirectory.listFiles();
         List<String> filesList = new ArrayList<>();

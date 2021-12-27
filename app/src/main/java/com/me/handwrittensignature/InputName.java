@@ -3,6 +3,7 @@ package com.me.handwrittensignature;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
@@ -41,8 +42,12 @@ public class InputName extends AppCompatActivity {
         List<Uri> uris_ = new ArrayList<>();
 
         // 내부 저장소 영역
-        final String rootPath = "/storage/self/primary/Pictures/Signature/";
+//        final String rootPath = "/storage/self/primary/Pictures/Signature/";
+        final String rootPath = Environment.getExternalStorageDirectory() + "/Pictures/Signature/";
         File directory = new File(rootPath);
+        // /sdcard/Pictures/sim
+//        File directory = new File(Environment.getExternalStorageDirectory(), "/Pictures");
+//        File directory = new File(Environment.getExternalStorageDirectory().DIRECTORY_PICTURES);
         File[] files = directory.listFiles();
         List<String> filesDirList = new ArrayList<>();
 
