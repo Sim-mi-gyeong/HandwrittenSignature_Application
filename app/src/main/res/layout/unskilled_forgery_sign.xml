@@ -27,14 +27,14 @@
 
             <ImageView
                 android:id="@+id/image1"
-                android:layout_width="210dp"
-                android:layout_height="200dp"
+                android:layout_width="0dp"
+                android:layout_height="400dp"
                 android:layout_weight="1" />
 
             <com.github.gcacace.signaturepad.views.SignaturePad
                 android:id="@+id/signaturePad"
-                android:layout_width="210dp"
-                android:layout_height="200dp"
+                android:layout_width="0dp"
+                android:layout_height="400dp"
                 android:background="#9A9A9A"
                 android:layout_marginBottom="10dp"
                 android:layout_weight="1"/>

@@ -30,11 +30,6 @@
         <activity android:name=".ForgerySign_Skilled_Practice"/>
         <activity android:name=".ForgerySign_Skilled"/>
 
-        <activity android:name=".TestActivity"/>
-        <activity android:name=".SubActivity"/>
-
     </application>
-
-
 
 </manifest>
