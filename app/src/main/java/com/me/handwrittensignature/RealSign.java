@@ -148,7 +148,7 @@ public class RealSign extends AppCompatActivity {
             }
         });
 
-        // 기록 시작 버튼 누르고 -> 저장버튼 누르면 해당 영역 챕처 사진 저장
+        // 기록 시작 버튼 누르고 -> 저장버튼 누르면 해당 영역 캡처 사진 저장
         saveButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -207,12 +207,14 @@ public class RealSign extends AppCompatActivity {
         String name = intent.getStringExtra("text");
 
         // 저장소 영역
-        final String rootPath = "/storage/self/primary/Pictures/Signature/";
+//        final String rootPath = "/storage/self/primary/Pictures/Signature/";
+        final String rootPath = Environment.getExternalStorageDirectory() + "/Pictures/Signature/";
         final String CAPTURE_PATH = name;
 //        Toast.makeText(getApplicationContext(), name + "의 새 폴더 생성 시도 ", Toast.LENGTH_SHORT).show();   // name null값 여부 확인
+        signaturePad.destroyDrawingCache();
         signaturePad.setDrawingCacheEnabled(true);
         signaturePad.buildDrawingCache();
-        Bitmap captureView = signaturePad.getDrawingCache();   // Bitmap 가져오기
+        Bitmap bitmap = signaturePad.getDrawingCache();   // Bitmap 가져오기
 
         FileOutputStream fos;
 
@@ -223,9 +225,9 @@ public class RealSign extends AppCompatActivity {
         File fileCacheItem = new File(strFilePath);
 
         try {
-            fos = new FileOutputStream(fileCacheItem);
+            fos = new FileOutputStream(fileCacheItem, false);
             // 해당 Bitmap 으로 만든 이미지를 png 파일 형태로 만들기
-            captureView.compress(Bitmap.CompressFormat.PNG, 100, fos);
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos);
             fos.flush();
             fos.close();
         } catch (IOException e) {

@@ -218,12 +218,14 @@ public class ForgerySign_Unskilled extends AppCompatActivity {
         String name = intent.getStringExtra("text");
 
         // 저장소 영역  ->  위조하는 대상의 디렉토리에 해당 서명 캡처 이미지 저장!!!
-        final String rootPath = "/storage/self/primary/Pictures/Signature/";
+//        final String rootPath = "/storage/self/primary/Pictures/Signature/";
+        final String rootPath = Environment.getExternalStorageDirectory() + "/Pictures/Signature/";
         final String CAPTURE_PATH = targetName;   // 위조서명 저장 시에는 -> name 대신 targetName으로
 //        Toast.makeText(getApplicationContext(), name + "의 새 폴더 생성 시도 ", Toast.LENGTH_SHORT).show();   // name null값 여부 확인
+        signaturePad.destroyDrawingCache();
         signaturePad.setDrawingCacheEnabled(true);
         signaturePad.buildDrawingCache();
-        Bitmap captureView = signaturePad.getDrawingCache();   // Bitmap 가져오기
+        Bitmap bitmap = signaturePad.getDrawingCache();   // Bitmap 가져오기
 
         FileOutputStream fos;
 
@@ -236,7 +238,7 @@ public class ForgerySign_Unskilled extends AppCompatActivity {
         try {
             fos = new FileOutputStream(fileCacheItem);
             // 해당 Bitmap 으로 만든 이미지를 png 파일 형태로 만들기
-            captureView.compress(Bitmap.CompressFormat.PNG, 100, fos);
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos);
             fos.flush();
             fos.close();
         } catch (IOException e) {

@@ -235,9 +235,10 @@ public class ForgerySign_Skilled extends AppCompatActivity {
         final String rootPath =Environment.getExternalStorageDirectory() + "/Pictures/Signature/";
         final String CAPTURE_PATH = targetName;   // -> name 대신 targetName으로
 //        Toast.makeText(getApplicationContext(), name + "의 새 폴더 생성 시도 ", Toast.LENGTH_SHORT).show();   // name null값 여부 확인
+        signaturePad.destroyDrawingCache();
         signaturePad.setDrawingCacheEnabled(true);
         signaturePad.buildDrawingCache();
-        Bitmap captureView = signaturePad.getDrawingCache();   // Bitmap 가져오기
+        Bitmap bitmap = signaturePad.getDrawingCache();   // Bitmap 가져오기
 
         FileOutputStream fos;
 
@@ -250,14 +251,13 @@ public class ForgerySign_Skilled extends AppCompatActivity {
         try {
             fos = new FileOutputStream(fileCacheItem);
             // 해당 Bitmap 으로 만든 이미지를 png 파일 형태로 만들기
-            captureView.compress(Bitmap.CompressFormat.PNG, 100, fos);
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos);
             fos.flush();
             fos.close();
         } catch (IOException e) {
             e.printStackTrace();
             Toast.makeText(getApplicationContext(), "스크린샷 저장 실패", Toast.LENGTH_SHORT).show();
         }
-
 
     }
 
