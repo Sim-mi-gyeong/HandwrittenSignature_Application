@@ -2,8 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:gravity="center">
+    android:orientation="vertical">
 
     <TextView
         android:id="@+id/modeText"
@@ -13,29 +12,9 @@
         android:layout_marginTop="5dp"
         android:layout_marginBottom="5dp"
         android:background="@drawable/background"
-        android:text="Register Mode"
+        android:text="Skilled Forgery Register Mode"
         android:textSize="15dp"
         android:layout_gravity="center"/>
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:gravity="center">
-
-<!--        <TextView-->
-<!--            android:id="@+id/modeText"-->
-<!--            android:layout_width="wrap_content"-->
-<!--            android:layout_height="wrap_content"-->
-<!--            android:padding="10dp"-->
-<!--            android:layout_marginTop="5dp"-->
-<!--            android:layout_marginBottom="5dp"-->
-<!--            android:background="@drawable/background"-->
-<!--            android:text="Register Mode"-->
-<!--            android:textSize="15dp"-->
-<!--            android:layout_gravity="center"/>-->
-
-    </LinearLayout>
 
 <!--    <TextView-->
 <!--        android:id="@+id/timerText"-->
@@ -47,8 +26,8 @@
 <!--        android:textSize="15dp" />-->
 
     <LinearLayout
-        android:layout_width="wrap_content"
-        android:layout_height="660dp"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
         android:gravity="center"
         android:orientation="vertical">
 
@@ -74,13 +53,13 @@
                 <ImageView
                     android:id="@+id/image1"
                     android:layout_width="0dp"
-                    android:layout_height="200dp"
+                    android:layout_height="400dp"
                     android:layout_weight="1" />
 
                 <com.github.gcacace.signaturepad.views.SignaturePad
                     android:id="@+id/signaturePad"
                     android:layout_width="0dp"
-                    android:layout_height="200dp"
+                    android:layout_height="400dp"
                     android:background="#9A9A9A"
                     android:layout_marginBottom="10dp"
                     android:layout_weight="1"/>
