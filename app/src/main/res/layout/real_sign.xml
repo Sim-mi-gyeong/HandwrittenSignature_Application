@@ -3,7 +3,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:background="@color/beige">
 
     <TextView
         android:id="@+id/modeText"
@@ -31,7 +32,6 @@
             android:gravity="center"
             android:textSize="20dp" />
 
-
         <TextView
             android:id="@+id/countText"
             android:layout_width="wrap_content"
@@ -48,10 +48,11 @@
 
             <com.github.gcacace.signaturepad.views.SignaturePad
                 android:id="@+id/signaturePad"
-                android:layout_width="match_parent"
-                android:layout_height="400dp"
+                android:layout_width="500dp"
+                android:layout_height="500dp"
                 android:layout_marginBottom="10dp"
-                android:background="#9A9A9A" />
+                android:layout_gravity="center"
+                android:background="@color/white"/>
 
             <TextView
                 android:id="@+id/finishText"

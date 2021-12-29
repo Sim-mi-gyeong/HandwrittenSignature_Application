@@ -2,7 +2,8 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:background="@color/beige">
 
     <TextView
         android:id="@+id/modeText"
@@ -54,13 +55,14 @@
                     android:id="@+id/image1"
                     android:layout_width="0dp"
                     android:layout_height="400dp"
-                    android:layout_weight="1" />
+                    android:layout_weight="1"
+                    android:background="@drawable/stroke"/>
 
                 <com.github.gcacace.signaturepad.views.SignaturePad
                     android:id="@+id/signaturePad"
                     android:layout_width="0dp"
                     android:layout_height="400dp"
-                    android:background="#9A9A9A"
+                    android:background="@color/white"
                     android:layout_marginBottom="10dp"
                     android:layout_weight="1"/>
 
