@@ -3,6 +3,7 @@ package com.me.handwrittensignature;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.View;
@@ -41,46 +42,22 @@ public class InputName extends AppCompatActivity {
         List<Uri> uris_ = new ArrayList<>();
 
         // 내부 저장소 영역
+
         // /storage/self/primary/Pictures/Signature
-        final String rootPath = "/storage/self/primary/Pictures/Signature/";
+//        final String rootPath = "/storage/self/primary/Pictures/Signature/";
+
+//        final String rootPath = "/storage/self/primary/Pictures/Signature/";
+        final String rootPath = Environment.getExternalStorageDirectory() + "/Pictures/Signature/";
+
         File directory = new File(rootPath);
+//        File directory = new File(Environment.getExternalStorageDirectory(), "/Pictures");
+//        File directory = new File(Environment.getExternalStorageDirectory().DIRECTORY_PICTURES);
         File[] files = directory.listFiles();
         List<String> filesDirList = new ArrayList<>();
 
         for (int i=0; i< files.length; i++) {
             filesDirList.add(files[i].getName());
         }
-
-//        nameText.addTextChangedListener(new TextWatcher() {
-//            @Override
-//            public void beforeTextChanged(CharSequence s, int start, int count, int after) {
-//
-//                start_button.setEnabled(false);
-//                start_button.setClickable(false);
-//
-//            }
-//
-//            @Override
-//            public void onTextChanged(CharSequence s, int start, int before, int count) {
-//
-//            }
-//
-//            @Override
-//            public void afterTextChanged(Editable s) {
-//                String name = nameText.getText().toString();
-//
-//                if (name.length() > 0){
-//                    confirm_button.setEnabled(true);
-//                    start_button.setEnabled(true);
-//                }
-//                else {
-//                    confirm_button.setEnabled(false);
-//                    start_button.setEnabled(false);
-//
-//                }
-//
-//            }
-//        });
 
         confirm_button.setOnClickListener(new View.OnClickListener() {
             // 버튼 클릭 시 기존 사용자 데이터와 확인

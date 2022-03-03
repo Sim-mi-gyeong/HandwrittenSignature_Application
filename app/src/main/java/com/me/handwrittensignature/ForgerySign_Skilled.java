@@ -7,6 +7,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.view.View;
@@ -106,8 +107,9 @@ public class ForgerySign_Skilled extends AppCompatActivity {
                 //불러오기 버튼 숨기기
                 loadButton.setEnabled(false);
                 // Practice 모드에서 랜덤으로 불러온 이미지를 띄우기
-                final String rootPath = "/storage/self/primary/Pictures/Signature/";
-                final String targetPath = "/storage/self/primary/Pictures/Signature/" + targetName;
+//                final String rootPath = "/storage/self/primary/Pictures/Signature/";
+                final String rootPath = Environment.getExternalStorageDirectory() + "/Pictures/Signature/";
+                final String targetPath = rootPath + targetName;
 
                 try {
                     File storageDir = new File(targetPath);
@@ -229,12 +231,14 @@ public class ForgerySign_Skilled extends AppCompatActivity {
         String targetFile = intent.getStringExtra("fileName");
 
         // 저장소 영역  ->  위조하는 대상의 디렉토리에 해당 서명 캡처 이미지 저장!!!
-        final String rootPath = "/storage/self/primary/Pictures/Signature/";
+//        final String rootPath = "/storage/self/primary/Pictures/Signature/";
+        final String rootPath =Environment.getExternalStorageDirectory() + "/Pictures/Signature/";
         final String CAPTURE_PATH = targetName;   // -> name 대신 targetName으로
 //        Toast.makeText(getApplicationContext(), name + "의 새 폴더 생성 시도 ", Toast.LENGTH_SHORT).show();   // name null값 여부 확인
+        signaturePad.destroyDrawingCache();
         signaturePad.setDrawingCacheEnabled(true);
         signaturePad.buildDrawingCache();
-        Bitmap captureView = signaturePad.getDrawingCache();   // Bitmap 가져오기
+        Bitmap bitmap = signaturePad.getDrawingCache();   // Bitmap 가져오기
 
         FileOutputStream fos;
 
@@ -247,14 +251,13 @@ public class ForgerySign_Skilled extends AppCompatActivity {
         try {
             fos = new FileOutputStream(fileCacheItem);
             // 해당 Bitmap 으로 만든 이미지를 png 파일 형태로 만들기
-            captureView.compress(Bitmap.CompressFormat.PNG, 100, fos);
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos);
             fos.flush();
             fos.close();
         } catch (IOException e) {
             e.printStackTrace();
             Toast.makeText(getApplicationContext(), "스크린샷 저장 실패", Toast.LENGTH_SHORT).show();
         }
-
 
     }
 
