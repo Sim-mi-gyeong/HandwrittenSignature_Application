@@ -58,6 +58,7 @@ public class RealSign extends AppCompatActivity {
 
     TimerTask timerTask;
     Timer timer = new Timer();
+    MyTimer myTimer;
 
     // 타이머 관련 변수
     private int timeLimit = 10;   // 제한 시간 설정
@@ -73,8 +74,11 @@ public class RealSign extends AppCompatActivity {
 
         TextView countText = (TextView)findViewById(R.id.countText);
         TextView finishText = (TextView)findViewById(R.id.finishText);
-//        TextView timerText = (TextView)findViewById(R.id.timerText);
+        TextView timerText = (TextView)findViewById(R.id.timerText);
         TextView nameView = (TextView)findViewById(R.id.nameView);
+
+        myTimer = new MyTimer(10000, 1000);
+        timerText.setText("제한시간 : " + timeLimit + " 초");
 
         Intent intent = getIntent(); // 전달한 데이터를 받을 Intent
         String name = intent.getStringExtra("text");
@@ -117,33 +121,33 @@ public class RealSign extends AppCompatActivity {
                 saveButton.setVisibility(View.VISIBLE);   // 저장 버튼 나타나게
                 startButton.setEnabled(false);   // 시작 버튼 비활성화
 
-//                final Timer ssmmss = new Timer();
-//                final Handler timerhandler = new Handler() {
-//                    public void handleMessage(Message msg) {
-////                        timeLimit = 10;
-//                        timeLimit --;
-//                        if (timeLimit == 0) {
-//                            ssmmss.cancel();
-//                        }
-//                        timerText.setText("제한 시간 : " + timeLimit + " 초");
-//
-//                    }
-//                };
-//
-//                final TimerTask outputtime = new TimerTask() {
-//                    @Override
-//                    public void run() {
-//                        Message msg = timerhandler.obtainMessage() ;
-//                        timerhandler.sendMessage(msg);
-//                    }
-//
-//                };
-//                ssmmss.schedule(outputtime, 0, 1000);
-//
-//                if (timeLimit == 0) {
-//                    outputtime.cancel();
-//                    timerText.setText("제한 시간 : " + timeLimit + " 초");
-//                }
+                final Timer ssmmss = new Timer();
+                final Handler timerHandler = new Handler() {
+                    public void handleMessage(Message msg) {
+//                        timeLimit = 10;
+                        timeLimit --;
+                        if (timeLimit == 0) {
+                            ssmmss.cancel();
+                        }
+                        timerText.setText("제한 시간 : " + timeLimit + " 초");
+
+                    }
+                };
+
+                final TimerTask outputtime = new TimerTask() {
+                    @Override
+                    public void run() {
+                        Message msg = timerHandler.obtainMessage() ;
+                        timerHandler.sendMessage(msg);
+                    }
+
+                };
+                ssmmss.schedule(outputtime, 0, 1000);
+
+                if (timeLimit == 0) {
+                    outputtime.cancel();
+                    timerText.setText("제한 시간 : " + timeLimit + " 초");
+                }
 
             }
         });
@@ -234,5 +238,6 @@ public class RealSign extends AppCompatActivity {
         }
 
     }
+
 
 }

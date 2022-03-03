@@ -41,6 +41,7 @@ public class InputName extends AppCompatActivity {
         List<Uri> uris_ = new ArrayList<>();
 
         // 내부 저장소 영역
+        // /storage/self/primary/Pictures/Signature
         final String rootPath = "/storage/self/primary/Pictures/Signature/";
         File directory = new File(rootPath);
         File[] files = directory.listFiles();
