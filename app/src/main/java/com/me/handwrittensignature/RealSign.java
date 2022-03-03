@@ -62,6 +62,7 @@ public class RealSign extends AppCompatActivity {
 
     // 타이머 관련 변수
     private int timeLimit = 10;   // 제한 시간 설정
+    TextView timerText;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -74,10 +75,11 @@ public class RealSign extends AppCompatActivity {
 
         TextView countText = (TextView)findViewById(R.id.countText);
         TextView finishText = (TextView)findViewById(R.id.finishText);
-        TextView timerText = (TextView)findViewById(R.id.timerText);
+        timerText = (TextView)findViewById(R.id.timerText);
         TextView nameView = (TextView)findViewById(R.id.nameView);
 
         myTimer = new MyTimer(10000, 1000);
+//        timeLimit = 10;
         timerText.setText("제한시간 : " + timeLimit + " 초");
 
         Intent intent = getIntent(); // 전달한 데이터를 받을 Intent
@@ -121,42 +123,18 @@ public class RealSign extends AppCompatActivity {
                 saveButton.setVisibility(View.VISIBLE);   // 저장 버튼 나타나게
                 startButton.setEnabled(false);   // 시작 버튼 비활성화
 
-                final Timer ssmmss = new Timer();
-                final Handler timerHandler = new Handler() {
-                    public void handleMessage(Message msg) {
-//                        timeLimit = 10;
-                        timeLimit --;
-                        if (timeLimit == 0) {
-                            ssmmss.cancel();
-                        }
-                        timerText.setText("제한 시간 : " + timeLimit + " 초");
-
-                    }
-                };
-
-                final TimerTask outputtime = new TimerTask() {
-                    @Override
-                    public void run() {
-                        Message msg = timerHandler.obtainMessage() ;
-                        timerHandler.sendMessage(msg);
-                    }
-
-                };
-                ssmmss.schedule(outputtime, 0, 1000);
-
-                if (timeLimit == 0) {
-                    outputtime.cancel();
-                    timerText.setText("제한 시간 : " + timeLimit + " 초");
-                }
+                startTimerTask();
 
             }
         });
+
+
 
         // 기록 시작 버튼 누르고 -> 저장버튼 누르면 해당 영역 캡처 사진 저장
         saveButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //write code for saving the signature here
+
                 captureView(signaturePad);
 
                 countNum += 1;   // 파일 이름은 name + '_' + countNum
@@ -200,6 +178,7 @@ public class RealSign extends AppCompatActivity {
                 signaturePad.clear();
                 saveButton.setEnabled(true);
                 clearButton.setEnabled(true);
+                stopTimerTask();
 
             }
         });
@@ -237,6 +216,42 @@ public class RealSign extends AppCompatActivity {
         } catch (IOException e) {
             e.printStackTrace();
             Toast.makeText(getApplicationContext(), "스크린샷 저장 실패", Toast.LENGTH_SHORT).show();
+        }
+
+    }
+    /**
+     * 서명 기록 시작 / 초기화 / 저장 / 제한 시간 종료 시 타이머 설정 메서드
+     */
+    private void startTimerTask() {
+        stopTimerTask();
+        timerTask = new TimerTask() {
+
+            @Override
+            public void run() {
+                timeLimit --;
+                timerText.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (timeLimit == 0) {
+                            timerTask.cancel();
+                        }
+                        timerText.setText("제한시간 : " + timeLimit + " 초");
+                    }
+                });
+
+            }
+        };
+        timer.schedule(timerTask, 0, 1000);
+
+    }
+
+    private void stopTimerTask() {
+        if (timerTask != null) {
+            timeLimit = 10;
+            timerText.setText("제한시간 : " + timeLimit + " 초");
+//            timerTask.cancel();
+            timerTask = null;
+            startTimerTask();
         }
 
     }

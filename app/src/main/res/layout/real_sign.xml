@@ -72,7 +72,7 @@
                 <com.github.gcacace.signaturepad.views.SignaturePad
                     android:id="@+id/signaturePad"
                     android:layout_width="500dp"
-                    android:layout_height="500dp"
+                    android:layout_height="300dp"
                     android:layout_gravity="center"
                     android:layout_marginBottom="10dp"
                     android:background="@color/white" />
@@ -104,7 +104,7 @@
                         android:layout_width="wrap_content"
                         android:layout_height="wrap_content"
                         android:layout_gravity="center"
-                        android:onClick="onClick"
+                        android:onClick="clickHandler"
                         android:text="기록 시작"
                         android:visibility="visible" />
 
@@ -131,7 +131,7 @@
                             android:layout_marginLeft="20dp"
                             android:layout_marginRight="60dp"
                             android:layout_weight="1"
-                            android:onClick="onClick"
+                            android:onClick="clickHandler"
                             android:text="초기화"
                             android:visibility="invisible" />
 
