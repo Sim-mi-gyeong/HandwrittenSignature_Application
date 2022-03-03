@@ -58,7 +58,6 @@ public class RealSign extends AppCompatActivity {
 
     TimerTask timerTask;
     Timer timer = new Timer();
-    MyTimer myTimer;
 
     // 타이머 관련 변수
     private int timeLimit = 10;   // 제한 시간 설정
@@ -78,8 +77,6 @@ public class RealSign extends AppCompatActivity {
         timerText = (TextView)findViewById(R.id.timerText);
         TextView nameView = (TextView)findViewById(R.id.nameView);
 
-        myTimer = new MyTimer(10000, 1000);
-//        timeLimit = 10;
         timerText.setText("제한시간 : " + timeLimit + " 초");
 
         Intent intent = getIntent(); // 전달한 데이터를 받을 Intent
@@ -145,10 +142,13 @@ public class RealSign extends AppCompatActivity {
                 // 기록 저장 후에도 초기화 실행
                 signaturePad.clear();
 
-                // 또 다시 시작 버튼 누르고 -> 기록 저장 / 초기화 버튼으로 구분할 것인지?
                 signaturePad.setEnabled(false);
 
                 sleep(1000);
+
+                // 타이머 세팅
+                saveStopTimerTask();
+                timerText.setText("제한시간 : " + timeLimit + " 초");
 
                 startButton.setVisibility(View.VISIBLE);
                 clearButton.setVisibility(View.GONE);
@@ -178,8 +178,6 @@ public class RealSign extends AppCompatActivity {
                 signaturePad.clear();
                 saveButton.setEnabled(true);
                 clearButton.setEnabled(true);
-                stopTimerTask();
-
             }
         });
 
@@ -234,6 +232,8 @@ public class RealSign extends AppCompatActivity {
                     public void run() {
                         if (timeLimit == 0) {
                             timerTask.cancel();
+                            signaturePad.setEnabled(false);
+                            Toast.makeText(getApplicationContext(), "제한시간 종료", Toast.LENGTH_SHORT).show();
                         }
                         timerText.setText("제한시간 : " + timeLimit + " 초");
                     }
@@ -249,9 +249,19 @@ public class RealSign extends AppCompatActivity {
         if (timerTask != null) {
             timeLimit = 10;
             timerText.setText("제한시간 : " + timeLimit + " 초");
-//            timerTask.cancel();
+            timerTask.cancel();
             timerTask = null;
-            startTimerTask();
+        }
+
+    }
+    // 저장 버튼 클릭했을 때 남은 시간에서 멈추고 -> 타이머 다시 시작
+    private void saveStopTimerTask() {
+        if (timerTask != null) {
+            timerText.setText("제한시간 : " + timeLimit + " 초");
+            timerTask.cancel();
+            timerTask = null;
+            timeLimit = 10;
+
         }
 
     }
