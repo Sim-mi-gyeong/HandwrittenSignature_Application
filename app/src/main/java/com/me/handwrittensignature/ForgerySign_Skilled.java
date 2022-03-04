@@ -44,7 +44,11 @@ public class ForgerySign_Skilled extends AppCompatActivity {
     public static String targetName;
     public static String targetFile;
 
+    // 타이머 관련 변수
+    TimerTask timerTask;
+    Timer timer = new Timer();
     private int timeLimit = 10;   // 제한 시간 설정
+    TextView timerText;
 
     ImageView iv;
 
@@ -61,10 +65,11 @@ public class ForgerySign_Skilled extends AppCompatActivity {
         TextView modeText = (TextView)findViewById(R.id.modeText);
         TextView countText = (TextView)findViewById(R.id.countText);
         TextView finishText = (TextView)findViewById(R.id.finishText);
-//        TextView timerText = (TextView)findViewById(R.id.timerText);
+        timerText = (TextView)findViewById(R.id.timerText);
 
         modeText.setVisibility(View.VISIBLE);
 
+        timerText.setText("제한시간 : " + timeLimit + " 초");
         iv = findViewById(R.id.image1);
 
         Intent intent = getIntent(); // 전달한 데이터를 받을 Intent
@@ -138,34 +143,7 @@ public class ForgerySign_Skilled extends AppCompatActivity {
 
                 startButton.setEnabled(false);
 
-                // 시작 버튼 클릭 시 CountDown Timer 실행
-//                final Timer ssmmss = new Timer();
-//                final Handler timerhandler = new Handler() {
-//                    public void handleMessage(Message msg) {
-////                        timeLimit = 10;
-//                        timeLimit --;
-//                        if (timeLimit == 0) {
-//                            ssmmss.cancel();
-//                        }
-//                        timerText.setText("제한 시간 : " + timeLimit + " 초");
-//
-//                    }
-//                };
-//
-//                final TimerTask outputtime = new TimerTask() {
-//                    @Override
-//                    public void run() {
-//                        Message msg = timerhandler.obtainMessage() ;
-//                        timerhandler.sendMessage(msg);
-//                    }
-//
-//                };
-//                ssmmss.schedule(outputtime, 0, 1000);
-//
-//                if (timeLimit == 0) {
-//                    outputtime.cancel();
-//                    timerText.setText("제한 시간 : " + timeLimit + " 초");
-//                }
+                startTimerTask();
 
             }
 
@@ -189,6 +167,10 @@ public class ForgerySign_Skilled extends AppCompatActivity {
                 signaturePad.setEnabled(false);
 
                 sleep(1000);
+
+                // 타이머 세팅
+                saveStopTimerTask();
+                timerText.setText("제한시간 : " + timeLimit + " 초");
 
                 startButton.setVisibility(View.VISIBLE);
                 clearButton.setVisibility(View.GONE);
@@ -257,6 +239,55 @@ public class ForgerySign_Skilled extends AppCompatActivity {
         } catch (IOException e) {
             e.printStackTrace();
             Toast.makeText(getApplicationContext(), "스크린샷 저장 실패", Toast.LENGTH_SHORT).show();
+        }
+
+    }
+
+    /**
+     * 서명 기록 시작 / 초기화 / 저장 / 제한 시간 종료 시 타이머 설정 메서드
+     */
+    private void startTimerTask() {
+        stopTimerTask();
+        timerTask = new TimerTask() {
+
+            @Override
+            public void run() {
+                timeLimit --;
+                timerText.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (timeLimit == 0) {
+                            timerTask.cancel();
+                            signaturePad.setEnabled(false);
+                            Toast.makeText(getApplicationContext(), "제한시간 종료", Toast.LENGTH_SHORT).show();
+                        }
+                        timerText.setText("제한시간 : " + timeLimit + " 초");
+                    }
+                });
+
+            }
+        };
+        timer.schedule(timerTask, 0, 1000);
+
+    }
+
+    private void stopTimerTask() {
+        if (timerTask != null) {
+            timeLimit = 10;
+            timerText.setText("제한시간 : " + timeLimit + " 초");
+            timerTask.cancel();
+            timerTask = null;
+        }
+
+    }
+    // 저장 버튼 클릭했을 때 남은 시간에서 멈추고 -> 타이머 다시 시작
+    private void saveStopTimerTask() {
+        if (timerTask != null) {
+            timerText.setText("제한시간 : " + timeLimit + " 초");
+            timerTask.cancel();
+            timerTask = null;
+            timeLimit = 10;
+
         }
 
     }

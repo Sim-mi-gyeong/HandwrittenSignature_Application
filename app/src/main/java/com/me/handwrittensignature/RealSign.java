@@ -56,10 +56,9 @@ public class RealSign extends AppCompatActivity {
     private TextView nameView;
     private Uri filePath;
 
+    // 타이머 관련 변수
     TimerTask timerTask;
     Timer timer = new Timer();
-
-    // 타이머 관련 변수
     private int timeLimit = 10;   // 제한 시간 설정
     TextView timerText;
 
@@ -124,8 +123,6 @@ public class RealSign extends AppCompatActivity {
 
             }
         });
-
-
 
         // 기록 시작 버튼 누르고 -> 저장버튼 누르면 해당 영역 캡처 사진 저장
         saveButton.setOnClickListener(new View.OnClickListener() {
@@ -215,6 +212,7 @@ public class RealSign extends AppCompatActivity {
             e.printStackTrace();
             Toast.makeText(getApplicationContext(), "스크린샷 저장 실패", Toast.LENGTH_SHORT).show();
         }
+
 
     }
     /**

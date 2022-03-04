@@ -47,6 +47,12 @@ public class ForgerySign_Unskilled extends AppCompatActivity {
     private String targetFile;
     private String pass_targetName;
 
+    // 타이머 관련 변수
+    TimerTask timerTask;
+    Timer timer = new Timer();
+    private int timeLimit = 10;   // 제한 시간 설정
+    TextView timerText;
+
     ImageView iv;
 
     @Override
@@ -61,8 +67,11 @@ public class ForgerySign_Unskilled extends AppCompatActivity {
 
         TextView countText = (TextView)findViewById(R.id.countText);
         TextView finishText = (TextView)findViewById(R.id.finishText);
+        timerText = (TextView)findViewById(R.id.timerText);
 
         iv = findViewById(R.id.image1);
+
+        timerText.setText("제한시간 : " + timeLimit + " 초");
 
         Intent intent = getIntent(); // 전달한 데이터를 받을 Intent
         String name = intent.getStringExtra("text");
@@ -128,7 +137,7 @@ public class ForgerySign_Unskilled extends AppCompatActivity {
 
             @Override
             public void onClick(View v) {
-                //불러오기 버튼 숨기기
+
                 loadButton.setEnabled(false);
 
                 try {
@@ -158,6 +167,8 @@ public class ForgerySign_Unskilled extends AppCompatActivity {
 
                 startButton.setEnabled(false);
 
+                startTimerTask();
+
             }
 
         });
@@ -172,13 +183,15 @@ public class ForgerySign_Unskilled extends AppCompatActivity {
                 countText.setText((countNum + "/" + countComplete).toString());
                 Toast.makeText(ForgerySign_Unskilled.this, "Signature Saved", Toast.LENGTH_SHORT).show();
 
-                // 기록 저장 후에도 초기화 실행
                 signaturePad.clear();
 
-                // 또 다시 시작 버튼 누르고 -> 기록 저장 / 초기화 버튼으로 구분할 것인지?
                 signaturePad.setEnabled(false);
 
                 sleep(1000);
+
+                // 타이머 세팅
+                saveStopTimerTask();
+                timerText.setText("제한시간 : " + timeLimit + " 초");
 
                 startButton.setVisibility(View.VISIBLE);
                 clearButton.setVisibility(View.GONE);
@@ -244,6 +257,54 @@ public class ForgerySign_Unskilled extends AppCompatActivity {
         } catch (IOException e) {
             e.printStackTrace();
             Toast.makeText(getApplicationContext(), "스크린샷 저장 실패", Toast.LENGTH_SHORT).show();
+        }
+
+    }
+
+    /**
+     * 서명 기록 시작 / 초기화 / 저장 / 제한 시간 종료 시 타이머 설정 메서드
+     */
+    private void startTimerTask() {
+        stopTimerTask();
+        timerTask = new TimerTask() {
+
+            @Override
+            public void run() {
+                timeLimit --;
+                timerText.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        if (timeLimit == 0) {
+                            timerTask.cancel();
+                            signaturePad.setEnabled(false);
+                            Toast.makeText(getApplicationContext(), "제한시간 종료", Toast.LENGTH_SHORT).show();
+                        }
+                        timerText.setText("제한시간 : " + timeLimit + " 초");
+                    }
+                });
+
+            }
+        };
+        timer.schedule(timerTask, 0, 1000);
+    }
+
+    private void stopTimerTask() {
+        if (timerTask != null) {
+            timeLimit = 10;
+            timerText.setText("제한시간 : " + timeLimit + " 초");
+            timerTask.cancel();
+            timerTask = null;
+        }
+
+    }
+    // 저장 버튼 클릭했을 때 남은 시간에서 멈추고 -> 타이머 다시 시작
+    private void saveStopTimerTask() {
+        if (timerTask != null) {
+            timerText.setText("제한시간 : " + timeLimit + " 초");
+            timerTask.cancel();
+            timerTask = null;
+            timeLimit = 10;
+
         }
 
     }
