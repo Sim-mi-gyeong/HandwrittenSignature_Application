@@ -2,16 +2,30 @@ package com.me.handwrittensignature;
 // RealSign
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.ProgressDialog;
+import android.content.Context;
 import android.content.Intent;
 //import android.support.v7.app.AppCompatActivity;
 import android.graphics.Bitmap;
+import android.graphics.PixelFormat;
+import android.graphics.Point;
+import android.hardware.display.DisplayManager;
+import android.hardware.display.VirtualDisplay;
+import android.media.Image;
+import android.media.ImageReader;
+import android.media.projection.MediaProjection;
+import android.media.projection.MediaProjectionManager;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
+import android.os.Looper;
 import android.os.Message;
+import android.util.DisplayMetrics;
+import android.view.Display;
+import android.view.OrientationEventListener;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -24,6 +38,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 
 import com.github.gcacace.signaturepad.views.SignaturePad;
+import com.google.android.gms.common.util.concurrent.HandlerExecutor;
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.storage.FirebaseStorage;
@@ -62,6 +77,33 @@ public class RealSign extends AppCompatActivity {
     private int timeLimit = 10;   // 제한 시간 설정
     TextView timerText;
 
+    /**
+     * 화면 녹화 관련 static object
+     */
+    private static final int REQUEST_CODE = 100;
+    private static String STORE_DIRECTORY;   // 기존 Signautre 폴더 위치에 SignatureVideo 폴더 생성해서 저장
+    private static int IMAGES_PRODUCED;
+    private static final String SCREENCAP_NAME = "screencap";
+    private static final String screenCapName = "screencap";
+    private static final int VIRTUAL_DISPLAY_FLAGS = DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY
+                                                    | DisplayManager.VIRTUAL_DISPLAY_FLAG_PUBLIC;
+    private static MediaProjection sMediaProjection;
+
+    /**
+     * 화면 녹화 관련 member object
+     */
+    private MediaProjectionManager mProjectionManager;
+    private ImageReader mImageReader;
+    private Handler mHandler;
+    private Display mDisplay;
+    private VirtualDisplay mVirtualDisplay;
+    private int mDensity;
+    private int mWidth;
+    private int mHeight;
+    private int mRotation;
+    private OrientationChangeCallback mOrientationChangeCallback;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -84,6 +126,26 @@ public class RealSign extends AppCompatActivity {
         nameView.setText(name);
 
         ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, MODE_PRIVATE);
+
+        /**
+         * 서비스 받아오기 -> 멤버변수 MediaProjectionManager 로 들어감
+         */
+        mProjectionManager = (MediaProjectionManager)getSystemService(Context.MEDIA_PROJECTION_SERVICE);
+
+        /**
+         * mHandler 생성
+         * 새로운 스레드를 하나 만들고 -> Handler 를 만들어 -> prepare()로 메세지 큐가 준비되면,
+         * -> Handler를 만들고 -> loop로 무한정 기다리게 되는 상태
+         * -> 해당 스레드를 사용할 때는 성능상 문제가 없도록 구현 필요 - 강제 종료를 시키지 않으면, 메모리를 계속 차지하고 있기 때문
+         */
+        new Thread() {
+            @Override
+            public void run() {
+                Looper.prepare();
+                mHandler = new Handler();
+                Looper.loop();
+            }
+        }.start();
 
         signaturePad = (SignaturePad) findViewById(R.id.signaturePad);
         signaturePad.setEnabled(false);
@@ -120,6 +182,8 @@ public class RealSign extends AppCompatActivity {
                 startButton.setEnabled(false);   // 시작 버튼 비활성화
 
                 startTimerTask();
+
+//                startProjection();
 
             }
         });
@@ -175,8 +239,89 @@ public class RealSign extends AppCompatActivity {
                 signaturePad.clear();
                 saveButton.setEnabled(true);
                 clearButton.setEnabled(true);
+
+                // TODO 초기화 시 이전 녹화 영상을 저장하지 않고 다시 녹화 시작
+//                stopProjection();
+//                startProjection();
             }
         });
+
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        // TODO 권한 요청 및 임의의 REQUEST_CODE
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == REQUEST_CODE) {
+            // resultCode 와 Intent 를 getMediaProjection 에 넘겨주고 -> sMediaProjection 에 들어가는 object 생성
+            // 권한 부여 받고는 끝이므로 -> static object 로 넣은 것?
+            sMediaProjection = mProjectionManager.getMediaProjection(resultCode, data);
+
+            if (sMediaProjection != null) {
+                // getMediaProjection 으로 생성된 object 를 저장할 directory 생성
+                STORE_DIRECTORY = Environment.getExternalStorageDirectory() + "/data/capture/test";
+
+                File storeDirectory = new File(STORE_DIRECTORY);
+                if (!storeDirectory.exists()) {
+                    boolean success = storeDirectory.mkdirs();
+                    if (!success) {
+                        return;
+                    }
+                }
+            }
+
+            // TODO 현재 디스플레이의 density dpi 가져오기
+            DisplayMetrics metrics = getResources().getDisplayMetrics();
+            mDensity = metrics.densityDpi;
+            mDisplay = getWindowManager().getDefaultDisplay();
+
+            // TODO createVirtual() 호출 -> virtualDisplay 생성
+            createVirtualDisplay();
+
+            // TODO orientation callback 등록 부분 - 감지할 수 있으면, enable()로 감지할 수 있도록
+            mOrientationChangeCallback = new OrientationChangeCallback(this);
+            if (mOrientationChangeCallback.canDetectOrientation()) {
+                mOrientationChangeCallback.enable();
+            }
+
+            // TODO getMediaProjection 으로 가져온 object 에 register 등록 + Handler
+            // -> mHandler 를 여기서 등록하면, null 값을 주어도 됨 ? => developer 참고
+            sMediaProjection.registerCallback(new MediaProjectionStopCallback(), mHandler);
+        }
+    }
+
+    private void startProjection(){
+        // TODO 사용자 허가 요청
+        startActivityForResult(mProjectionManager.createScreenCaptureIntent(), REQUEST_CODE);
+    }
+
+    private void stopProjection() {
+        // Projection 종료
+        mHandler.post(new Runnable() {
+            @Override
+            public void run() {
+                if (sMediaProjection != null) {
+                    sMediaProjection.stop();
+                }
+            }
+        });
+
+    }
+    // TODO 가상 디스플레이 생성
+    @SuppressLint("WrongConstant")
+    private void createVirtualDisplay() {
+        // 가로/세로 사이즈 다시 설정
+        Point size = new Point();
+        mDisplay.getSize(size);
+        mWidth = size.x;
+        mHeight = size.y;
+
+        // TODO ImageReader 새로운 사이즈의 인스턴스 생성 by createVirtualDisplay -> 이미지를 처리할 ImageAvailableListener 등록
+        mImageReader = ImageReader.newInstance(mWidth, mHeight, PixelFormat.RGBA_8888, 2);
+        mVirtualDisplay = sMediaProjection.createVirtualDisplay(SCREENCAP_NAME, mWidth, mHeight, mDensity
+                , VIRTUAL_DISPLAY_FLAGS, mImageReader.getSurface(), null, mHandler);
+
+        mImageReader.setOnImageAvailableListener(new ImageAvailableListener(), mHandler);
 
     }
 
@@ -213,8 +358,13 @@ public class RealSign extends AppCompatActivity {
             Toast.makeText(getApplicationContext(), "스크린샷 저장 실패", Toast.LENGTH_SHORT).show();
         }
 
-
     }
+    /**
+     * MediaProjection API 를 활용한 화면 캡처 녹화
+     */
+
+
+
     /**
      * 서명 기록 시작 / 초기화 / 저장 / 제한 시간 종료 시 타이머 설정 메서드
      */
@@ -264,5 +414,90 @@ public class RealSign extends AppCompatActivity {
 
     }
 
+    /**
+     * ImageReader 에서 Image를 처리할 class
+     */
+    private class ImageAvailableListener implements ImageReader.OnImageAvailableListener {
+        @Override
+        public void onImageAvailable(ImageReader imageReader) {
+            Image image = null;
+            FileOutputStream fos = null;
+            Bitmap bitmap = null;
 
+            try {
+                // 가장 최신 이미지 가져오기
+                image = mImageReader.acquireLatestImage();
+                if (image != null) {
+
+                    /**
+                     * 이 부분 채워넣어야 함
+                     */
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+            } finally {
+                if (fos != null) {
+                    try {
+                        fos.close();
+                    } catch (IOException ioe) {
+                        ioe.printStackTrace();
+                    }
+                }
+                if (bitmap != null) {
+                    bitmap.recycle();
+                }
+                if (image != null) {
+                    image.close();
+                }
+            }
+        }
+
+    }
+
+    /**
+     * Rotation 시 사용할 클래스 + change 되는 부분이 있는지
+     */
+    private class OrientationChangeCallback extends OrientationEventListener {
+        public OrientationChangeCallback(Context context) {
+            super(context);
+        }
+
+        @Override
+        public void onOrientationChanged(int orientation) {
+            synchronized (this) {   // 화면 전환으로 인해 virtual Display 를 새로 만드는 과정 -> 동기화 필요
+                final int rotation = mDisplay.getRotation();
+                // rotation 값이 다르다면
+                if (rotation != mRotation) {
+                    mRotation = rotation;
+                    try {
+                        // TODO virtual Display 를 release 해주고 -> imageReader 의 이벤트를 빼고,
+                        if (mVirtualDisplay != null) mVirtualDisplay.release();
+                        if (mImageReader != null) mImageReader.setOnImageAvailableListener(null, null);
+
+//                        createVirtualDisplay();   // virtualdisplay 새로 생성
+
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+
+            }
+        }
+    }
+
+    private class MediaProjectionStopCallback extends MediaProjection.Callback {
+        @Override
+        public void onStop() {
+            mHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    if (mVirtualDisplay != null) mVirtualDisplay.release();
+                    if (mImageReader != null) mImageReader.setOnImageAvailableListener(null, null);
+                    if (mOrientationChangeCallback != null) mOrientationChangeCallback.disable();
+
+                    sMediaProjection.unregisterCallback(MediaProjectionStopCallback.this);
+                }
+            });
+        }
+    }
 }
