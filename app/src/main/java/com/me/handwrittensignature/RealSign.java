@@ -23,6 +23,7 @@ import android.os.Environment;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.text.Html;
 import android.util.DisplayMetrics;
 import android.view.Display;
 import android.view.OrientationEventListener;
@@ -54,6 +55,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.ByteBuffer;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Timer;
@@ -81,10 +83,9 @@ public class RealSign extends AppCompatActivity {
      * 화면 녹화 관련 static object
      */
     private static final int REQUEST_CODE = 100;
-    private static String STORE_DIRECTORY;   // 기존 Signautre 폴더 위치에 SignatureVideo 폴더 생성해서 저장
+    private static String STORE_DIRECTORY;   // 기존 Signature 폴더 위치에 SignatureVideo 폴더 생성해서 저장
     private static int IMAGES_PRODUCED;
     private static final String SCREENCAP_NAME = "screencap";
-    private static final String screenCapName = "screencap";
     private static final int VIRTUAL_DISPLAY_FLAGS = DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY
                                                     | DisplayManager.VIRTUAL_DISPLAY_FLAG_PUBLIC;
     private static MediaProjection sMediaProjection;
@@ -102,6 +103,7 @@ public class RealSign extends AppCompatActivity {
     private int mHeight;
     private int mRotation;
     private OrientationChangeCallback mOrientationChangeCallback;
+    private MediaProjectionStopCallback sMediaProjectionStopCallback;
 
 
     @Override
@@ -128,9 +130,14 @@ public class RealSign extends AppCompatActivity {
         ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE}, MODE_PRIVATE);
 
         /**
-         * 서비스 받아오기 -> 멤버변수 MediaProjectionManager 로 들어감
+         * 1단계 : MediaProjectionManager 는 getSystemService 를 통해 service를 생성하고
+         *     -> 사용자에게 권한 요구
          */
+        // TODO 서비스 받아오기 -> 멤버변수 MediaProjectionManager 로 들어감
         mProjectionManager = (MediaProjectionManager)getSystemService(Context.MEDIA_PROJECTION_SERVICE);
+
+        // TODO 실제 권한을 사용자에게 통보하고 권한 요구
+        startActivityForResult(mProjectionManager.createScreenCaptureIntent(), REQUEST_CODE);
 
         /**
          * mHandler 생성
@@ -184,6 +191,9 @@ public class RealSign extends AppCompatActivity {
                 startTimerTask();
 
 //                startProjection();
+                onActivityResult(REQUEST_CODE, Activity.RESULT_OK, mProjectionManager.createScreenCaptureIntent());
+
+
 
             }
         });
@@ -243,6 +253,8 @@ public class RealSign extends AppCompatActivity {
                 // TODO 초기화 시 이전 녹화 영상을 저장하지 않고 다시 녹화 시작
 //                stopProjection();
 //                startProjection();
+                sMediaProjectionStopCallback.onStop();
+                onActivityResult(REQUEST_CODE, Activity.RESULT_OK, mProjectionManager.createScreenCaptureIntent());
             }
         });
 
@@ -252,7 +264,14 @@ public class RealSign extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         // TODO 권한 요청 및 임의의 REQUEST_CODE
         super.onActivityResult(requestCode, resultCode, data);
+
         if (requestCode == REQUEST_CODE) {
+
+            // 사용자가 권한을 허용해주었는지에 대한 처리
+            if (resultCode != RESULT_OK) {
+                return;   // 권한을 허용하지 않았을 때
+            }
+
             // resultCode 와 Intent 를 getMediaProjection 에 넘겨주고 -> sMediaProjection 에 들어가는 object 생성
             // 권한 부여 받고는 끝이므로 -> static object 로 넣은 것?
             sMediaProjection = mProjectionManager.getMediaProjection(resultCode, data);
@@ -268,25 +287,28 @@ public class RealSign extends AppCompatActivity {
                         return;
                     }
                 }
+
+                // TODO 현재 디스플레이의 density dpi 가져오기
+                DisplayMetrics metrics = getResources().getDisplayMetrics();
+                mDensity = metrics.densityDpi;
+                mDisplay = getWindowManager().getDefaultDisplay();
+
+                // TODO createVirtual() 호출 -> virtualDisplay 생성
+//                sMediaProjection.createVirtualDisplay();
+                createVirtualDisplay();
+
+                // TODO orientation callback 등록 부분 - 감지할 수 있으면, enable()로 감지할 수 있도록
+                mOrientationChangeCallback = new OrientationChangeCallback(this);
+                if (mOrientationChangeCallback.canDetectOrientation()) {
+                    mOrientationChangeCallback.enable();
+                }
+
+                // TODO getMediaProjection 으로 가져온 object 에 register 등록 + Handler
+                // -> mHandler 를 여기서 등록하면, null 값을 주어도 됨 ? => developer 참고
+                sMediaProjection.registerCallback(new MediaProjectionStopCallback(), mHandler);
+
             }
 
-            // TODO 현재 디스플레이의 density dpi 가져오기
-            DisplayMetrics metrics = getResources().getDisplayMetrics();
-            mDensity = metrics.densityDpi;
-            mDisplay = getWindowManager().getDefaultDisplay();
-
-            // TODO createVirtual() 호출 -> virtualDisplay 생성
-            createVirtualDisplay();
-
-            // TODO orientation callback 등록 부분 - 감지할 수 있으면, enable()로 감지할 수 있도록
-            mOrientationChangeCallback = new OrientationChangeCallback(this);
-            if (mOrientationChangeCallback.canDetectOrientation()) {
-                mOrientationChangeCallback.enable();
-            }
-
-            // TODO getMediaProjection 으로 가져온 object 에 register 등록 + Handler
-            // -> mHandler 를 여기서 등록하면, null 값을 주어도 됨 ? => developer 참고
-            sMediaProjection.registerCallback(new MediaProjectionStopCallback(), mHandler);
         }
     }
 
@@ -409,7 +431,6 @@ public class RealSign extends AppCompatActivity {
             timerTask.cancel();
             timerTask = null;
             timeLimit = 10;
-
         }
 
     }
@@ -429,9 +450,23 @@ public class RealSign extends AppCompatActivity {
                 image = mImageReader.acquireLatestImage();
                 if (image != null) {
 
-                    /**
-                     * 이 부분 채워넣어야 함
-                     */
+                    Image.Plane[] planes = image.getPlanes();
+                    ByteBuffer buffer = planes[0].getBuffer();   // 이미지 버퍼 정보
+                    // 픽셀 + rowStride -> rowPadding = rowStride - pixxelStride * mWidth
+                    int pixelStride = planes[0].getPixelStride();
+                    int rowStride = planes[0].getRowStride();
+                    int rowPadding = rowStride - pixelStride * mWidth;
+
+                    // createBitmap() -> bitmap 파일을 만들고 -> 위의 이미지 buffer로 이미지를 가져옴
+                    bitmap = Bitmap.createBitmap(mWidth + rowPadding / pixelStride, mHeight, Bitmap.Config.ARGB_8888);
+                    bitmap.copyPixelsFromBuffer(buffer);
+
+                    // 그 다음 저장하는 부분
+                    fos = new FileOutputStream(STORE_DIRECTORY + " /myscreen_" + IMAGES_PRODUCED + ".jpg");
+                    bitmap.compress(Bitmap.CompressFormat.JPEG, 100, fos);
+
+                    IMAGES_PRODUCED++;
+
                 }
             } catch (Exception e) {
                 e.printStackTrace();
