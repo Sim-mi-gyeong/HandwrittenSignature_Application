@@ -39,17 +39,22 @@ public class MainActivity extends AppCompatActivity {
                 }
 
                 final String rootName = "Signature";
-                if (filesDirList.contains(rootName)) {
-                    Toast.makeText(getApplicationContext(), "이미 Signature 폴더가 존재합니.", Toast.LENGTH_SHORT).show();
-
+                final String rootName2 = "Signature_ver2";
+//                if (filesDirList.contains(rootName)) {
+//                    Toast.makeText(getApplicationContext(), "이미 Signature 폴더가 존재합니.", Toast.LENGTH_SHORT).show();
+//                }
+                if (filesDirList.contains(rootName2)) {
+                    Toast.makeText(getApplicationContext(), "이미 Signature_ver2 폴더가 존재합니.", Toast.LENGTH_SHORT).show();
                 }
                 else {
                     // Signature 디렉토리 생성
-                    String strFolderPath = rootPath + rootName;
+//                    String strFolderPath = rootPath + rootName;
+                    String strFolderPath = rootPath + rootName2;
                     File folder = new File(strFolderPath);
                     try {
                         folder.mkdir();   //폴더 생성
-                        Toast.makeText(getApplicationContext(), "Signature 폴더 생성", Toast.LENGTH_SHORT).show();
+//                        Toast.makeText(getApplicationContext(), "Signature 폴더 생성", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getApplicationContext(), "Signature_ver2 폴더 생성", Toast.LENGTH_SHORT).show();
                     } catch (Exception e) {
                         e.getStackTrace();
                     }

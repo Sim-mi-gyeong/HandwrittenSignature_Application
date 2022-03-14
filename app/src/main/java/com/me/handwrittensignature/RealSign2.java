@@ -505,8 +505,6 @@ public class RealSign2 extends AppCompatActivity {
     /**
      * Rotation 시 사용할 클래스 + change 되는 부분이 있는지
      */
-
-
     private class OrientationChangeCallback extends OrientationEventListener {
         public OrientationChangeCallback(Context context) {
             super(context);

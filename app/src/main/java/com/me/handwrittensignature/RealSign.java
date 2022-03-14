@@ -1,11 +1,14 @@
 package com.me.handwrittensignature;
 
 import android.Manifest;
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.graphics.PixelFormat;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.VirtualDisplay;
+import android.media.Image;
 import android.media.ImageReader;
 import android.media.projection.MediaProjection;
 import android.media.projection.MediaProjectionManager;
@@ -13,6 +16,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
+import android.util.DisplayMetrics;
 import android.view.Display;
 import android.view.View;
 import android.widget.Button;
@@ -28,6 +32,7 @@ import com.github.gcacace.signaturepad.views.SignaturePad;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -270,5 +275,113 @@ public class RealSign extends AppCompatActivity {
         }
 
     }
+
+    @SuppressLint("WrongConstant")
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        // TODO 권한 요청 및 임의의 REQUEST_CODE
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == REQUEST_CODE) {
+
+            // 사용자가 권한을 허용해주었는지에 대한 처리
+            if (resultCode != RESULT_OK) {
+                Toast.makeText(this, "권한 획득 실패", Toast.LENGTH_SHORT).show();
+                return;   // 권한을 허용하지 않았을 때
+            }
+
+            // resultCode 와 Intent 를 getMediaProjection 에 넘겨주고 -> sMediaProjection 에 들어가는 object 생성
+            // 권한 부여 받고는 끝이므로 -> static object 로 넣은 것?
+            sMediaProjection = mProjectionManager.getMediaProjection(resultCode, data);
+
+            DisplayMetrics displayMetrics = new DisplayMetrics();
+            getWindowManager().getDefaultDisplay().getRealMetrics(displayMetrics);
+            int dpi = displayMetrics.densityDpi;
+            int width = displayMetrics.widthPixels;
+            int height = displayMetrics.heightPixels;
+
+            // TODO VirtualDisplay 생성
+            imageReader = ImageReader.newInstance(width, height, PixelFormat.RGBA_8888, 2);
+
+            VirtualDisplay virtualDisplay = sMediaProjection.createVirtualDisplay("ScreenCapture",
+                    width, height, dpi,
+                    DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR,
+                    imageReader.getSurface(), null, null);
+
+
+            imageReader.setOnImageAvailableListener(new RealSign.ImageAvailableListener(), null);
+
+        }
+    }
+
+    /**
+     * ImageReader 에서 Image를 처리할 class
+     */
+    private class ImageAvailableListener implements ImageReader.OnImageAvailableListener {
+        @Override
+        public void onImageAvailable(ImageReader imageReader) {
+            Image image = null;
+            FileOutputStream fos = null;
+            Bitmap bitmap = null;
+
+            try {
+                // 가장 최신 이미지 가져오기
+//                image = mImageReader.acquireLatestImage();
+                image = imageReader.acquireLatestImage();
+                if (image != null) {
+
+                    Image.Plane[] planes = image.getPlanes();
+                    ByteBuffer buffer = planes[0].getBuffer();   // 이미지 버퍼 정보
+                    // 픽셀 + rowStride -> rowPadding = rowStride - pixxelStride * mWidth
+                    int pixelStride = planes[0].getPixelStride();
+                    int rowStride = planes[0].getRowStride();
+                    int rowPadding = rowStride - pixelStride * mWidth;
+
+                    // createBitmap() -> bitmap 파일을 만들고 -> 위의 이미지 buffer로 이미지를 가져옴
+                    bitmap = Bitmap.createBitmap(mWidth + rowPadding / pixelStride, mHeight, Bitmap.Config.ARGB_8888);
+                    bitmap.copyPixelsFromBuffer(buffer);
+
+                    final String rootPath = Environment.getExternalStorageDirectory() + "/Pictures/Signature_ver2/";
+                    final String CAPTURE_PATH = name;
+                    STORE_DIRECTORY = rootPath + CAPTURE_PATH;
+//
+//                    signaturePad.destroyDrawingCache();
+//                    signaturePad.setDrawingCacheEnabled(true);
+//                    signaturePad.buildDrawingCache();
+//                    Bitmap bitmap = signaturePad.getDrawingCache();   // Bitmap 가져오기
+//
+//                    FileOutputStream fos;
+
+                    String strFilePath = STORE_DIRECTORY + "/" + name + '_' + System.currentTimeMillis() + ".png";   // strFilePath: 이미지 저장 경로
+                    File fileCacheItem = new File(strFilePath);
+
+                    bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos);
+                    fos.flush();
+                    fos.close();
+
+
+                }
+            } catch (Exception e) {
+                e.printStackTrace();
+                Toast.makeText(getApplicationContext(), "스크린샷 저장 실패", Toast.LENGTH_SHORT).show();
+            } finally {
+                if (fos != null) {
+                    try {
+                        fos.close();
+                    } catch (IOException ioe) {
+                        ioe.printStackTrace();
+                    }
+                }
+                if (bitmap != null) {
+                    bitmap.recycle();
+                }
+                if (image != null) {
+                    image.close();
+                }
+            }
+        }
+
+    }
+
 
 }
