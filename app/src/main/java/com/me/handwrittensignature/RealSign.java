@@ -64,12 +64,14 @@ public class RealSign extends AppCompatActivity {
     private static final String SCREENCAP_NAME = "screencap";
     private static final int VIRTUAL_DISPLAY_FLAGS = DisplayManager.VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY
             | DisplayManager.VIRTUAL_DISPLAY_FLAG_PUBLIC;
-    private static MediaProjection sMediaProjection;
+//    private static MediaProjection sMediaProjection;
 
     /**
      * 화면 녹화 관련 member object
      */
     private MediaProjectionManager mProjectionManager;
+    private MediaProjectionManager mpm;
+    private MediaProjection mProjection;
     private ImageReader mImageReader;
     private ImageReader imageReader;
     private Handler mHandler;
@@ -111,15 +113,15 @@ public class RealSign extends AppCompatActivity {
          */
         // TODO 서비스 받아오기 -> 멤버변수 MediaProjectionManager 로 들어감
 //        mProjectionManager = (MediaProjectionManager)getSystemService(Context.MEDIA_PROJECTION_SERVICE);
-        MediaProjectionManager mpm = (MediaProjectionManager) getSystemService(Context.MEDIA_PROJECTION_SERVICE);
+        mpm = (MediaProjectionManager) getSystemService(MEDIA_PROJECTION_SERVICE);
 //        // TODO 실제 권한을 사용자에게 통보하고 권한 요구
 //        startActivityForResult(mProjectionManager.createScreenCaptureIntent(), REQUEST_CODE);
 
         if (mpm != null) {
             startActivityForResult(mpm.createScreenCaptureIntent(), REQUEST_CODE);
-            Toast.makeText(RealSign.this, "권한 획득 성공", Toast.LENGTH_SHORT).show();
+//            Toast.makeText(RealSign.this, "권한 획득 성공", Toast.LENGTH_SHORT).show();
         } else {
-            Toast.makeText(RealSign.this, "권한 획득 실패", Toast.LENGTH_SHORT).show();
+            Toast.makeText(RealSign.this, "mpm is null", Toast.LENGTH_SHORT).show();
         }
 
 
@@ -276,6 +278,7 @@ public class RealSign extends AppCompatActivity {
 
     }
 
+//    @SuppressLint("WrongConstant")
     @SuppressLint("WrongConstant")
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
@@ -283,39 +286,49 @@ public class RealSign extends AppCompatActivity {
         super.onActivityResult(requestCode, resultCode, data);
 
         if (requestCode == REQUEST_CODE) {
+            Toast.makeText(RealSign.this, "권한 획득 성공", Toast.LENGTH_SHORT).show();
 
             // 사용자가 권한을 허용해주었는지에 대한 처리
             if (resultCode != RESULT_OK) {
-                Toast.makeText(this, "권한 획득 실패", Toast.LENGTH_SHORT).show();
+                Toast.makeText(RealSign.this, "권한 획득 실패 상태입니다.", Toast.LENGTH_SHORT).show();
                 return;   // 권한을 허용하지 않았을 때
             }
 
             // resultCode 와 Intent 를 getMediaProjection 에 넘겨주고 -> sMediaProjection 에 들어가는 object 생성
             // 권한 부여 받고는 끝이므로 -> static object 로 넣은 것?
-            sMediaProjection = mProjectionManager.getMediaProjection(resultCode, data);
+            // TODO 이 부분에서 오류 발생!!!!!!!!
+//            sMediaProjection = mProjectionManager.getMediaProjection(resultCode, data);
+            try {
+                mProjection = mpm.getMediaProjection(resultCode, data);
 
-            DisplayMetrics displayMetrics = new DisplayMetrics();
-            getWindowManager().getDefaultDisplay().getRealMetrics(displayMetrics);
-            int dpi = displayMetrics.densityDpi;
-            int width = displayMetrics.widthPixels;
-            int height = displayMetrics.heightPixels;
+                DisplayMetrics displayMetrics = new DisplayMetrics();
+                getWindowManager().getDefaultDisplay().getRealMetrics(displayMetrics);
+                int dpi = displayMetrics.densityDpi;
+                int width = displayMetrics.widthPixels;
+                int height = displayMetrics.heightPixels;
 
-            // TODO VirtualDisplay 생성
-            imageReader = ImageReader.newInstance(width, height, PixelFormat.RGBA_8888, 2);
+                // TODO VirtualDisplay 생성
+                imageReader = ImageReader.newInstance(width, height, PixelFormat.RGBA_8888, 2);
 
-            VirtualDisplay virtualDisplay = sMediaProjection.createVirtualDisplay("ScreenCapture",
-                    width, height, dpi,
-                    DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR,
-                    imageReader.getSurface(), null, null);
+                VirtualDisplay virtualDisplay = mProjection.createVirtualDisplay("ScreenCapture",
+                        width, height, dpi,
+                        DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR,
+                        imageReader.getSurface(), null, null);
 
+                imageReader.setOnImageAvailableListener(new RealSign.ImageAvailableListener(), null);
 
-            imageReader.setOnImageAvailableListener(new RealSign.ImageAvailableListener(), null);
+            } catch (IllegalStateException e) {
+                e.printStackTrace();
+                Toast.makeText(RealSign.this, "getMediaProjection() 실패", Toast.LENGTH_SHORT).show();
+            }
 
         }
+        else {
+            Toast.makeText(RealSign.this, "requestCode != REQUEST_CODE 상태입니다.", Toast.LENGTH_SHORT).show();
+        }
     }
-
     /**
-     * ImageReader 에서 Image를 처리할 class
+     * ImageReader 에서 Image 를 처리할 class
      */
     private class ImageAvailableListener implements ImageReader.OnImageAvailableListener {
         @Override
@@ -382,6 +395,7 @@ public class RealSign extends AppCompatActivity {
         }
 
     }
+
 
 
 }

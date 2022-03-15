@@ -5,6 +5,9 @@
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
+    <!-- 서비스 권한 설정 -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+
 
     <application
         android:requestLegacyExternalStorage="true"
@@ -30,6 +33,15 @@
         <activity android:name=".ForgerySign_Unskilled"/>
         <activity android:name=".ForgerySign_Skilled_Practice"/>
         <activity android:name=".ForgerySign_Skilled"/>
+
+<!--        <service-->
+<!--            android:name=".ui.MediaProjectionAccessService"-->
+<!--            android:foregroundServiceType="mediaProjection" />-->
+<!--        <activity-->
+<!--            android:name=".ui.mediaprojection.MediaProjectionActivity"/>-->
+        <service
+            android:name=".RealSign"
+            android:foregroundServiceType="mediaProjection" />
 
     </application>
 

@@ -43,11 +43,9 @@ public class InputName extends AppCompatActivity {
 
         // 내부 저장소 영역
 
-        // /storage/self/primary/Pictures/Signature
 //        final String rootPath = "/storage/self/primary/Pictures/Signature/";
-
-//        final String rootPath = "/storage/self/primary/Pictures/Signature/";
-        final String rootPath = Environment.getExternalStorageDirectory() + "/Pictures/Signature/";
+//        final String rootPath = Environment.getExternalStorageDirectory() + "/Pictures/Signature/";
+        final String rootPath = Environment.getExternalStorageDirectory() + "/Pictures/Signature_ver2/";
 
         File directory = new File(rootPath);
 //        File directory = new File(Environment.getExternalStorageDirectory(), "/Pictures");
