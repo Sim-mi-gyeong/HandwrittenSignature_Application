@@ -2,7 +2,6 @@ package com.me.handwrittensignature;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
-import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.PixelFormat;
@@ -13,6 +12,7 @@ import android.media.ImageReader;
 import android.media.projection.MediaProjection;
 import android.media.projection.MediaProjectionManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
@@ -36,7 +36,6 @@ import java.nio.ByteBuffer;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import static android.content.Context.MODE_PRIVATE;
 import static android.os.SystemClock.sleep;
 
 public class RealSign extends AppCompatActivity {
@@ -70,6 +69,7 @@ public class RealSign extends AppCompatActivity {
      * 화면 녹화 관련 member object
      */
     private MediaProjectionManager mProjectionManager;
+    private static final int REQUEST_SCREENCAST=59706;
     private MediaProjectionManager mpm;
     private MediaProjection mProjection;
     private ImageReader mImageReader;
@@ -285,6 +285,43 @@ public class RealSign extends AppCompatActivity {
         // TODO 권한 요청 및 임의의 REQUEST_CODE
         super.onActivityResult(requestCode, resultCode, data);
 
+        if (requestCode==REQUEST_SCREENCAST) {
+            if (resultCode==RESULT_OK) {
+//                Intent i=
+//                        new Intent(this, RecorderService.class)
+//                                .putExtra(RecorderService.EXTRA_RESULT_CODE, resultCode)
+//                                .putExtra(RecorderService.EXTRA_RESULT_INTENT, data);
+//
+//                startService(i);
+
+                Intent intent = new Intent(this, RecorderService.class);
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    startForegroundService(intent);
+                } else {
+                    startService(intent);
+                }
+
+                DisplayMetrics displayMetrics = new DisplayMetrics();
+                getWindowManager().getDefaultDisplay().getRealMetrics(displayMetrics);
+                int dpi = displayMetrics.densityDpi;
+                int width = displayMetrics.widthPixels;
+                int height = displayMetrics.heightPixels;
+
+                // TODO VirtualDisplay 생성
+                imageReader = ImageReader.newInstance(width, height, PixelFormat.RGBA_8888, 2);
+
+                VirtualDisplay virtualDisplay = mProjection.createVirtualDisplay("ScreenCapture",
+                        width, height, dpi,
+                        DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR,
+                        imageReader.getSurface(), null, null);
+
+                imageReader.setOnImageAvailableListener(new RealSign.ImageAvailableListener(), null);
+
+            }
+        }
+/*
+        finish();
+
         if (requestCode == REQUEST_CODE) {
             Toast.makeText(RealSign.this, "권한 획득 성공", Toast.LENGTH_SHORT).show();
 
@@ -326,7 +363,12 @@ public class RealSign extends AppCompatActivity {
         else {
             Toast.makeText(RealSign.this, "requestCode != REQUEST_CODE 상태입니다.", Toast.LENGTH_SHORT).show();
         }
+
+ */
+
     }
+
+
     /**
      * ImageReader 에서 Image 를 처리할 class
      */
@@ -395,7 +437,5 @@ public class RealSign extends AppCompatActivity {
         }
 
     }
-
-
 
 }
