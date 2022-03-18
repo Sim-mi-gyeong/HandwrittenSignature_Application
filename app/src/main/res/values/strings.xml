@@ -3,4 +3,28 @@
     <string name="notify_record">Record</string>
     <string name="notify_stop">Stop</string>
     <string name="notify_shutdown">Shutdown</string>
+
+
+    <string-array name="options_format_keys">
+        <item>H264</item>
+        <item>VP8</item>
+    </string-array>
+
+    <string-array name="options_format_values">
+        <item>video/avc</item>
+        <item>video/x-vnd.on2.vp8</item>
+    </string-array>
+
+    <string-array name="options_resolution_keys">
+        <item>1280x720 @ 320</item>
+        <item>800x480 @ 160</item>
+        <item>640x360 @ 96</item>
+    </string-array>
+
+    <string-array name="options_resolution_values">
+        <item>1280,720,320</item>
+        <item>800,480,160</item>
+        <item>640,360,96</item>
+    </string-array>
+
 </resources>

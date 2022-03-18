@@ -457,7 +457,6 @@ public class RealSign2 extends AppCompatActivity {
 
             try {
                 // 가장 최신 이미지 가져오기
-//                image = mImageReader.acquireLatestImage();
                 image = imageReader.acquireLatestImage();
                 if (image != null) {
 

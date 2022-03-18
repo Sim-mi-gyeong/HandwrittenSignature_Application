@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
     package="com.me.handwrittensignature">
 
     <uses-permission android:name="android.permission.INTERNET"/>
@@ -7,6 +8,7 @@
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
     <!-- 서비스 권한 설정 -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
 
 
     <application
@@ -30,9 +32,14 @@
         <activity android:name=".SelectStatus"/>
         <activity android:name=".RealSign"/>
         <activity android:name=".RealSign2"/>
+        <activity android:name=".RealSignMain"/>
+        <activity android:name=".RealSignService"/>
         <activity android:name=".ForgerySign_Unskilled"/>
         <activity android:name=".ForgerySign_Skilled_Practice"/>
         <activity android:name=".ForgerySign_Skilled"/>
+        <activity android:name=".RecorderService"
+            tools:ignore="Instantiatable"/>
+        <activity android:name=".TestMainActivity"/>
 
 <!--        <service-->
 <!--            android:name=".ui.MediaProjectionAccessService"-->
@@ -40,7 +47,10 @@
 <!--        <activity-->
 <!--            android:name=".ui.mediaprojection.MediaProjectionActivity"/>-->
         <service
-            android:name=".RealSign"
+            android:name=".RecorderService"
+            android:foregroundServiceType="mediaProjection" />
+        <service
+            android:name=".RealSignService"
             android:foregroundServiceType="mediaProjection" />
 
     </application>
