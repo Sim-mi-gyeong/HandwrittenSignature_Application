@@ -5,6 +5,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.hardware.display.VirtualDisplay;
 import android.media.MediaCodec;
+import android.media.MediaCodecInfo;
 import android.media.MediaFormat;
 import android.media.projection.MediaProjection;
 import android.media.projection.MediaProjectionManager;
@@ -25,6 +26,7 @@ import com.me.handwrittensignature.consts.ActivityServiceMessage;
 import com.me.handwrittensignature.consts.ExtraIntent;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 
 
 public final class RealSignService extends Service {
@@ -135,12 +137,61 @@ public final class RealSignService extends Service {
 //        mediaFormat.setInteger(MediaFormat.KEY_CHANNEL_COUNT, 0);
 //        mediaFormat.setInteger(MediaFormat.KEY_BIT_RATE, bitrate);
 
-//        try {
-//
-//        } catch (IOException e) {
-//            Log.e(TAG, "Failed to initial encoder, e : " + e);
-//            releaseEncoders();
-//        }
+        try {
+
+            switch (format) {
+                case MediaFormat.MIMETYPE_VIDEO_AVC:
+                    // AVC
+                    mediaFormat.setInteger(MediaFormat.KEY_COLOR_FORMAT, MediaCodecInfo.CodecCapabilities.COLOR_FormatSurface);
+
+                    this.encoder = MediaCodec.createEncoderByType(format);
+                    this.encoder.setCallback(new MediaCodec.Callback() {
+                        @Override
+                        public void onInputBufferAvailable(@NonNull MediaCodec codec, int index) {
+
+                        }
+
+                        @Override
+                        public void onOutputBufferAvailable(@NonNull MediaCodec codec, int outputBufferId, @NonNull MediaCodec.BufferInfo info) {
+                            ByteBuffer outputBuffer = codec.getOutputBuffer(outputBufferId);
+
+                            if (info.size > 0 && outputBuffer != null) {
+                                outputBuffer.position(info.offset);
+                                outputBuffer.limit(info.offset + info.size);
+                                byte[] b = new byte[outputBuffer.remaining()];
+                                outputBuffer.get(b);
+
+//                                sendData(null, b);
+                            }
+
+                            if (encoder != null) {
+                                encoder.releaseOutputBuffer(outputBufferId, false);
+                            }
+                            if ((videoBufferInfo.flags & MediaCodec.BUFFER_FLAG_END_OF_STREAM) != 0) {
+                                Log.i(TAG, "End of Stream");
+                                stopScreenCapture();
+                            }
+                        }
+
+                        @Override
+                        public void onError(@NonNull MediaCodec codec, @NonNull MediaCodec.CodecException e) {
+                            e.printStackTrace();
+                        }
+
+                        @Override
+                        public void onOutputFormatChanged(@NonNull MediaCodec codec, @NonNull MediaFormat format) {
+                            Log.i(TAG, "onOutputFormatChanged. CodecInfo : " + codec.getCodecInfo().toString() + " MediaFormat : " + format.toString());
+                        }
+                    });
+
+                    break;
+
+            }
+
+        } catch (IOException e) {
+            Log.e(TAG, "Failed to initial encoder, e : " + e);
+            releaseEncoders();
+        }
     }
 
     private void stopScreenCapture() {
