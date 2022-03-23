@@ -4,6 +4,7 @@ import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.PendingIntent;
+import android.app.Service;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -30,6 +31,9 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.activity.result.ActivityResult;
+import androidx.activity.result.ActivityResultCallback;
+import androidx.activity.result.ActivityResultLauncher;
 import androidx.activity.result.contract.ActivityResultContracts;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
@@ -92,6 +96,9 @@ public class RealSignMain extends AppCompatActivity {
 //    private OrientationChangeCallback mOrientationChangeCallback;
 //    private MediaProjectionStopCallback sMediaProjectionStopCallback;
 
+    private ActivityResultLauncher<Intent> resultLauncher;
+    private static final String PREFERENCE_KEY = "default";
+
     private Context context;
     private Messenger messenger;
 
@@ -138,11 +145,35 @@ public class RealSignMain extends AppCompatActivity {
         // TODO 서비스 받아오기
         this.mpm = (MediaProjectionManager) getSystemService(Context.MEDIA_PROJECTION_SERVICE);
 
+        this.messenger = new Messenger(new Handler(new Handler.Callback() {
+            @Override
+            public boolean handleMessage(Message msg) {
+                Log.i(TAG, "Handler got message : " + msg.what);
+                return false;
+            }
+        }));
+
         this.serviceConnection = new ServiceConnection() {
             @Override
             public void onServiceConnected(ComponentName nams, IBinder service) {
                 Log.i(TAG, name + " service is connected");
 
+//                RealSignService.LocalBinder binder=(RealSignService.LocalBinder)service;
+//                Service recordService = binder.getService();
+//
+//                if(recordService != null) {
+//                    Log.i("service-bind", "Service is bonded successfully!");
+//
+//                    serviceMessenger = new Messenger(service);
+//                    Message msg = Message.obtain(null, ActivityServiceMessage.CONNECTED);
+//                    msg.replyTo = messenger;
+//                    try {
+//                        serviceMessenger.send(msg);
+//                    } catch (RemoteException e) {
+//                        Log.e(TAG, "Failed to send message due to : " + e.toString());
+//                        e.printStackTrace();
+//                    }
+//                }
                 serviceMessenger = new Messenger(service);
                 Message msg = Message.obtain(null, ActivityServiceMessage.CONNECTED);
                 msg.replyTo = messenger;
@@ -160,6 +191,24 @@ public class RealSignMain extends AppCompatActivity {
                 serviceMessenger = null;
             }
         };
+
+        // TODO resultLauncher 콜백 함수
+        resultLauncher = registerForActivityResult(
+                new ActivityResultContracts.StartActivityForResult()
+                , new ActivityResultCallback<ActivityResult>() {
+                    @Override
+                    public void onActivityResult(ActivityResult result) {
+                        if (result.getResultCode() == RESULT_OK) {
+                            Intent intent = result.getData();
+//                            int CallType = intent.getIntExtra(STATE_RESULT_CODE, stateResultCode);
+                            int CallType = intent.getIntExtra(ExtraIntent.RESULT_CODE.toString(), -1);
+
+
+                        }
+
+                    }
+                }
+        );
 
         /**
          * 1단계 : MediaProjectionManager 는 getSystemService 를 통해 service를 생성하고
@@ -344,8 +393,9 @@ public class RealSignMain extends AppCompatActivity {
             startService();
         } else {
             Log.d(TAG, "Requesting confirmation");
-            startActivityForResult(mpm.createScreenCaptureIntent(),
-                    REQUEST_CODE);
+//            startActivityForResult(mpm.createScreenCaptureIntent(),
+//                    REQUEST_CODE);
+            resultLauncher.launch(mpm.createScreenCaptureIntent());
         }
     }
 

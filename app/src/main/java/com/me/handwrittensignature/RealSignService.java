@@ -16,6 +16,7 @@ import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
 import android.util.Log;
+import android.view.Surface;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -39,6 +40,7 @@ public final class RealSignService extends Service {
     private Messenger crossProcessMessenger;
 
     private MediaProjection mediaProjection;
+    private Surface inputSurface;
     private VirtualDisplay virtualDisplay;
     private MediaCodec encoder;
     private MediaCodec.BufferInfo videoBufferInfo;
@@ -186,12 +188,30 @@ public final class RealSignService extends Service {
 
                     break;
 
+                default:
+                    throw new RuntimeException("Unknown Media Format. You need to add mimetype to string.xml and else if statement");
+
             }
+
+            this.encoder.configure(mediaFormat
+                    , null   // surface
+                    , null   // crypto(암호)
+                    , MediaCodec.CONFIGURE_FLAG_ENCODE);
+
+            this.inputSurface = this.encoder.createInputSurface();
+            this.encoder.start();
 
         } catch (IOException e) {
             Log.e(TAG, "Failed to initial encoder, e : " + e);
             releaseEncoders();
         }
+
+        this.virtualDisplay = this.mediaProjection.createVirtualDisplay("Recording Display", screenWidth, screenHeight, screenDpi, 0, this.inputSurface, null, null);
+    }
+
+    // TODO 비디오 저장 메서드
+   private void saveData() {
+
     }
 
     private void stopScreenCapture() {
@@ -209,6 +229,10 @@ public final class RealSignService extends Service {
             encoder.stop();
             encoder.release();
             encoder = null;
+        }
+        if (inputSurface != null) {
+            inputSurface.release();
+            inputSurface = null;
         }
         if (mediaProjection != null) {
             mediaProjection.stop();
