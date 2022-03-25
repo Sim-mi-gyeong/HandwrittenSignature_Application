@@ -3,6 +3,7 @@ package com.me.handwrittensignature;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ServiceInfo;
 import android.hardware.display.VirtualDisplay;
 import android.media.MediaCodec;
 import android.media.MediaCodecInfo;
@@ -10,6 +11,7 @@ import android.media.MediaFormat;
 import android.media.projection.MediaProjection;
 import android.media.projection.MediaProjectionManager;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
@@ -101,6 +103,14 @@ public final class RealSignService extends Service {
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
 
+        Log.i(TAG, "Service onStartCommand() is called");
+
+//        startForeground();
+
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+//            startForeground(0, intent, ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PROJECTION);
+//        }
+
         if (intent == null) {
             return START_NOT_STICKY;   // 2
         }
@@ -127,7 +137,7 @@ public final class RealSignService extends Service {
     }
 
     private void startScreenCapture(int resultCode, Intent resultData, String format, int screenWidth, int screenHeight, int screenDpi) {
-        this.mediaProjection = mpm. getMediaProjection(resultCode, resultData);
+        this.mediaProjection = mpm.getMediaProjection(resultCode, resultData);
 
         Log.d(TAG, "startRecording ... ");
 

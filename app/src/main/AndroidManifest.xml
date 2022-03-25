@@ -33,7 +33,6 @@
         <activity android:name=".RealSign"/>
         <activity android:name=".RealSign2"/>
         <activity android:name=".RealSignMain"/>
-<!--        <activity android:name=".RealSignService"/>-->
         <activity android:name=".ForgerySign_Unskilled"/>
         <activity android:name=".ForgerySign_Skilled_Practice"/>
         <activity android:name=".ForgerySign_Skilled"/>
@@ -41,18 +40,12 @@
             tools:ignore="Instantiatable"/>
         <activity android:name=".TestMainActivity"/>
 
-<!--        <service-->
-<!--            android:name=".ui.MediaProjectionAccessService"-->
-<!--            android:foregroundServiceType="mediaProjection" />-->
-<!--        <activity-->
-<!--            android:name=".ui.mediaprojection.MediaProjectionActivity"/>-->
-        <service
-            android:name=".RecorderService"
-            android:foregroundServiceType="mediaProjection" />
         <service
             android:name=".RealSignService"
             android:enabled="true"
-            android:foregroundServiceType="mediaProjection" />
+            android:foregroundServiceType="mediaProjection"
+            android:process=":remote"
+            android:exported="true"/>/>
 
     </application>
 

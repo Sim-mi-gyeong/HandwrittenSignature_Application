@@ -242,21 +242,6 @@ public class RealSignMain extends AppCompatActivity {
                         }
                     }
 
-//                    @Override
-//                    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-//                        // TODO 권한 요청 및 임의의 REQUEST_CODE = 100
-//                        super.onActivityResult(requestCode, resultCode, data);
-//
-//                        if (requestCode == REQUEST_CODE) {
-//                            if (resultCode != Activity.RESULT_OK) {
-//                                Log.i(TAG, "User didn't allow.");
-//                            } else {
-//                                Log.d(TAG, "Starting screen capture");
-//                                stateResultCode = resultCode;
-//                                stateResultData = data;
-//                                startCaptureScreen();
-//                            }
-//                        }
                 }
         );
 
