@@ -22,6 +22,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
 import android.os.Messenger;
+import android.os.PersistableBundle;
 import android.os.RemoteException;
 import android.util.Log;
 import android.view.Display;
@@ -45,6 +46,7 @@ import com.me.handwrittensignature.consts.ExtraIntent;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -125,6 +127,7 @@ public class RealSignMain extends AppCompatActivity {
         TextView countText = (TextView)findViewById(R.id.countText);
         TextView finishText = (TextView)findViewById(R.id.finishText);
         timerText = (TextView)findViewById(R.id.timerText);
+        timerText = (TextView)findViewById(R.id.timerText);
         TextView nameView = (TextView)findViewById(R.id.nameView);
 
         timerText.setText("제한시간 : " + timeLimit + " 초");
@@ -140,6 +143,23 @@ public class RealSignMain extends AppCompatActivity {
             this.stateResultCode = savedInstanceState.getInt(STATE_RESULT_CODE);
             this.stateResultData = savedInstanceState.getParcelable(STATE_RESULT_DATA);
         }
+
+//        if(savedInstanceState == null){
+//            stateResultCode = 0;
+//            stateResultData = null;
+//
+////            this.stateResultCode = Integer.parseInt(STATE_RESULT_CODE);
+////            try {
+////                this.stateResultData = Intent.getIntent(STATE_RESULT_DATA);
+////            } catch (URISyntaxException e) {
+////                e.printStackTrace();
+////            }
+//
+//            Log.e(TAG, STATE_RESULT_CODE);
+//        } else {
+//            this.stateResultCode = savedInstanceState.getInt(STATE_RESULT_CODE);
+//            this.stateResultData = savedInstanceState.getParcelable(STATE_RESULT_DATA);
+//        }
 
         this.context = this;
         // TODO 서비스 받아오기
@@ -199,14 +219,44 @@ public class RealSignMain extends AppCompatActivity {
                     @Override
                     public void onActivityResult(ActivityResult result) {
                         if (result.getResultCode() == RESULT_OK) {
+                            Log.e(TAG, "result : " + result);
                             Intent intent = result.getData();
+                            Log.e(TAG, "intent : " + intent);
+                            stateResultCode = result.getResultCode();
+                            Log.e(TAG, "stateResultCode : " + stateResultCode);
+                            stateResultData = result.getData();
+                            Log.e(TAG, "stateResultData : " + stateResultData);
+
+                            Log.d(TAG, "Starting screen capture");
+                            startCaptureScreen();
+
 //                            int CallType = intent.getIntExtra(STATE_RESULT_CODE, stateResultCode);
-                            int CallType = intent.getIntExtra(ExtraIntent.RESULT_CODE.toString(), -1);
-
-
+//                            int callType = intent.getIntExtra(ExtraIntent.RESULT_CODE.toString(), -1);
+//
+//                            if (callType == -1) {
+//
+//                            }
                         }
-
+                        else {
+                            Log.i(TAG, "User didn't allow. ");
+                        }
                     }
+
+//                    @Override
+//                    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+//                        // TODO 권한 요청 및 임의의 REQUEST_CODE = 100
+//                        super.onActivityResult(requestCode, resultCode, data);
+//
+//                        if (requestCode == REQUEST_CODE) {
+//                            if (resultCode != Activity.RESULT_OK) {
+//                                Log.i(TAG, "User didn't allow.");
+//                            } else {
+//                                Log.d(TAG, "Starting screen capture");
+//                                stateResultCode = resultCode;
+//                                stateResultData = data;
+//                                startCaptureScreen();
+//                            }
+//                        }
                 }
         );
 
@@ -420,29 +470,33 @@ public class RealSignMain extends AppCompatActivity {
      */
 
     @Override
-    public void onSaveInstanceState(Bundle outState) {
-        super.onSaveInstanceState(outState);
-        if (stateResultData != null) {
-            outState.putInt(STATE_RESULT_CODE, stateResultCode);
-            outState.putParcelable(STATE_RESULT_DATA, stateResultData);
-        }
+    public void onSaveInstanceState(Bundle outState,  PersistableBundle outPersistentState) {
+        super.onSaveInstanceState(outState, outPersistentState);
+        outState.putInt(STATE_RESULT_CODE, stateResultCode);
+        outState.putParcelable(STATE_RESULT_DATA, stateResultData);
+//        if (stateResultData != null) {
+//        if (stateResultData == null) {
+//            outState.putInt(STATE_RESULT_CODE, stateResultCode);
+//            outState.putParcelable(STATE_RESULT_DATA, stateResultData);
+//        }
+//        super.onSaveInstanceState(outState, outPersistentState);
     }
 
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        // TODO 권한 요청 및 임의의 REQUEST_CODE = 100
-        super.onActivityResult(requestCode, resultCode, data);
-
-        if (requestCode == REQUEST_CODE) {
-            if (resultCode != Activity.RESULT_OK) {
-                Log.i(TAG, "User didn't allow.");
-            } else {
-                Log.d(TAG, "Starting screen capture");
-                stateResultCode = resultCode;
-                stateResultData = data;
-                startCaptureScreen();
-            }
-        }
+//    @Override
+//    public void onActivityResult(int requestCode, int resultCode, Intent data) {
+//        // TODO 권한 요청 및 임의의 REQUEST_CODE = 100
+//        super.onActivityResult(requestCode, resultCode, data);
+//
+//        if (requestCode == REQUEST_CODE) {
+//            if (resultCode != Activity.RESULT_OK) {
+//                Log.i(TAG, "User didn't allow.");
+//            } else {
+//                Log.d(TAG, "Starting screen capture");
+//                stateResultCode = resultCode;
+//                stateResultData = data;
+//                startCaptureScreen();
+//            }
+//        }
 
 //        if (requestCode == REQUEST_CODE) {
 //            if (resultCode == RESULT_OK) {
@@ -451,7 +505,7 @@ public class RealSignMain extends AppCompatActivity {
 //                super.onActivityResult(requestCode, resultCode, data);
 //            }
 //        }
-    }
+//    }
 
 
 /*
@@ -492,6 +546,9 @@ public class RealSignMain extends AppCompatActivity {
             intent.putExtra(ExtraIntent.SCREEN_WIDTH.toString(), screenWidth);
             intent.putExtra(ExtraIntent.SCREEN_HEIGHT.toString(), screenHeight);
             intent.putExtra(ExtraIntent.SCREEN_DPI.toString(), screenDpi);
+
+            setResult(RESULT_OK, intent);
+            finish();
 
         }
 

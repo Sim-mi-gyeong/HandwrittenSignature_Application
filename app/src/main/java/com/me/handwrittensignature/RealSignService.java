@@ -65,9 +65,9 @@ public final class RealSignService extends Service {
                 Log.i(TAG, "Handler got message. what : " + msg.what);
                 switch (msg.what) {
                     case ActivityServiceMessage.CONNECTED:   // 100
-                    case ActivityServiceMessage.DISCONNECTED:
+                    case ActivityServiceMessage.DISCONNECTED:   // 101
                         break;
-                    case ActivityServiceMessage.STOP:
+                    case ActivityServiceMessage.STOP:   // 999
                         stopScreenCapture();
                         stopSelf();
                         break;
@@ -127,7 +127,7 @@ public final class RealSignService extends Service {
     }
 
     private void startScreenCapture(int resultCode, Intent resultData, String format, int screenWidth, int screenHeight, int screenDpi) {
-        this.mediaProjection = mpm.getMediaProjection(resultCode, resultData);
+        this.mediaProjection = mpm. getMediaProjection(resultCode, resultData);
 
         Log.d(TAG, "startRecording ... ");
 

@@ -51,6 +51,7 @@
             android:foregroundServiceType="mediaProjection" />
         <service
             android:name=".RealSignService"
+            android:enabled="true"
             android:foregroundServiceType="mediaProjection" />
 
     </application>
