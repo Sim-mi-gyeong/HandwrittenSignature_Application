@@ -63,6 +63,8 @@ public class RealSign_ver_Frame extends AppCompatActivity {
     private int timeLimit = 10;   // 제한 시간 설정
     TextView timerText;
 
+    TimerTask captureTimerTask;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -139,7 +141,8 @@ public class RealSign_ver_Frame extends AppCompatActivity {
             @Override
             public void onClick(View v) {
 
-                captureView(signaturePad);   // 스크린 캡처 메서드 반복 실행
+//                captureView(signaturePad);   // 스크린 캡처 메서드 반복 실행
+                iterableCaptureView();
 
                 countNum += 1;   // 파일 이름은 name + '_' + countNum
 
@@ -189,7 +192,8 @@ public class RealSign_ver_Frame extends AppCompatActivity {
                 // TODO 초기화 시 이전 녹화 영상을 저장하지 않고 다시 녹화 시작
                 checkInit = 0;
                 // 초기화 시 init 표시를 추가해 스크린 캡처
-                captureView(signaturePad);
+                iterableCaptureView();
+//                captureView(signaturePad);
 
             }
         });
@@ -204,9 +208,6 @@ public class RealSign_ver_Frame extends AppCompatActivity {
         Toast.makeText(getApplicationContext(), targetSignatureFolderPath + " 내 서명 프레임 저장 ", Toast.LENGTH_SHORT).show();
 
 //        final String rootPath = "/storage/self/primary/Pictures/Signature/";
-//        final String rootPath = Environment.getExternalStorageDirectory() + "/Pictures/Signature_ver2/";
-//        final String CAPTURE_PATH = name;
-//        Toast.makeText(getApplicationContext(), name + "의 새 폴더 생성 시도 ", Toast.LENGTH_SHORT).show();   // name null 값 여부 확인
         signaturePad.destroyDrawingCache();
         signaturePad.setDrawingCacheEnabled(true);
         signaturePad.buildDrawingCache();
@@ -214,12 +215,10 @@ public class RealSign_ver_Frame extends AppCompatActivity {
 
         FileOutputStream fos;
 
-//        String strFolderPath = Environment.getExternalStorageDirectory().getAbsolutePath() + CAPTURE_PATH;
-
         if (checkInit == 1) {
-            strFilePath = targetSignatureFolderPath + "/" + name + '_' + System.currentTimeMillis() + ".png";   // strFilePath: 이미지 저장 경로
+            strFilePath = targetSignatureFolderPath + "/" + name + "_" + System.currentTimeMillis() + ".png";   // strFilePath: 이미지 저장 경로
         } else {
-            strFilePath = targetSignatureFolderPath + "/" + name + '_' + System.currentTimeMillis() + "_init_" + ".png";
+            strFilePath = targetSignatureFolderPath + "/" + name + "_" + System.currentTimeMillis() + "_init_" + ".png";
         }
 
         File fileCacheItem = new File(strFilePath);
@@ -266,6 +265,22 @@ public class RealSign_ver_Frame extends AppCompatActivity {
     /**
      * captureView() 메서드를 반복해서 처리할 핸들러 구현
      */
+    private void iterableCaptureView() {
+        stopTimerTask();
+        captureTimerTask = new TimerTask() {
+
+            @Override
+            public void run() {
+                signaturePad.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        captureView(signaturePad);
+                    }
+                });
+            }
+        };
+        timer.schedule(timerTask, 0, 100);
+    }
 
     /**
      * 서명 기록 시작 / 초기화 / 저장 / 제한 시간 종료 시 타이머 설정 메서드
@@ -314,6 +329,5 @@ public class RealSign_ver_Frame extends AppCompatActivity {
         }
 
     }
-
-
+    
 }
