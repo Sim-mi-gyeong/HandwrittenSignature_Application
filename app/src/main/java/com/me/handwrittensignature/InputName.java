@@ -39,7 +39,6 @@ public class InputName extends AppCompatActivity {
         EditText nameText = (EditText) findViewById(R.id.nameText);
 
         start_button.setEnabled(false);
-        List<Uri> uris_ = new ArrayList<>();
 
         // 내부 저장소 영역
 
@@ -59,8 +58,8 @@ public class InputName extends AppCompatActivity {
 
         confirm_button.setOnClickListener(new View.OnClickListener() {
             // 버튼 클릭 시 기존 사용자 데이터와 확인
-            // (실제 서명이) 이미 등록된 사용자이면 -> Toast Message로 '이미 등록된 사용자입니다'를 알리고 "등록 시작" 버튼 클릭 시 -> SetStatus 페이지로
-            // (실제 서명이) 등록되지 않은 사용자이면 -> Toast Message로 '등록되지 않은 사용자입니다'를 알리고 "등록 시작" 버튼 클릭 시 -> SetMode 페이지로
+            // (실제 서명이) 이미 등록된 사용자이면 -> Toast Message 로 '이미 등록된 사용자입니다'
+            // (실제 서명이) 등록되지 않은 사용자이면 -> Toast Message 로 '등록되지 않은 사용자입니다'
             @Override
             public void onClick(View v) {
                 String name = nameText.getText().toString();
@@ -109,8 +108,6 @@ public class InputName extends AppCompatActivity {
 //                Intent intent1 = new Intent(getApplicationContext(), SelectStatus.class);
 //                startActivity(intent1);
 
-                // 아직 등록되지 않은 사용자인 경우
-                // 우선 SelectMode로 연결되도록
                 // 사용자 이름을 입력하지 않은 경우 인텐트 비활성화 하기
                 Intent intent2 = new Intent(getApplicationContext(), SelectMode.class);
                 intent2.putExtra("text", name);

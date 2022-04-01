@@ -34,6 +34,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -47,6 +49,13 @@ public class RealSign_ver_Frame extends AppCompatActivity {
     private String name;
     private TextView nameView;
     private Uri filePath;
+
+    private int checkInit = 1;
+    private String strFilePath;
+    private int signatureCnt;
+    private int newSignatureCnt;
+    private String targetSignatureFolderPath;
+    private File signatureFolder;
 
     // 타이머 관련 변수
     TimerTask timerTask;
@@ -72,7 +81,7 @@ public class RealSign_ver_Frame extends AppCompatActivity {
         timerText.setText("제한시간 : " + timeLimit + " 초");
 
         Intent intent = getIntent(); // 전달한 데이터를 받을 Intent
-        String name = intent.getStringExtra("text");
+        name = intent.getStringExtra("text");
 
         nameView.setText(name);
 
@@ -117,6 +126,9 @@ public class RealSign_ver_Frame extends AppCompatActivity {
                 saveButton.setVisibility(View.VISIBLE);   // 저장 버튼 나타나게
                 startButton.setEnabled(false);   // 시작 버튼 비활성화
 
+                createSignatureDir();   // 해당 서명이 저장될 디렉토리 생성 후
+                // captureView(signaturePad);   // 스크린 캡처 메서드 반복 실행
+
                 startTimerTask();
 
             }
@@ -127,7 +139,7 @@ public class RealSign_ver_Frame extends AppCompatActivity {
             @Override
             public void onClick(View v) {
 
-                captureView(signaturePad);
+                captureView(signaturePad);   // 스크린 캡처 메서드 반복 실행
 
                 countNum += 1;   // 파일 이름은 name + '_' + countNum
 
@@ -175,6 +187,9 @@ public class RealSign_ver_Frame extends AppCompatActivity {
                 clearButton.setEnabled(true);
 
                 // TODO 초기화 시 이전 녹화 영상을 저장하지 않고 다시 녹화 시작
+                checkInit = 0;
+                // 초기화 시 init 표시를 추가해 스크린 캡처
+                captureView(signaturePad);
 
             }
         });
@@ -183,13 +198,15 @@ public class RealSign_ver_Frame extends AppCompatActivity {
 
     public void captureView(View View) {
         Intent intent = getIntent(); // 전달한 데이터를 받을 Intent
-        String name = intent.getStringExtra("text");
+        name = intent.getStringExtra("text");
 
-        // 저장소 영역
+        // TODO 저장소 영역 : ./name + 서명 저장 개수 => targetSignatureFolderPath + name_System.currentTimeMillis().png
+        Toast.makeText(getApplicationContext(), targetSignatureFolderPath + " 내 서명 프레임 저장 ", Toast.LENGTH_SHORT).show();
+
 //        final String rootPath = "/storage/self/primary/Pictures/Signature/";
-        final String rootPath = Environment.getExternalStorageDirectory() + "/Pictures/Signature_ver2/";
-        final String CAPTURE_PATH = name;
-//        Toast.makeText(getApplicationContext(), name + "의 새 폴더 생성 시도 ", Toast.LENGTH_SHORT).show();   // name null값 여부 확인
+//        final String rootPath = Environment.getExternalStorageDirectory() + "/Pictures/Signature_ver2/";
+//        final String CAPTURE_PATH = name;
+//        Toast.makeText(getApplicationContext(), name + "의 새 폴더 생성 시도 ", Toast.LENGTH_SHORT).show();   // name null 값 여부 확인
         signaturePad.destroyDrawingCache();
         signaturePad.setDrawingCacheEnabled(true);
         signaturePad.buildDrawingCache();
@@ -198,9 +215,13 @@ public class RealSign_ver_Frame extends AppCompatActivity {
         FileOutputStream fos;
 
 //        String strFolderPath = Environment.getExternalStorageDirectory().getAbsolutePath() + CAPTURE_PATH;
-        String strFolderPath = rootPath + CAPTURE_PATH;
 
-        String strFilePath = strFolderPath + "/" + name + '_' + System.currentTimeMillis() + ".png";   // strFilePath: 이미지 저장 경로
+        if (checkInit == 1) {
+            strFilePath = targetSignatureFolderPath + "/" + name + '_' + System.currentTimeMillis() + ".png";   // strFilePath: 이미지 저장 경로
+        } else {
+            strFilePath = targetSignatureFolderPath + "/" + name + '_' + System.currentTimeMillis() + "_init_" + ".png";
+        }
+
         File fileCacheItem = new File(strFilePath);
 
         try {
@@ -215,6 +236,36 @@ public class RealSign_ver_Frame extends AppCompatActivity {
         }
 
     }
+
+    /**
+     * 각 서명 하나의 프레임들이 저장될 디렉토리 생성메서드
+     */
+    private void createSignatureDir() {
+        // TODO 사용자 디렉토리 안에 있는 각 서명 디렉토리 파일 리스트 개수 -> 개수 + 1 로 새로운 디렉토리 생성
+
+        final String rootPath = Environment.getExternalStorageDirectory() + "/Pictures/Signature_ver2/";
+        String targetFolderPath = rootPath + name;
+
+        File signatureDir = new File(targetFolderPath);
+        File[] files = signatureDir.listFiles();
+
+        // name_signatureCnt + 1 의 이름으로 폴더 생성
+        signatureCnt = files.length;
+        newSignatureCnt = signatureCnt + 1;
+        targetSignatureFolderPath = targetFolderPath + '/' + name + '_' + String.valueOf(newSignatureCnt);
+        signatureFolder = new File(targetSignatureFolderPath);
+        try {
+            signatureFolder.mkdir();   // 서명 한 개의 프레임들이 저장될 폴더 생성
+            Toast.makeText(getApplicationContext(), "서명 폴더 생성", Toast.LENGTH_SHORT).show();
+        } catch (Exception e) {
+            e.getStackTrace();
+        }
+
+    }
+
+    /**
+     * captureView() 메서드를 반복해서 처리할 핸들러 구현
+     */
 
     /**
      * 서명 기록 시작 / 초기화 / 저장 / 제한 시간 종료 시 타이머 설정 메서드
