@@ -50,12 +50,12 @@ public class ForgerySign_Unskilled extends AppCompatActivity {
     private int checkInit = 1;
     private final String rootPath = Environment.getExternalStorageDirectory() + "/Pictures/Signature_ver2/";
     private String strFilePath;
-    private int signatureCnt;
-    private int newSignatureCnt;
+    private String targetSignature;
+    private int unskilledSignatureCnt;
+    private int newUnskilledSignatureCnt;
     private String targetSignatureFolderPath;
-    private File signatureFolder;
+    private File targetSignatureFolder;
     private String targetPath;
-
 
     // 타이머 관련 변수
     TimerTask timerTask;
@@ -86,7 +86,7 @@ public class ForgerySign_Unskilled extends AppCompatActivity {
         timerText.setText("제한시간 : " + timeLimit + " 초");
 
         Intent intent = getIntent(); // 전달한 데이터를 받을 Intent
-        String name = intent.getStringExtra("text");
+        name = intent.getStringExtra("text");
 
         signaturePad = (SignaturePad) findViewById(R.id.signaturePad);
         signaturePad.setEnabled(false);
@@ -95,9 +95,7 @@ public class ForgerySign_Unskilled extends AppCompatActivity {
 
             @Override
             public void onStartSigning() {
-                //Event triggered when the pad is touched
-//                clearButton.setVisibility(true);
-//                saveButton.setVisibility(true);
+
             }
 
             @Override
@@ -153,13 +151,13 @@ public class ForgerySign_Unskilled extends AppCompatActivity {
 
             @Override
             public void onClick(View v) {
-
                 loadButton.setEnabled(false);
+//                loadTargetSignature();
 
                 try {
                     loadTargetSignature();
-                    File storageDir = new File(targetPath);
-                    String loadImgName = targetFile;
+                    File storageDir = new File(targetSignature);   // 위조할 대상의 위조할 서명 디렉토리 path
+                    String loadImgName = targetFile;   // 위조할 대상의 위조할 서명 디렉토리 path 내 보여줄 이미지(-1번째)
                     File file = new File(storageDir, loadImgName);
                     Bitmap bitmap = BitmapFactory.decodeStream(new FileInputStream(file));
                     iv.setImageBitmap(bitmap);
@@ -184,6 +182,8 @@ public class ForgerySign_Unskilled extends AppCompatActivity {
 
                 startButton.setEnabled(false);
 
+                createSignatureDir();
+
                 startTimerTask();
 
             }
@@ -193,7 +193,8 @@ public class ForgerySign_Unskilled extends AppCompatActivity {
         saveButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                captureView(signaturePad);
+
+//                captureView(signaturePad);
 
                 countNum += 1;
 
@@ -245,7 +246,7 @@ public class ForgerySign_Unskilled extends AppCompatActivity {
 
     public void captureView(View View) {
         Intent intent = getIntent();   // 전달한 데이터를 받을 Intent
-        String name = intent.getStringExtra("text");
+        name = intent.getStringExtra("text");
 
         // 저장소 영역  ->  위조하는 대상의 디렉토리에 해당 서명 캡처 이미지 저장!!!
 //        final String rootPath = "/storage/self/primary/Pictures/Signature/";
@@ -294,7 +295,7 @@ public class ForgerySign_Unskilled extends AppCompatActivity {
         targetName = filesDirList.get(idx1);
 
         // TODO 위조할 타켓 대상의 디렉토리 내 서명 선택 - 각 서명 디렉토리 이름 중 unskilled or skilled 문자열 미포함 디렉토리 선택
-        final String targetPath = rootPath + targetName;
+        targetPath = rootPath + targetName;
         File targetPathFiles = new File(targetPath);
         File[] targetPathFileList = targetPathFiles.listFiles();   // 위조할 타켓 대상 디렉토리 내의 목록
         List<String> targetPathFolderList = new ArrayList<>();
@@ -311,9 +312,14 @@ public class ForgerySign_Unskilled extends AppCompatActivity {
 
         // 위조 대상의 실제 서명 디렉토리 중 랜덤 선택
         int idx2 = new Random().nextInt(targetPathFolderList.size());
-        String targetSignature = targetPathFolderList.get(idx2);
+        targetSignature = targetPathFolderList.get(idx2);
+        Toast.makeText(getApplicationContext(), targetSignature, Toast.LENGTH_SHORT).show();
+        
+        // 위에 부분까지 성공
+        
         // 위조할 서명 프레임들이 저장된 디렉토리 내에서 가장 마지막에서 두 번째 이미지 선택
-        File[] targetSignatureFrame = new File(targetSignature).listFiles();
+        File targetSignatureFiles = new File(targetSignature);
+        File[] targetSignatureFrame = targetSignatureFiles.listFiles();
         List<String> targetSignatureFrameList = new ArrayList<>();
 
         for (int i = 0; i < targetSignatureFrame.length; i++) {
@@ -321,12 +327,33 @@ public class ForgerySign_Unskilled extends AppCompatActivity {
         }
 
         targetFile = targetSignatureFrameList.get(-1);
+        Toast.makeText(getApplicationContext(), targetName + " / " + targetSignature +  " / " + targetSignature, Toast.LENGTH_SHORT).show();
     }
 
 
     /**
      * 각 서명 하나의 프레임들이 저장될 디렉토리 생성 메서드
      */
+    private void createSignatureDir() {
+        //TODO targetName 디렉토리 내에, unskilled 가 붙은 서명 디렉토리 개수 + 1 로 새로운 디렉토리 생성
+        File unskilledSignatureDir = new File(targetPath);
+        File[] files = unskilledSignatureDir.listFiles();
+        unskilledSignatureCnt = 0;
+        for (int i = 0; i < files.length; i++) {
+            if (files[i].getName().contains("unskilled")) {   // skilled 위조 서명의 경우, 이름에 skilled 포함 여부 체크 + unskilled 는 포함되지 않도록 =? 2개 조건 검사
+                unskilledSignatureCnt++;
+            }
+        }
+        newUnskilledSignatureCnt = unskilledSignatureCnt + 1;
+        targetSignatureFolderPath = targetPath + "/" + targetName + "_unskilled_" + String.valueOf(unskilledSignatureCnt);
+        targetSignatureFolder = new File(targetSignatureFolderPath);
+        try {
+            targetSignatureFolder.mkdir();
+            Toast.makeText(getApplicationContext(), "위조 서명 폴더 생성", Toast.LENGTH_SHORT).show();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
 
     /**
      * 서명 기록 시작 / 초기화 / 저장 / 제한 시간 종료 시 타이머 설정 메서드
