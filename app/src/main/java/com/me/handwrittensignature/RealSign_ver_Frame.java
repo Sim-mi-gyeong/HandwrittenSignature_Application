@@ -129,9 +129,9 @@ public class RealSign_ver_Frame extends AppCompatActivity {
                 startButton.setEnabled(false);   // 시작 버튼 비활성화
 
                 createSignatureDir();   // 해당 서명이 저장될 디렉토리 생성 후
-                // captureView(signaturePad);   // 스크린 캡처 메서드 반복 실행
 
                 startTimerTask();
+                iterableCaptureView();
 
             }
         });
@@ -142,12 +142,13 @@ public class RealSign_ver_Frame extends AppCompatActivity {
             public void onClick(View v) {
 
 //                captureView(signaturePad);   // 스크린 캡처 메서드 반복 실행
-                iterableCaptureView();
 
                 countNum += 1;   // 파일 이름은 name + '_' + countNum
 
                 countText.setText((countNum + "/" + countComplete).toString());
                 Toast.makeText(RealSign_ver_Frame.this, "Signature Saved", Toast.LENGTH_SHORT).show();
+
+                iterableCaptureViewSave();
 
                 // 기록 저장 후에도 초기화 실행
                 signaturePad.clear();
@@ -190,10 +191,8 @@ public class RealSign_ver_Frame extends AppCompatActivity {
                 clearButton.setEnabled(true);
 
                 // TODO 초기화 시 이전 녹화 영상을 저장하지 않고 다시 녹화 시작
-                checkInit = 0;
                 // 초기화 시 init 표시를 추가해 스크린 캡처
-                iterableCaptureView();
-//                captureView(signaturePad);
+                checkInit = 0;
 
             }
         });
@@ -205,7 +204,6 @@ public class RealSign_ver_Frame extends AppCompatActivity {
         name = intent.getStringExtra("text");
 
         // TODO 저장소 영역 : ./name + 서명 저장 개수 => targetSignatureFolderPath + name_System.currentTimeMillis().png
-        Toast.makeText(getApplicationContext(), targetSignatureFolderPath + " 내 서명 프레임 저장 ", Toast.LENGTH_SHORT).show();
 
 //        final String rootPath = "/storage/self/primary/Pictures/Signature/";
         signaturePad.destroyDrawingCache();
@@ -266,7 +264,7 @@ public class RealSign_ver_Frame extends AppCompatActivity {
      * captureView() 메서드를 반복해서 처리할 핸들러 구현
      */
     private void iterableCaptureView() {
-        stopTimerTask();
+        iterableCaptureViewSave();
         captureTimerTask = new TimerTask() {
 
             @Override
@@ -279,7 +277,14 @@ public class RealSign_ver_Frame extends AppCompatActivity {
                 });
             }
         };
-        timer.schedule(timerTask, 0, 100);
+        timer.schedule(captureTimerTask, 0, 100);
+    }
+    // 기록 저장 버튼 클릭 시 스크린 캡처 Timer 종료
+    private void iterableCaptureViewSave() {
+        if (captureTimerTask != null) {
+            captureTimerTask.cancel();
+            captureTimerTask = null;
+        }
     }
 
     /**
@@ -329,5 +334,5 @@ public class RealSign_ver_Frame extends AppCompatActivity {
         }
 
     }
-    
+
 }
