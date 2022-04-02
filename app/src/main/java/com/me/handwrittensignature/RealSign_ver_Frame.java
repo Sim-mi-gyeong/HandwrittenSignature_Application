@@ -64,6 +64,9 @@ public class RealSign_ver_Frame extends AppCompatActivity {
     TextView timerText;
 
     TimerTask captureTimerTask;
+    TimerTask initTimerTask;
+
+    Handler handler = new Handler();
 
 
     @Override
@@ -193,6 +196,16 @@ public class RealSign_ver_Frame extends AppCompatActivity {
                 // TODO 초기화 시 이전 녹화 영상을 저장하지 않고 다시 녹화 시작
                 // 초기화 시 init 표시를 추가해 스크린 캡처
                 checkInit = 0;
+                /**
+                 * clearButton 클릭 이벤트 발생 시 이미지 캡처 - init 표시 후에는 init 표시 제거되도록
+                 * clearButton 을 누른 순간 -> initCheck = 0 -> 0.1초(특정 시간) delay 후 initCheck = 1 상태로 돌리기
+                 */
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        checkInit = 1;
+                    }
+                }, 1000);
 
             }
         });
@@ -277,7 +290,7 @@ public class RealSign_ver_Frame extends AppCompatActivity {
                 });
             }
         };
-        timer.schedule(captureTimerTask, 0, 100);
+        timer.schedule(captureTimerTask, 0, 1000);
     }
     // 기록 저장 버튼 클릭 시 스크린 캡처 Timer 종료
     private void iterableCaptureViewSave() {

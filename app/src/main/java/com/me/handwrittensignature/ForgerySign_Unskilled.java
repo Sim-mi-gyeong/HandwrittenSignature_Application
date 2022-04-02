@@ -47,11 +47,21 @@ public class ForgerySign_Unskilled extends AppCompatActivity {
     private String targetFile;
     private String pass_targetName;
 
+    private int checkInit = 1;
+    private String strFilePath;
+    private int signatureCnt;
+    private int newSignatureCnt;
+    private String targetSignatureFolderPath;
+    private File signatureFolder;
+
+
     // 타이머 관련 변수
     TimerTask timerTask;
     Timer timer = new Timer();
     private int timeLimit = 10;   // 제한 시간 설정
     TextView timerText;
+
+    TimerTask captureTimerTask;
 
     ImageView iv;
 
