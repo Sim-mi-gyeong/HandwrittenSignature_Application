@@ -266,9 +266,14 @@ public class RealSign_ver_Frame extends AppCompatActivity {
 
         File signatureDir = new File(targetFolderPath);
         File[] files = signatureDir.listFiles();
-
+        signatureCnt = 0;
+        for (int i = 0; i < files.length; i++) {
+            if (!files[i].getName().contains("unskilled") || !files[i].getName().contains("skilled")) {
+                signatureCnt++;
+            }
+        }
         // name_signatureCnt + 1 의 이름으로 폴더 생성
-        signatureCnt = files.length;
+//        signatureCnt = files.length;
         newSignatureCnt = signatureCnt + 1;
         targetSignatureFolderPath = targetFolderPath + '/' + name + '_' + String.valueOf(newSignatureCnt);
         signatureFolder = new File(targetSignatureFolderPath);
