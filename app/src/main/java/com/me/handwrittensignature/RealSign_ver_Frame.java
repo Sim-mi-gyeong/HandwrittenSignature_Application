@@ -55,7 +55,7 @@ public class RealSign_ver_Frame extends AppCompatActivity {
     private String strFilePath;
     private int signatureCnt;
     private int newSignatureCnt;
-    private String targetSignatureFolderPath;
+    private String signatureFolderPath;
     private File signatureFolder;
 
     // 타이머 관련 변수
@@ -224,7 +224,7 @@ public class RealSign_ver_Frame extends AppCompatActivity {
         Intent intent = getIntent(); // 전달한 데이터를 받을 Intent
         name = intent.getStringExtra("text");
 
-        // TODO 저장소 영역 : ./name + 서명 저장 개수 => targetSignatureFolderPath + name_System.currentTimeMillis().png
+        // TODO 저장소 영역 : ./name + 서명 저장 개수 => signatureFolderPath + name_System.currentTimeMillis().png
 
 //        final String rootPath = "/storage/self/primary/Pictures/Signature/";
         signaturePad.destroyDrawingCache();
@@ -235,9 +235,9 @@ public class RealSign_ver_Frame extends AppCompatActivity {
         FileOutputStream fos;
 
         if (checkInit == 1) {
-            strFilePath = targetSignatureFolderPath + "/" + name + "_" + System.currentTimeMillis() + ".png";   // strFilePath: 이미지 저장 경로
+            strFilePath = signatureFolderPath + "/" + name + "_" + System.currentTimeMillis() + ".png";   // strFilePath: 이미지 저장 경로
         } else {
-            strFilePath = targetSignatureFolderPath + "/" + name + "_" + System.currentTimeMillis() + "_init_" + ".png";
+            strFilePath = signatureFolderPath + "/" + name + "_" + System.currentTimeMillis() + "_init_" + ".png";
         }
 
         File fileCacheItem = new File(strFilePath);
@@ -262,9 +262,9 @@ public class RealSign_ver_Frame extends AppCompatActivity {
         // TODO 사용자 디렉토리 안에 있는 각 서명 디렉토리 파일 리스트 개수 -> 개수 + 1 로 새로운 디렉토리 생성
 
 //        final String rootPath = Environment.getExternalStorageDirectory() + "/Pictures/Signature_ver2/";
-        String targetFolderPath = rootPath + name;
+        String userFolderPath = rootPath + name;
 
-        File signatureDir = new File(targetFolderPath);
+        File signatureDir = new File(userFolderPath);
         File[] files = signatureDir.listFiles();
         signatureCnt = 0;
         for (int i = 0; i < files.length; i++) {
@@ -275,8 +275,8 @@ public class RealSign_ver_Frame extends AppCompatActivity {
         // name_signatureCnt + 1 의 이름으로 폴더 생성
 //        signatureCnt = files.length;
         newSignatureCnt = signatureCnt + 1;
-        targetSignatureFolderPath = targetFolderPath + '/' + name + '_' + String.valueOf(newSignatureCnt);
-        signatureFolder = new File(targetSignatureFolderPath);
+        signatureFolderPath = userFolderPath + '/' + name + '_' + String.valueOf(newSignatureCnt);
+        signatureFolder = new File(signatureFolderPath);
         try {
             signatureFolder.mkdir();   // 서명 한 개의 프레임들이 저장될 폴더 생성
             Toast.makeText(getApplicationContext(), "서명 폴더 생성", Toast.LENGTH_SHORT).show();
