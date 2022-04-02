@@ -51,6 +51,7 @@ public class RealSign_ver_Frame extends AppCompatActivity {
     private Uri filePath;
 
     private int checkInit = 1;
+    private final String rootPath = Environment.getExternalStorageDirectory() + "/Pictures/Signature_ver2/";
     private String strFilePath;
     private int signatureCnt;
     private int newSignatureCnt;
@@ -67,7 +68,6 @@ public class RealSign_ver_Frame extends AppCompatActivity {
     TimerTask initTimerTask;
 
     Handler handler = new Handler();
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -154,7 +154,12 @@ public class RealSign_ver_Frame extends AppCompatActivity {
                 iterableCaptureViewSave();
 
                 // 기록 저장 후에도 초기화 실행
-                signaturePad.clear();
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        signaturePad.clear();
+                    }
+                }, 100);
 
                 signaturePad.setEnabled(false);
 
@@ -163,6 +168,8 @@ public class RealSign_ver_Frame extends AppCompatActivity {
                 // 타이머 세팅
                 saveStopTimerTask();
                 timerText.setText("제한시간 : " + timeLimit + " 초");
+
+//                iterableCaptureViewSave();
 
                 startButton.setVisibility(View.VISIBLE);
                 clearButton.setVisibility(View.GONE);
@@ -182,6 +189,7 @@ public class RealSign_ver_Frame extends AppCompatActivity {
                         }
                     });
                 }
+
 
             }
         });
@@ -205,7 +213,7 @@ public class RealSign_ver_Frame extends AppCompatActivity {
                     public void run() {
                         checkInit = 1;
                     }
-                }, 1000);
+                }, 100);
 
             }
         });
@@ -253,7 +261,7 @@ public class RealSign_ver_Frame extends AppCompatActivity {
     private void createSignatureDir() {
         // TODO 사용자 디렉토리 안에 있는 각 서명 디렉토리 파일 리스트 개수 -> 개수 + 1 로 새로운 디렉토리 생성
 
-        final String rootPath = Environment.getExternalStorageDirectory() + "/Pictures/Signature_ver2/";
+//        final String rootPath = Environment.getExternalStorageDirectory() + "/Pictures/Signature_ver2/";
         String targetFolderPath = rootPath + name;
 
         File signatureDir = new File(targetFolderPath);
@@ -290,7 +298,7 @@ public class RealSign_ver_Frame extends AppCompatActivity {
                 });
             }
         };
-        timer.schedule(captureTimerTask, 0, 1000);
+        timer.schedule(captureTimerTask, 0, 100);
     }
     // 기록 저장 버튼 클릭 시 스크린 캡처 Timer 종료
     private void iterableCaptureViewSave() {
