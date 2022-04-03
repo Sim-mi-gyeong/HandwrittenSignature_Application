@@ -51,6 +51,7 @@ public class ForgerySign_Unskilled extends AppCompatActivity {
     private final String rootPath = Environment.getExternalStorageDirectory() + "/Pictures/Signature_ver2/";
     private String strFilePath;
     private String targetSignature;
+    private String targetSignaturePath;
     private int unskilledSignatureCnt;
     private int newUnskilledSignatureCnt;
     private String targetSignatureFolderPath;
@@ -152,11 +153,10 @@ public class ForgerySign_Unskilled extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 loadButton.setEnabled(false);
-//                loadTargetSignature();
 
                 try {
                     loadTargetSignature();
-                    File storageDir = new File(targetSignature);   // 위조할 대상의 위조할 서명 디렉토리 path
+                    File storageDir = new File(targetSignaturePath);   // 위조할 대상의 위조할 서명 디렉토리 path
                     String loadImgName = targetFile;   // 위조할 대상의 위조할 서명 디렉토리 path 내 보여줄 이미지(-1번째)
                     File file = new File(storageDir, loadImgName);
                     Bitmap bitmap = BitmapFactory.decodeStream(new FileInputStream(file));
@@ -313,21 +313,19 @@ public class ForgerySign_Unskilled extends AppCompatActivity {
         // 위조 대상의 실제 서명 디렉토리 중 랜덤 선택
         int idx2 = new Random().nextInt(targetPathFolderList.size());
         targetSignature = targetPathFolderList.get(idx2);
-        Toast.makeText(getApplicationContext(), targetSignature, Toast.LENGTH_SHORT).show();
-        
-        // 위에 부분까지 성공
-        
+        targetSignaturePath = targetPath + "/" + targetSignature;
+
         // 위조할 서명 프레임들이 저장된 디렉토리 내에서 가장 마지막에서 두 번째 이미지 선택
-        File targetSignatureFiles = new File(targetSignature);
+        File targetSignatureFiles = new File(targetSignaturePath);
         File[] targetSignatureFrame = targetSignatureFiles.listFiles();
         List<String> targetSignatureFrameList = new ArrayList<>();
 
         for (int i = 0; i < targetSignatureFrame.length; i++) {
             targetSignatureFrameList.add(targetSignatureFrame[i].getName());
         }
+//        targetFile = targetSignatureFrameList.get(-1);
+        targetFile = targetSignatureFrameList.get(targetSignatureFrameList.size()-1);
 
-        targetFile = targetSignatureFrameList.get(-1);
-        Toast.makeText(getApplicationContext(), targetName + " / " + targetSignature +  " / " + targetSignature, Toast.LENGTH_SHORT).show();
     }
 
 
@@ -340,7 +338,7 @@ public class ForgerySign_Unskilled extends AppCompatActivity {
         File[] files = unskilledSignatureDir.listFiles();
         unskilledSignatureCnt = 0;
         for (int i = 0; i < files.length; i++) {
-            if (files[i].getName().contains("unskilled")) {   // skilled 위조 서명의 경우, 이름에 skilled 포함 여부 체크 + unskilled 는 포함되지 않도록 =? 2개 조건 검사
+            if (files[i].getName().contains("unskilled")) {   // skilled 위조 서명의 경우, 이름에 skilled 포함 여부 체크 + unskilled 는 포함되지 않도록 => 2개 조건 검사
                 unskilledSignatureCnt++;
             }
         }
