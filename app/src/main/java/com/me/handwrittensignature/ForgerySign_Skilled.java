@@ -47,7 +47,11 @@ public class ForgerySign_Skilled extends AppCompatActivity {
     private int checkInit = 0;
     private final String rootPath = Environment.getExternalStorageDirectory() + "/Pictures/Signature_ver2/";
     private String strFilePath;
+    private String targetPath;
     private String targetSignatureFolderPath;   // intent 로 practice 에서 전달받기
+    private int skilledSignatureCnt;
+    private int newSkilledSignatureCnt;
+    private File targetSignatureFolder;
 
 
     // 타이머 관련 변수
@@ -83,6 +87,7 @@ public class ForgerySign_Skilled extends AppCompatActivity {
         Intent intent = getIntent(); // 전달한 데이터를 받을 Intent
         name = intent.getStringExtra("text");
         targetName = intent.getStringExtra("targetName");
+        targetPath = intent.getStringExtra("targetPath");
         targetSignatureFolderPath = intent.getStringExtra("targetSignatureFolderPath");
 
         signaturePad = (SignaturePad) findViewById(R.id.signaturePad);
@@ -118,14 +123,11 @@ public class ForgerySign_Skilled extends AppCompatActivity {
                 loadButton.setEnabled(false);
                 // Practice 모드에서 랜덤으로 불러온 이미지를 띄우기
                 try {
-//                    File storageDir = new File(targetPath);
-//                    String loadImgName = targetFile;
                     File file = new File(targetSignatureFolderPath);
                     Bitmap bitmap = BitmapFactory.decodeStream(new FileInputStream(file));
                     iv.setImageBitmap(bitmap);
 
                 } catch (Exception e) {
-                    Toast.makeText(getApplicationContext(), targetName + "   " + targetFile, Toast.LENGTH_SHORT).show();   // intent로 넘긴 값 확인용
                     Toast.makeText(getApplicationContext(), "이미지 로드 실패", Toast.LENGTH_SHORT).show();
                 }
 
@@ -144,7 +146,10 @@ public class ForgerySign_Skilled extends AppCompatActivity {
 
                 startButton.setEnabled(false);
 
+                createSignatureDir();
+
                 startTimerTask();
+                iterableCaptureView();
 
             }
 
@@ -153,16 +158,21 @@ public class ForgerySign_Skilled extends AppCompatActivity {
         saveButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                //write code for saving the signature here
-                captureView(signaturePad);
+//                captureView(signaturePad);
 
                 countNum += 1;
 
                 countText.setText((countNum + "/" + countComplete).toString());
                 Toast.makeText(ForgerySign_Skilled.this, "Signature Saved", Toast.LENGTH_SHORT).show();
 
-                // 기록 저장 후에도 초기화 실행
-                signaturePad.clear();
+                iterableCaptureViewSave();
+
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        signaturePad.clear();
+                    }
+                }, 100);
 
                 // 또 다시 시작 버튼 누르고 -> 기록 저장 / 초기화 버튼으로 구분할 것인지?
                 signaturePad.setEnabled(false);
@@ -202,6 +212,18 @@ public class ForgerySign_Skilled extends AppCompatActivity {
                 signaturePad.clear();
                 saveButton.setEnabled(true);
                 clearButton.setEnabled(true);
+
+                checkInit = 1;
+                /**
+                 * clearButton 클릭 이벤트 발생 시 이미지 캡처 - init 표시 후에는 init 표시 제거되도록
+                 * clearButton 을 누른 순간 -> initCheck = 0 -> 0.1초(특정 시간) delay 후 initCheck = 1 상태로 돌리기
+                 */
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        checkInit = 0;
+                    }
+                }, 100);
             }
         });
 
@@ -222,9 +244,9 @@ public class ForgerySign_Skilled extends AppCompatActivity {
 
         // TODO 위조 서명이 저장될 경로는, 위조 대상의 디렉토리 내 생성된 unskiiled 표시가 붙은 디렉토리 => targetSignaturePath
         if (checkInit == 0) {
-            strFilePath = targetSignatureFolderPath + "/" + targetName + '_' + "unskilled_forgery_" + System.currentTimeMillis() + ".png";   // strFilePath: 이미지 저장 경로
+            strFilePath = targetSignatureFolderPath + "/" + targetName + '_' + "skilled_forgery_" + System.currentTimeMillis() + ".png";   // strFilePath: 이미지 저장 경로
         } else {
-            strFilePath = targetSignatureFolderPath + "/" + targetName + '_' + "unskilled_forgery_" + System.currentTimeMillis() + "_init_" + ".png";   // strFilePath: 이미지 저장 경로
+            strFilePath = targetSignatureFolderPath + "/" + targetName + '_' + "skilled_forgery_" + System.currentTimeMillis() + "_init_" + ".png";   // strFilePath: 이미지 저장 경로
         }
 
         File fileCacheItem = new File(strFilePath);
@@ -240,6 +262,53 @@ public class ForgerySign_Skilled extends AppCompatActivity {
             Toast.makeText(getApplicationContext(), "스크린샷 저장 실패", Toast.LENGTH_SHORT).show();
         }
 
+    }
+
+    private void createSignatureDir() {
+        //TODO targetName 디렉토리 내에, skilled 가 붙은 서명 디렉토리 개수 + 1 로 새로운 디렉토리 생성
+        File unskilledSignatureDir = new File(targetPath);
+        File[] files = unskilledSignatureDir.listFiles();
+        skilledSignatureCnt = 0;
+        for (int i = 0; i < files.length; i++) {
+            if (files[i].getName().contains("skilled") && !files[i].getName().contains("unskilled")) {   // skilled 위조 서명의 경우, 이름에 skilled 포함 여부 체크 + unskilled 는 포함되지 않도록 => 2개 조건 검사
+                skilledSignatureCnt++;
+            }
+        }
+        newSkilledSignatureCnt = skilledSignatureCnt + 1;
+        targetSignatureFolderPath = targetPath + "/" + targetName + "_skilled_forgery_" + String.valueOf(newSkilledSignatureCnt);
+        targetSignatureFolder = new File(targetSignatureFolderPath);
+        try {
+            targetSignatureFolder.mkdir();
+            Toast.makeText(getApplicationContext(), "위조 서명 폴더 생성", Toast.LENGTH_SHORT).show();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    /**
+     * captureView() 메서드를 반복해서 처리할 핸들러 구현
+     */
+    private void iterableCaptureView() {
+        iterableCaptureViewSave();
+        captureTimerTask = new TimerTask() {
+            @Override
+            public void run() {
+                signaturePad.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        captureView(signaturePad);
+                    }
+                });
+            }
+        };
+        timer.schedule(captureTimerTask, 0, 100);
+    }
+
+    private void iterableCaptureViewSave() {
+        if (captureTimerTask != null) {
+            captureTimerTask.cancel();
+            captureTimerTask = null;
+        }
     }
 
     /**
