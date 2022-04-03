@@ -323,7 +323,7 @@ public class ForgerySign_Unskilled extends AppCompatActivity {
         for (int i = 0; i < targetSignatureFrame.length; i++) {
             targetSignatureFrameList.add(targetSignatureFrame[i].getName());
         }
-//        targetFile = targetSignatureFrameList.get(-1);
+//        targetFile = targetSignatureFrameList.get(-1);   // Java 는 이렇게 안 쓴다,, Python 만 이렇게 쓴다,,
         targetFile = targetSignatureFrameList.get(targetSignatureFrameList.size()-1);
 
     }
@@ -343,7 +343,7 @@ public class ForgerySign_Unskilled extends AppCompatActivity {
             }
         }
         newUnskilledSignatureCnt = unskilledSignatureCnt + 1;
-        targetSignatureFolderPath = targetPath + "/" + targetName + "_unskilled_" + String.valueOf(unskilledSignatureCnt);
+        targetSignatureFolderPath = targetPath + "/" + targetName + "_unskilled_" + String.valueOf(newUnskilledSignatureCnt);
         targetSignatureFolder = new File(targetSignatureFolderPath);
         try {
             targetSignatureFolder.mkdir();
