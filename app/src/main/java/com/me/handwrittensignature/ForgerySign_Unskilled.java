@@ -47,7 +47,7 @@ public class ForgerySign_Unskilled extends AppCompatActivity {
     private String targetFile;
     private String pass_targetName;
 
-    private int checkInit = 1;
+    private int checkInit = 0;
     private final String rootPath = Environment.getExternalStorageDirectory() + "/Pictures/Signature_ver2/";
     private String strFilePath;
     private String targetSignature;
@@ -185,6 +185,7 @@ public class ForgerySign_Unskilled extends AppCompatActivity {
                 createSignatureDir();
 
                 startTimerTask();
+                iterableCaptureView();
 
             }
 
@@ -201,7 +202,15 @@ public class ForgerySign_Unskilled extends AppCompatActivity {
                 countText.setText((countNum + "/" + countComplete).toString());
                 Toast.makeText(ForgerySign_Unskilled.this, "Signature Saved", Toast.LENGTH_SHORT).show();
 
-                signaturePad.clear();
+                iterableCaptureViewSave();
+
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        signaturePad.clear();
+                    }
+                }, 100);
+
 
                 signaturePad.setEnabled(false);
 
@@ -239,6 +248,18 @@ public class ForgerySign_Unskilled extends AppCompatActivity {
                 signaturePad.clear();
                 saveButton.setEnabled(true);
                 clearButton.setEnabled(true);
+
+                checkInit = 1;
+                /**
+                 * clearButton 클릭 이벤트 발생 시 이미지 캡처 - init 표시 후에는 init 표시 제거되도록
+                 * clearButton 을 누른 순간 -> initCheck = 0 -> 0.1초(특정 시간) delay 후 initCheck = 1 상태로 돌리기
+                 */
+                new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                        checkInit = 0;
+                    }
+                }, 100);
             }
         });
 
@@ -250,7 +271,6 @@ public class ForgerySign_Unskilled extends AppCompatActivity {
 
         // 저장소 영역  ->  위조하는 대상의 디렉토리에 해당 서명 캡처 이미지 저장!!!
 //        final String rootPath = "/storage/self/primary/Pictures/Signature/";
-        final String CAPTURE_PATH = targetName;
         signaturePad.destroyDrawingCache();
         signaturePad.setDrawingCacheEnabled(true);
         signaturePad.buildDrawingCache();
@@ -258,14 +278,17 @@ public class ForgerySign_Unskilled extends AppCompatActivity {
 
         FileOutputStream fos;
 
-//        String strFolderPath = Environment.getExternalStorageDirectory().getAbsolutePath() + CAPTURE_PATH;
-        String strFolderPath = rootPath + CAPTURE_PATH;
+        // TODO 위조 서명이 저장될 경로는, 위조 대상의 디렉토리 내 생성된 unskiiled 표시가 붙은 디렉토리 => targetSignaturePath
+        if (checkInit == 0) {
+            strFilePath = targetSignatureFolderPath + "/" + targetName + '_' + "unskilled_forgery_" + System.currentTimeMillis() + ".png";   // strFilePath: 이미지 저장 경로
+        } else {
+            strFilePath = targetSignatureFolderPath + "/" + targetName + '_' + "unskilled_forgery_" + System.currentTimeMillis() + "_init_" + ".png";   // strFilePath: 이미지 저장 경로
+        }
 
-        String strFilePath = strFolderPath + "/" + targetName + '_' + "unskilled_forgery_" + System.currentTimeMillis() + ".png";   // strFilePath: 이미지 저장 경로
         File fileCacheItem = new File(strFilePath);
 
         try {
-            fos = new FileOutputStream(fileCacheItem);
+            fos = new FileOutputStream(fileCacheItem, false);
             // 해당 Bitmap 으로 만든 이미지를 png 파일 형태로 만들기
             bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos);
             fos.flush();
@@ -343,13 +366,39 @@ public class ForgerySign_Unskilled extends AppCompatActivity {
             }
         }
         newUnskilledSignatureCnt = unskilledSignatureCnt + 1;
-        targetSignatureFolderPath = targetPath + "/" + targetName + "_unskilled_" + String.valueOf(newUnskilledSignatureCnt);
+        targetSignatureFolderPath = targetPath + "/" + targetName + "_unskilled_forgery_" + String.valueOf(newUnskilledSignatureCnt);
         targetSignatureFolder = new File(targetSignatureFolderPath);
         try {
             targetSignatureFolder.mkdir();
             Toast.makeText(getApplicationContext(), "위조 서명 폴더 생성", Toast.LENGTH_SHORT).show();
         } catch (Exception e) {
             e.printStackTrace();
+        }
+    }
+
+    /**
+     * captureView() 메서드를 반복해서 처리할 핸들러 구현
+     */
+    private void iterableCaptureView() {
+        iterableCaptureViewSave();
+        captureTimerTask = new TimerTask() {
+            @Override
+            public void run() {
+                signaturePad.post(new Runnable() {
+                    @Override
+                    public void run() {
+                        captureView(signaturePad);
+                    }
+                });
+            }
+        };
+        timer.schedule(captureTimerTask, 0, 100);
+    }
+
+    private void iterableCaptureViewSave() {
+        if (captureTimerTask != null) {
+            captureTimerTask.cancel();
+            captureTimerTask = null;
         }
     }
 

@@ -50,7 +50,7 @@ public class RealSign_ver_Frame extends AppCompatActivity {
     private TextView nameView;
     private Uri filePath;
 
-    private int checkInit = 1;
+    private int checkInit = 0;
     private final String rootPath = Environment.getExternalStorageDirectory() + "/Pictures/Signature_ver2/";
     private String strFilePath;
     private int signatureCnt;
@@ -169,8 +169,6 @@ public class RealSign_ver_Frame extends AppCompatActivity {
                 saveStopTimerTask();
                 timerText.setText("제한시간 : " + timeLimit + " 초");
 
-//                iterableCaptureViewSave();
-
                 startButton.setVisibility(View.VISIBLE);
                 clearButton.setVisibility(View.GONE);
                 saveButton.setVisibility(View.GONE);
@@ -203,7 +201,7 @@ public class RealSign_ver_Frame extends AppCompatActivity {
 
                 // TODO 초기화 시 이전 녹화 영상을 저장하지 않고 다시 녹화 시작
                 // 초기화 시 init 표시를 추가해 스크린 캡처
-                checkInit = 0;
+                checkInit = 1;
                 /**
                  * clearButton 클릭 이벤트 발생 시 이미지 캡처 - init 표시 후에는 init 표시 제거되도록
                  * clearButton 을 누른 순간 -> initCheck = 0 -> 0.1초(특정 시간) delay 후 initCheck = 1 상태로 돌리기
@@ -211,7 +209,7 @@ public class RealSign_ver_Frame extends AppCompatActivity {
                 new Handler().postDelayed(new Runnable() {
                     @Override
                     public void run() {
-                        checkInit = 1;
+                        checkInit = 0;
                     }
                 }, 100);
 
@@ -234,7 +232,7 @@ public class RealSign_ver_Frame extends AppCompatActivity {
 
         FileOutputStream fos;
 
-        if (checkInit == 1) {
+        if (checkInit == 0) {
             strFilePath = signatureFolderPath + "/" + name + "_" + System.currentTimeMillis() + ".png";   // strFilePath: 이미지 저장 경로
         } else {
             strFilePath = signatureFolderPath + "/" + name + "_" + System.currentTimeMillis() + "_init_" + ".png";
