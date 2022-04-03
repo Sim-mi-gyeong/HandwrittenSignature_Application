@@ -44,11 +44,19 @@ public class ForgerySign_Skilled extends AppCompatActivity {
     public static String targetName;
     public static String targetFile;
 
+    private int checkInit = 0;
+    private final String rootPath = Environment.getExternalStorageDirectory() + "/Pictures/Signature_ver2/";
+    private String strFilePath;
+    private String targetSignatureFolderPath;   // intent 로 practice 에서 전달받기
+
+
     // 타이머 관련 변수
     TimerTask timerTask;
     Timer timer = new Timer();
     private int timeLimit = 10;   // 제한 시간 설정
     TextView timerText;
+
+    TimerTask captureTimerTask;
 
     ImageView iv;
 
@@ -73,9 +81,9 @@ public class ForgerySign_Skilled extends AppCompatActivity {
         iv = findViewById(R.id.image1);
 
         Intent intent = getIntent(); // 전달한 데이터를 받을 Intent
-        String name = intent.getStringExtra("text");
-        String targetName = intent.getStringExtra("dirName");
-        String targetFile = intent.getStringExtra("fileName");
+        name = intent.getStringExtra("text");
+        targetName = intent.getStringExtra("targetName");
+        targetSignatureFolderPath = intent.getStringExtra("targetSignatureFolderPath");
 
         signaturePad = (SignaturePad) findViewById(R.id.signaturePad);
         signaturePad.setEnabled(false);
@@ -84,10 +92,7 @@ public class ForgerySign_Skilled extends AppCompatActivity {
 
             @Override
             public void onStartSigning() {
-                //Event triggered when the pad is touched
 
-//                clearButton.setVisibility(true);
-//                saveButton.setVisibility(true);
             }
 
             @Override
@@ -112,14 +117,10 @@ public class ForgerySign_Skilled extends AppCompatActivity {
                 //불러오기 버튼 숨기기
                 loadButton.setEnabled(false);
                 // Practice 모드에서 랜덤으로 불러온 이미지를 띄우기
-//                final String rootPath = "/storage/self/primary/Pictures/Signature/";
-                final String rootPath = Environment.getExternalStorageDirectory() + "/Pictures/Signature/";
-                final String targetPath = rootPath + targetName;
-
                 try {
-                    File storageDir = new File(targetPath);
-                    String loadImgName = targetFile;
-                    File file = new File(storageDir, loadImgName);
+//                    File storageDir = new File(targetPath);
+//                    String loadImgName = targetFile;
+                    File file = new File(targetSignatureFolderPath);
                     Bitmap bitmap = BitmapFactory.decodeStream(new FileInputStream(file));
                     iv.setImageBitmap(bitmap);
 
@@ -207,16 +208,11 @@ public class ForgerySign_Skilled extends AppCompatActivity {
     }
 
     public void captureView(View View) {
-        Intent intent = getIntent(); // 전달한 데이터를 받을 Intent
-        String name = intent.getStringExtra("text");
-        String targetName = intent.getStringExtra("dirName");
-        String targetFile = intent.getStringExtra("fileName");
+        Intent intent = getIntent();   // 전달한 데이터를 받을 Intent
+        name = intent.getStringExtra("text");
 
         // 저장소 영역  ->  위조하는 대상의 디렉토리에 해당 서명 캡처 이미지 저장!!!
 //        final String rootPath = "/storage/self/primary/Pictures/Signature/";
-        final String rootPath =Environment.getExternalStorageDirectory() + "/Pictures/Signature/";
-        final String CAPTURE_PATH = targetName;   // -> name 대신 targetName으로
-//        Toast.makeText(getApplicationContext(), name + "의 새 폴더 생성 시도 ", Toast.LENGTH_SHORT).show();   // name null값 여부 확인
         signaturePad.destroyDrawingCache();
         signaturePad.setDrawingCacheEnabled(true);
         signaturePad.buildDrawingCache();
@@ -224,14 +220,17 @@ public class ForgerySign_Skilled extends AppCompatActivity {
 
         FileOutputStream fos;
 
-//        String strFolderPath = Environment.getExternalStorageDirectory().getAbsolutePath() + CAPTURE_PATH;
-        String strFolderPath = rootPath + CAPTURE_PATH;
+        // TODO 위조 서명이 저장될 경로는, 위조 대상의 디렉토리 내 생성된 unskiiled 표시가 붙은 디렉토리 => targetSignaturePath
+        if (checkInit == 0) {
+            strFilePath = targetSignatureFolderPath + "/" + targetName + '_' + "unskilled_forgery_" + System.currentTimeMillis() + ".png";   // strFilePath: 이미지 저장 경로
+        } else {
+            strFilePath = targetSignatureFolderPath + "/" + targetName + '_' + "unskilled_forgery_" + System.currentTimeMillis() + "_init_" + ".png";   // strFilePath: 이미지 저장 경로
+        }
 
-        String strFilePath = strFolderPath + "/" + targetName + '_' +"skilled_forgery_" + System.currentTimeMillis() + ".png";   // strFilePath: 이미지 저장 경로
         File fileCacheItem = new File(strFilePath);
 
         try {
-            fos = new FileOutputStream(fileCacheItem);
+            fos = new FileOutputStream(fileCacheItem, false);
             // 해당 Bitmap 으로 만든 이미지를 png 파일 형태로 만들기
             bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos);
             fos.flush();
