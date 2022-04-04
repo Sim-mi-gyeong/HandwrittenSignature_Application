@@ -69,7 +69,7 @@ public class ForgerySign_Skilled_Practice extends AppCompatActivity {
         iv = findViewById(R.id.image1);
 
         Intent intent = getIntent(); // 전달한 데이터를 받을 Intent
-        String name = intent.getStringExtra("text");
+        name = intent.getStringExtra("text");
 
         signaturePad = (SignaturePad) findViewById(R.id.signaturePad);
         signaturePad.setEnabled(false);
@@ -166,6 +166,7 @@ public class ForgerySign_Skilled_Practice extends AppCompatActivity {
             filesDirList.add(files[i].getName());
         }
 
+        Toast.makeText(getApplicationContext(), name, Toast.LENGTH_SHORT).show();
         filesDirList.remove(name);   // 본인의 디렉토리(서명은)는 위조 대상에서 제외
 
         // 위조할 타겟 대상의 디렉토리 랜덤 선택
