@@ -166,7 +166,6 @@ public class ForgerySign_Skilled_Practice extends AppCompatActivity {
             filesDirList.add(files[i].getName());
         }
 
-        Toast.makeText(getApplicationContext(), name, Toast.LENGTH_SHORT).show();
         filesDirList.remove(name);   // 본인의 디렉토리(서명은)는 위조 대상에서 제외
 
         // 위조할 타겟 대상의 디렉토리 랜덤 선택
