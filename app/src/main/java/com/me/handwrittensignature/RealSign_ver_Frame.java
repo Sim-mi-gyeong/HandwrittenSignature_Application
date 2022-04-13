@@ -57,6 +57,7 @@ public class RealSign_ver_Frame extends AppCompatActivity {
     private int newSignatureCnt;
     private String signatureFolderPath;
     private File signatureFolder;
+    private Bitmap bitmap;
 
     // 타이머 관련 변수
     TimerTask timerTask;
@@ -96,7 +97,6 @@ public class RealSign_ver_Frame extends AppCompatActivity {
          * 1단계 : MediaProjectionManager 는 getSystemService 를 통해 service를 생성하고
          *     -> 사용자에게 권한 요구
          */
-
         signaturePad = (SignaturePad) findViewById(R.id.signaturePad);
         signaturePad.setEnabled(false);
 
@@ -225,10 +225,10 @@ public class RealSign_ver_Frame extends AppCompatActivity {
         // TODO 저장소 영역 : ./name + 서명 저장 개수 => signatureFolderPath + name_System.currentTimeMillis().png
 
 //        final String rootPath = "/storage/self/primary/Pictures/Signature/";
-        signaturePad.destroyDrawingCache();
-        signaturePad.setDrawingCacheEnabled(true);
-        signaturePad.buildDrawingCache();
-        Bitmap bitmap = signaturePad.getDrawingCache();   // Bitmap 가져오기
+        View.destroyDrawingCache();
+        View.setDrawingCacheEnabled(true);
+        View.buildDrawingCache();
+        bitmap = View.getDrawingCache();   // Bitmap 가져오기
 
         FileOutputStream fos;
 
@@ -242,6 +242,7 @@ public class RealSign_ver_Frame extends AppCompatActivity {
 
         try {
             fos = new FileOutputStream(fileCacheItem, false);
+            bitmap.createBitmap(View.getWidth(), View.getHeight(), Bitmap.Config.ARGB_8888);
             // 해당 Bitmap 으로 만든 이미지를 png 파일 형태로 만들기
             bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos);
             fos.flush();
@@ -266,7 +267,7 @@ public class RealSign_ver_Frame extends AppCompatActivity {
         File[] files = signatureDir.listFiles();
         signatureCnt = 0;
         for (int i = 0; i < files.length; i++) {
-            if (!files[i].getName().contains("unskilled") || !files[i].getName().contains("skilled")) {
+            if (!files[i].getName().contains("unskilled") && !files[i].getName().contains("skilled")) {
                 signatureCnt++;
             }
         }
@@ -301,7 +302,7 @@ public class RealSign_ver_Frame extends AppCompatActivity {
                 });
             }
         };
-        timer.schedule(captureTimerTask, 0, 100);
+        timer.schedule(captureTimerTask, 0, 50);
     }
     // 기록 저장 버튼 클릭 시 스크린 캡처 Timer 종료
     private void iterableCaptureViewSave() {

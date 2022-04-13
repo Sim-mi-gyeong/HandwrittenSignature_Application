@@ -52,6 +52,7 @@ public class ForgerySign_Skilled extends AppCompatActivity {
     private int skilledSignatureCnt;
     private int newSkilledSignatureCnt;
     private File targetSignatureFolder;
+    private Bitmap bitmap;
 
 
     // 타이머 관련 변수
@@ -235,10 +236,10 @@ public class ForgerySign_Skilled extends AppCompatActivity {
 
         // 저장소 영역  ->  위조하는 대상의 디렉토리에 해당 서명 캡처 이미지 저장!!!
 //        final String rootPath = "/storage/self/primary/Pictures/Signature/";
-        signaturePad.destroyDrawingCache();
-        signaturePad.setDrawingCacheEnabled(true);
-        signaturePad.buildDrawingCache();
-        Bitmap bitmap = signaturePad.getDrawingCache();   // Bitmap 가져오기
+        View.destroyDrawingCache();
+        View.setDrawingCacheEnabled(true);
+        View.buildDrawingCache();
+        bitmap = View.getDrawingCache();   // Bitmap 가져오기
 
         FileOutputStream fos;
 
@@ -254,6 +255,7 @@ public class ForgerySign_Skilled extends AppCompatActivity {
         try {
             fos = new FileOutputStream(fileCacheItem, false);
             // 해당 Bitmap 으로 만든 이미지를 png 파일 형태로 만들기
+            bitmap.createBitmap(View.getWidth(), View.getHeight(), Bitmap.Config.ARGB_8888);
             bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos);
             fos.flush();
             fos.close();
