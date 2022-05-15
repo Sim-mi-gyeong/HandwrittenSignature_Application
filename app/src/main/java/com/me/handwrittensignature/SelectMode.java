@@ -21,7 +21,8 @@ public class SelectMode extends AppCompatActivity {
         button1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                Intent intent2 = new Intent(getApplicationContext(), RealSign_ver_Frame.class);
+//                Intent intent2 = new Intent(getApplicationContext(), RealSign_ver_Frame.class);
+                Intent intent2 = new Intent(getApplicationContext(), RealSignMain2.class);
                 intent2.putExtra("text", name);
                 startActivity(intent2);
             }

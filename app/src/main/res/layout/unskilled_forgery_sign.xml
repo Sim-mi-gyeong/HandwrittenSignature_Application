@@ -139,7 +139,8 @@
                     android:layout_height="500dp"
                     android:background="@color/white"
                     android:layout_marginBottom="10dp"
-                    android:layout_weight="1"/>
+                    android:layout_weight="1"
+                    tools:ignore="MissingClass" />
 
             </LinearLayout>
 

@@ -111,7 +111,7 @@ public final class RealSignService extends Service {
 //            startForeground(0, intent, ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PROJECTION);
 //        }
 
-        if (intent == null) {
+        if (intent == null) {   // 인텐트가 null 이면 -> 서비스가 종료되어도 다시 자동으로 실행
             return START_NOT_STICKY;   // 2
         }
 
@@ -128,15 +128,26 @@ public final class RealSignService extends Service {
         final int screenWidth = intent.getIntExtra(ExtraIntent.SCREEN_WIDTH.toString(), 640);
         final int screenHeight = intent.getIntExtra(ExtraIntent.SCREEN_HEIGHT.toString(), 360);
         final int screenDpi = intent.getIntExtra(ExtraIntent.SCREEN_DPI.toString(), 96);
+        final int bitrate = intent.getIntExtra(ExtraIntent.VIDEO_BITRATE.toString(), 1024000);
 
-        Log.i(TAG, "Start Casting with format : " + format + "screen : " + screenWidth + " x " + screenHeight + " @ " + screenDpi);
 
-        startScreenCapture(resultCode, resultData, format, screenWidth, screenHeight, screenDpi);
+        Log.i(TAG, "Start Casting with format : " + format + "screen : " + screenWidth + " x " + screenHeight + " @ " + screenDpi +  " bitrate:" + bitrate);
 
-        return START_STICKY;
+        Thread thread = new Thread(new Runnable() {
+            @Override
+            public void run() {
+                startScreenCapture(resultCode, resultData, format, screenWidth, screenHeight, screenDpi, bitrate);
+            }
+        });
+        thread.start();
+
+//        startScreenCapture(resultCode, resultData, format, screenWidth, screenHeight, screenDpi, bitrate);
+
+//        return START_STICKY;
+        return START_REDELIVER_INTENT;
     }
 
-    private void startScreenCapture(int resultCode, Intent resultData, String format, int screenWidth, int screenHeight, int screenDpi) {
+    private void startScreenCapture(int resultCode, Intent resultData, String format, int screenWidth, int screenHeight, int screenDpi, int bitrate) {
         this.mediaProjection = mpm.getMediaProjection(resultCode, resultData);
 
         Log.d(TAG, "startRecording ... ");
@@ -144,6 +155,7 @@ public final class RealSignService extends Service {
         this.videoBufferInfo = new MediaCodec.BufferInfo();
         MediaFormat mediaFormat = MediaFormat.createVideoFormat(format, screenWidth, screenHeight);
 
+        mediaFormat.setInteger(MediaFormat.KEY_BIT_RATE, bitrate);
         mediaFormat.setInteger(MediaFormat.KEY_FRAME_RATE, FPS);
         mediaFormat.setInteger(MediaFormat.KEY_I_FRAME_INTERVAL, 1);
 //        mediaFormat.setInteger(MediaFormat.KEY_CHANNEL_COUNT, 0);
@@ -173,7 +185,7 @@ public final class RealSignService extends Service {
                                 byte[] b = new byte[outputBuffer.remaining()];
                                 outputBuffer.get(b);
 
-//                                sendData(null, b);
+                                saveData(null, b);
                             }
 
                             if (encoder != null) {
@@ -220,7 +232,7 @@ public final class RealSignService extends Service {
     }
 
     // TODO 비디오 저장 메서드
-   private void saveData() {
+   private void saveData(byte[] header, byte[] data) {
 
     }
 

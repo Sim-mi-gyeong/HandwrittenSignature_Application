@@ -60,7 +60,7 @@ class RecorderService extends IntentService {
 
     @Override
     protected void onHandleIntent(@Nullable Intent intent) {
-        try {
+        try {START_STICKY
             Thread.sleep(5000);
         } catch (InterruptedException e) {
             // Restore interrupt status.
@@ -258,8 +258,10 @@ public class RecorderService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
 
         Log.i(TAG, "Service onStartCommand() is called");
+
         if (intent == null) {
-            return Service.START_STICKY;   // 서비스가 종료되어도 다시 실행 요청
+//            return Service.START_STICKY;   // 서비스가 종료되어도 다시 실행 요청
+            return Service.START_REDELIVER_INTENT;
        }
 
         resultCode = intent.getIntExtra("resultCode", -1);

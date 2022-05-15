@@ -55,6 +55,7 @@ import static android.os.SystemClock.sleep;
 
 
 public class RealSignMain extends AppCompatActivity {
+    private ActivityResultLauncher<Intent> resultLauncher;
 
     private static final String TAG = "RealSignMain";
     public EditText nameText;
@@ -85,7 +86,6 @@ public class RealSignMain extends AppCompatActivity {
     /**
      * 화면 녹화 관련 member object
      */
-//    private MediaProjectionManager mpm;
     private ImageReader mImageReader;
     private ImageReader imageReader;
     private Handler mHandler;
@@ -98,7 +98,6 @@ public class RealSignMain extends AppCompatActivity {
 //    private OrientationChangeCallback mOrientationChangeCallback;
 //    private MediaProjectionStopCallback sMediaProjectionStopCallback;
 
-    private ActivityResultLauncher<Intent> resultLauncher;
     private static final String PREFERENCE_KEY = "default";
 
     private Context context;
@@ -175,7 +174,8 @@ public class RealSignMain extends AppCompatActivity {
 
         this.serviceConnection = new ServiceConnection() {
             @Override
-            public void onServiceConnected(ComponentName nams, IBinder service) {
+            // TODO 서비스에 바인드 되었을 때 호출되는 메서드
+            public void onServiceConnected(ComponentName name, IBinder service) {
                 Log.i(TAG, name + " service is connected");
 
 //                RealSignService.LocalBinder binder=(RealSignService.LocalBinder)service;
@@ -205,6 +205,8 @@ public class RealSignMain extends AppCompatActivity {
                 }
 
             }
+
+            // TODO 서비스를 호스팅하는 프로세스가 중단되거나, 서비스에 연결이 끊어졌을 때 호출되는 메서드
             @Override
             public void onServiceDisconnected(ComponentName name) {
                 Log.i(TAG, name + " service is disconnected");
@@ -220,7 +222,7 @@ public class RealSignMain extends AppCompatActivity {
                     public void onActivityResult(ActivityResult result) {
                         if (result.getResultCode() == RESULT_OK) {
                             Log.e(TAG, "result : " + result);
-                            Intent intent = result.getData();
+//                            Intent intent = result.getData();
                             Log.e(TAG, "intent : " + intent);
                             stateResultCode = result.getResultCode();
                             Log.e(TAG, "stateResultCode : " + stateResultCode);
@@ -229,6 +231,7 @@ public class RealSignMain extends AppCompatActivity {
 
                             Log.d(TAG, "Starting screen capture");
                             startCaptureScreen();
+//                            startService();
 
 //                            int CallType = intent.getIntExtra(STATE_RESULT_CODE, stateResultCode);
 //                            int callType = intent.getIntExtra(ExtraIntent.RESULT_CODE.toString(), -1);
@@ -423,17 +426,6 @@ public class RealSignMain extends AppCompatActivity {
 
     }
 
-    private void startCaptureScreen() {
-        if (stateResultCode != 0 && stateResultData != null) {
-            startService();
-        } else {
-            Log.d(TAG, "Requesting confirmation");
-//            startActivityForResult(mpm.createScreenCaptureIntent(),
-//                    REQUEST_CODE);
-            resultLauncher.launch(mpm.createScreenCaptureIntent());
-        }
-    }
-
     private void stopCaptureScreen() {
         if (serviceMessenger == null) {
             return;
@@ -453,18 +445,21 @@ public class RealSignMain extends AppCompatActivity {
     /**
      * Service 실행 관련 메서드
      */
-
+/*
     @Override
     public void onSaveInstanceState(Bundle outState,  PersistableBundle outPersistentState) {
         super.onSaveInstanceState(outState, outPersistentState);
         outState.putInt(STATE_RESULT_CODE, stateResultCode);
         outState.putParcelable(STATE_RESULT_DATA, stateResultData);
-//        if (stateResultData != null) {
-//        if (stateResultData == null) {
-//            outState.putInt(STATE_RESULT_CODE, stateResultCode);
-//            outState.putParcelable(STATE_RESULT_DATA, stateResultData);
-//        }
-//        super.onSaveInstanceState(outState, outPersistentState);
+    }
+ */
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        if (stateResultData != null) {
+            outState.putInt(STATE_RESULT_CODE, stateResultCode);
+            outState.putParcelable(STATE_RESULT_DATA, stateResultData);
+        }
     }
 
 //    @Override
@@ -482,6 +477,7 @@ public class RealSignMain extends AppCompatActivity {
 //                startCaptureScreen();
 //            }
 //        }
+//    }
 
 //        if (requestCode == REQUEST_CODE) {
 //            if (resultCode == RESULT_OK) {
@@ -492,19 +488,18 @@ public class RealSignMain extends AppCompatActivity {
 //        }
 //    }
 
-
-/*
     private void startCaptureScreen() {
         if (stateResultCode != 0 && stateResultData != null) {
             startService();
         } else {
             Log.d(TAG, "Requesting confirmation");
-            startActivityForResult(
-                    mpm.createScreenCaptureIntent(), REQUEST_CODE);
+//            startActivityForResult(
+//                    mpm.createScreenCaptureIntent(), REQUEST_CODE);
+            mpm.createScreenCaptureIntent().putExtra("REQUEST_CODE", REQUEST_CODE);
+            resultLauncher.launch(mpm.createScreenCaptureIntent());
         }
     }
 
- */
 
     private void startService() {
         Log.i(TAG, "Starting Service");
@@ -532,8 +527,8 @@ public class RealSignMain extends AppCompatActivity {
             intent.putExtra(ExtraIntent.SCREEN_HEIGHT.toString(), screenHeight);
             intent.putExtra(ExtraIntent.SCREEN_DPI.toString(), screenDpi);
 
-            setResult(RESULT_OK, intent);
-            finish();
+//            setResult(RESULT_OK, intent);
+//            finish();
 
         }
 
@@ -544,6 +539,7 @@ public class RealSignMain extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        unbindService();
     }
 
     private void unbindService() {

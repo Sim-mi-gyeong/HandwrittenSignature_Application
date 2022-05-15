@@ -10,5 +10,5 @@ public enum ExtraIntent {
     SCREEN_HEIGHT,
     SCREEN_DPI,
     VIDEO_FORMAT,
-//    VIDEO_BITRATE
+    VIDEO_BITRATE
 }
