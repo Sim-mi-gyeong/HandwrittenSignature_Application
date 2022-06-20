@@ -49,7 +49,7 @@ public class RealSignService2 extends Service {
         private MediaMuxer muxer;
 
         private final String mimeType = MediaFormat.MIMETYPE_VIDEO_MPEG4;
-        private final String videoUrl = Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + "Recorded video2.mp4";
+        private final String videoUrl = Environment.getExternalStorageDirectory().getAbsolutePath() + File.separator + "Recorded video3.mp4";
         private VirtualDisplay virtualDisplay;
         private MediaProjection mediaProjection;
 

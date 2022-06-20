@@ -28,7 +28,7 @@ public class MainActivity extends AppCompatActivity {
             public void onClick(View view) {
 
                 // rootPath 를 Environment.getExternalStorageDirectory() + "/Pictures/"로 하고 이 안에 Signature 폴더가 있는지 확인 후 없으면 생성하도록!
-                // -> MainActivity에 추가
+                // -> MainActivity 에 추가
                 final String rootPath = Environment.getExternalStorageDirectory() + "/Pictures/";
                 File directory = new File(rootPath);
                 File[] files = directory.listFiles();
@@ -44,7 +44,7 @@ public class MainActivity extends AppCompatActivity {
 //                    Toast.makeText(getApplicationContext(), "이미 Signature 폴더가 존재합니.", Toast.LENGTH_SHORT).show();
 //                }
                 if (filesDirList.contains(rootName2)) {
-                    Toast.makeText(getApplicationContext(), "이미 Signature_ver2 폴더가 존재합니.", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getApplicationContext(), "이미 Signature_ver2 폴더가 존재합니다.", Toast.LENGTH_SHORT).show();
                 }
                 else {
                     // Signature 디렉토리 생성

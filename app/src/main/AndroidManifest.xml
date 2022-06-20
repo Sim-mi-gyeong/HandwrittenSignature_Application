@@ -42,6 +42,8 @@
 <!--            tools:ignore="Instantiatable"/>-->
         <activity android:name=".TestMainActivity"/>
 
+        <activity android:name=".RealSign_ver_Record"/>
+
         <service
             android:name=".RealSignService"
             android:enabled="true"
