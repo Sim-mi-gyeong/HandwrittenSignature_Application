@@ -28,7 +28,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="right"
-            android:text="제한시간 : 10 초"
+            android:text="제한시간 : 60 초"
             android:textSize="15sp">
         </TextView>
     </LinearLayout>
@@ -117,8 +117,8 @@
 
             <com.github.gcacace.signaturepad.views.SignaturePad
                 android:id="@+id/signaturePad"
-                android:layout_width="300dp"
-                android:layout_height="300dp"
+                android:layout_width="500dp"
+                android:layout_height="500dp"
                 android:layout_gravity="center"
                 android:layout_marginBottom="10dp"
                 android:background="@color/white" />

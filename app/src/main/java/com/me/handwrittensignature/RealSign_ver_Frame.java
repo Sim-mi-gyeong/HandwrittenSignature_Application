@@ -52,6 +52,7 @@ public class RealSign_ver_Frame extends AppCompatActivity {
 
     private int checkInit = 0;
     private final String rootPath = Environment.getExternalStorageDirectory() + "/Pictures/Signature_ver2/";
+    private String userFolderPath;
     private String strFilePath;
     private int signatureCnt;
     private int newSignatureCnt;
@@ -261,7 +262,7 @@ public class RealSign_ver_Frame extends AppCompatActivity {
         // TODO 사용자 디렉토리 안에 있는 각 서명 디렉토리 파일 리스트 개수 -> 개수 + 1 로 새로운 디렉토리 생성
 
 //        final String rootPath = Environment.getExternalStorageDirectory() + "/Pictures/Signature_ver2/";
-        String userFolderPath = rootPath + name;
+        userFolderPath = rootPath + name;
 
         File signatureDir = new File(userFolderPath);
         File[] files = signatureDir.listFiles();

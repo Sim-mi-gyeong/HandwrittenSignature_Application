@@ -29,7 +29,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_gravity="right"
-            android:text="제한시간 : 10 초"
+            android:text="제한시간 : 60 초"
             android:textSize="15sp">
 
         </TextView>

@@ -25,33 +25,33 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class InputName extends AppCompatActivity {
+
+    private Button confirm_button;
+    private Button start_button;
     private EditText nameText;
     private String pathName;
+    private List<String> filesDirList;   // 등록된 사용자 리스트
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.input_name);
 
-        Button confirm_button = (Button) findViewById(R.id.confirm_button);
-        Button start_button = (Button) findViewById(R.id.start_button);
+        confirm_button = findViewById(R.id.confirm_button);
+        start_button = findViewById(R.id.start_button);
 
-        EditText nameText = (EditText) findViewById(R.id.nameText);
+        nameText = findViewById(R.id.nameText);
 
         start_button.setEnabled(false);
 
         // 내부 저장소 영역
-
-//        final String rootPath = "/storage/self/primary/Pictures/Signature/";
 //        final String rootPath = Environment.getExternalStorageDirectory() + "/Pictures/Signature/";
-        final String rootPath = Environment.getExternalStorageDirectory() + "/Pictures/Signature_ver2/";
+        final String rootPath = Environment.getExternalStorageDirectory() + "/Movies/Signature_ver_Record/";
 
         File directory = new File(rootPath);
 //        File directory = new File(Environment.getExternalStorageDirectory(), "/Pictures");
-//        File directory = new File(Environment.getExternalStorageDirectory().DIRECTORY_PICTURES);
         File[] files = directory.listFiles();
-        List<String> filesDirList = new ArrayList<>();
-
+        filesDirList = new ArrayList<>();
         for (int i=0; i< files.length; i++) {
             filesDirList.add(files[i].getName());
         }

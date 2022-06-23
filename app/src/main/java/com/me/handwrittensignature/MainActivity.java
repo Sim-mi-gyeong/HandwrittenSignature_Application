@@ -16,12 +16,14 @@ import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
+    private Button button;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        Button button = (Button) findViewById(R.id.button);
+        button = findViewById(R.id.button);
 
         button.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -29,7 +31,8 @@ public class MainActivity extends AppCompatActivity {
 
                 // rootPath 를 Environment.getExternalStorageDirectory() + "/Pictures/"로 하고 이 안에 Signature 폴더가 있는지 확인 후 없으면 생성하도록!
                 // -> MainActivity 에 추가
-                final String rootPath = Environment.getExternalStorageDirectory() + "/Pictures/";
+//                final String rootPath = Environment.getExternalStorageDirectory() + "/Pictures/";
+                final String rootPath = Environment.getExternalStorageDirectory() + "/Movies/";
                 File directory = new File(rootPath);
                 File[] files = directory.listFiles();
                 List<String> filesDirList = new ArrayList<>();
@@ -38,23 +41,21 @@ public class MainActivity extends AppCompatActivity {
                     filesDirList.add(files[i].getName());
                 }
 
-                final String rootName = "Signature";
-                final String rootName2 = "Signature_ver2";
+                final String rootName = "Signature_ver_Record";
 //                if (filesDirList.contains(rootName)) {
 //                    Toast.makeText(getApplicationContext(), "이미 Signature 폴더가 존재합니.", Toast.LENGTH_SHORT).show();
 //                }
-                if (filesDirList.contains(rootName2)) {
-                    Toast.makeText(getApplicationContext(), "이미 Signature_ver2 폴더가 존재합니다.", Toast.LENGTH_SHORT).show();
+                if (filesDirList.contains(rootName)) {
+                    Toast.makeText(getApplicationContext(), "이미 Signature_ver_Record 폴더가 존재합니다.", Toast.LENGTH_SHORT).show();
                 }
                 else {
                     // Signature 디렉토리 생성
-//                    String strFolderPath = rootPath + rootName;
-                    String strFolderPath = rootPath + rootName2;
+                    String strFolderPath = rootPath + rootName;
                     File folder = new File(strFolderPath);
                     try {
                         folder.mkdir();   //폴더 생성
 //                        Toast.makeText(getApplicationContext(), "Signature 폴더 생성", Toast.LENGTH_SHORT).show();
-                        Toast.makeText(getApplicationContext(), "Signature_ver2 폴더 생성", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getApplicationContext(), "Signature_ver_Record 폴더 생성", Toast.LENGTH_SHORT).show();
                     } catch (Exception e) {
                         e.getStackTrace();
                     }
