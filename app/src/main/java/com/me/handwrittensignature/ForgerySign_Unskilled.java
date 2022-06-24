@@ -1,22 +1,36 @@
 package com.me.handwrittensignature;
 // ForgerySign_Unskilled
+import android.Manifest;
+import android.content.ContentResolver;
+import android.content.ContentValues;
+import android.content.Context;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.media.MediaScannerConnection;
+import android.media.projection.MediaProjectionManager;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
+import android.provider.MediaStore;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import androidx.annotation.DrawableRes;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 
 import com.bumptech.glide.Glide;
 import com.github.gcacace.signaturepad.views.SignaturePad;
@@ -24,20 +38,35 @@ import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
+import com.hbisoft.hbrecorder.HBRecorder;
+import com.hbisoft.hbrecorder.HBRecorderListener;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Locale;
 import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
 
 import static android.os.SystemClock.sleep;
 
-public class ForgerySign_Unskilled extends AppCompatActivity {
+public class ForgerySign_Unskilled extends AppCompatActivity implements HBRecorderListener {
+
+    private static final int SCREEN_RECORD_REQUEST_CODE = 100;
+    private static final int PERMISSION_REQ_ID_RECORD_AUDIO = 101;
+    private static final int PERMISSION_REQ_ID_WRITE_EXTERNAL_STORAGE = 102;
+    HBRecorder hbRecorder;
+    boolean hasPermissions;
+    ContentValues contentValues;
+    ContentResolver resolver;
+    Uri mUri;
 
     private SignaturePad signaturePad;
     private int countNum = 0;   // 등록된 사용자 서명 횟수
@@ -47,25 +76,19 @@ public class ForgerySign_Unskilled extends AppCompatActivity {
     private String targetFile;
     private String pass_targetName;
 
-    private int checkInit = 0;
-    private final String rootPath = Environment.getExternalStorageDirectory() + "/Pictures/Signature_ver2/";
+    private final String rootPath = Environment.getExternalStorageDirectory() + "/Movies/Signature_ver_Record/";
+    private String userFolderPath;
     private String strFilePath;
     private String targetSignature;
     private String targetSignaturePath;
-    private int unskilledSignatureCnt;
-    private int newUnskilledSignatureCnt;
-    private String targetSignatureFolderPath;
-    private File targetSignatureFolder;
     private String targetPath;
     private Bitmap bitmap;
 
     // 타이머 관련 변수
     TimerTask timerTask;
     Timer timer = new Timer();
-    private int timeLimit = 10;   // 제한 시간 설정
+    private int timeLimit = 60;   // 제한 시간 설정
     TextView timerText;
-
-    TimerTask captureTimerTask;
 
     ImageView iv;
 
@@ -92,6 +115,14 @@ public class ForgerySign_Unskilled extends AppCompatActivity {
 
         signaturePad = (SignaturePad) findViewById(R.id.signaturePad);
         signaturePad.setEnabled(false);
+
+        hbRecorder = new HBRecorder(this, this);
+        hbRecorder.enableCustomSettings();
+        hbRecorder.setScreenDimensions(signaturePad.getMeasuredHeight(), signaturePad.getMeasuredWidth());
+        Log.d("signaturePad Size : ", signaturePad.getHeight() + "  " + signaturePad.getWidth());
+
+        hbRecorder.setOutputPath(targetSignaturePath);
+        hbRecorder.setFileName(targetName + "_skilled_forgery_"  + System.currentTimeMillis());
 
         signaturePad.setOnSignedListener(new SignaturePad.OnSignedListener() {
 
@@ -137,6 +168,8 @@ public class ForgerySign_Unskilled extends AppCompatActivity {
         });
 
         startButton.setOnClickListener(new View.OnClickListener() {
+
+            @RequiresApi(api = Build.VERSION_CODES.M)
             @Override
             public void onClick(View v) {
                 signaturePad.setEnabled(true);
@@ -149,10 +182,23 @@ public class ForgerySign_Unskilled extends AppCompatActivity {
 
                 startButton.setEnabled(false);
 
-                createSignatureDir();
-
                 startTimerTask();
-                iterableCaptureView();
+
+                // 권한 체크
+                // 녹화 시작
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    //first check if permissions was granted
+                    if (checkSelfPermission(Manifest.permission.RECORD_AUDIO, PERMISSION_REQ_ID_RECORD_AUDIO) && checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE, PERMISSION_REQ_ID_WRITE_EXTERNAL_STORAGE)) {
+                        hasPermissions = true;
+                    }
+                    if (hasPermissions) {
+
+                        startRecordingScreen();
+
+                    }
+                } else {
+                    //showLongToast("This library requires API 21>");
+                }
 
             }
 
@@ -162,23 +208,16 @@ public class ForgerySign_Unskilled extends AppCompatActivity {
             @Override
             public void onClick(View v) {
 
-//                captureView(signaturePad);
+                // 영상 저장
+                hbRecorder.setFileName(targetName + "_unskilled_forgery_" + System.currentTimeMillis());
+                hbRecorder.stopScreenRecording();
 
                 countNum += 1;
 
                 countText.setText((countNum + "/" + countComplete).toString());
                 Toast.makeText(ForgerySign_Unskilled.this, "Signature Saved", Toast.LENGTH_SHORT).show();
 
-                iterableCaptureViewSave();
-
-                new Handler().postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        signaturePad.clear();
-                    }
-                }, 100);
-
-
+                signaturePad.clear();
                 signaturePad.setEnabled(false);
 
                 sleep(1000);
@@ -210,63 +249,32 @@ public class ForgerySign_Unskilled extends AppCompatActivity {
         });
 
         clearButton.setOnClickListener(new View.OnClickListener() {
+
+            @RequiresApi(api = Build.VERSION_CODES.M)
             @Override
             public void onClick(View v) {
                 signaturePad.clear();
                 saveButton.setEnabled(true);
                 clearButton.setEnabled(true);
 
-                checkInit = 1;
-                /**
-                 * clearButton 클릭 이벤트 발생 시 이미지 캡처 - init 표시 후에는 init 표시 제거되도록
-                 * clearButton 을 누른 순간 -> initCheck = 0 -> 0.1초(특정 시간) delay 후 initCheck = 1 상태로 돌리기
-                 */
-                new Handler().postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                        checkInit = 0;
+                // TODO 초기화 시 이전 녹화 영상을 저장하지 않고 다시 녹화 시작
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+                    //first check if permissions was granted
+                    if (checkSelfPermission(Manifest.permission.RECORD_AUDIO, PERMISSION_REQ_ID_RECORD_AUDIO) && checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE, PERMISSION_REQ_ID_WRITE_EXTERNAL_STORAGE)) {
+                        hasPermissions = true;
                     }
-                }, 100);
+                    if (hasPermissions) {
+                        startRecordingScreen();
+                    }
+                } else {
+                    //showLongToast("This library requires API 21>");
+                }
+
             }
         });
 
     }
 
-    public void captureView(View View) {
-        Intent intent = getIntent();   // 전달한 데이터를 받을 Intent
-        name = intent.getStringExtra("text");
-
-        // 저장소 영역  ->  위조하는 대상의 디렉토리에 해당 서명 캡처 이미지 저장!!!
-//        final String rootPath = "/storage/self/primary/Pictures/Signature/";
-        View.destroyDrawingCache();
-        View.setDrawingCacheEnabled(true);
-        View.buildDrawingCache();
-        bitmap = signaturePad.getDrawingCache();   // Bitmap 가져오기
-
-        FileOutputStream fos;
-
-        // TODO 위조 서명이 저장될 경로는, 위조 대상의 디렉토리 내 생성된 unskiiled 표시가 붙은 디렉토리 => targetSignaturePath
-        if (checkInit == 0) {
-            strFilePath = targetSignatureFolderPath + "/" + targetName + '_' + "unskilled_forgery_" + System.currentTimeMillis() + ".png";   // strFilePath: 이미지 저장 경로
-        } else {
-            strFilePath = targetSignatureFolderPath + "/" + targetName + '_' + "unskilled_forgery_" + System.currentTimeMillis() + "_init_" + ".png";   // strFilePath: 이미지 저장 경로
-        }
-
-        File fileCacheItem = new File(strFilePath);
-
-        try {
-            fos = new FileOutputStream(fileCacheItem, false);
-            bitmap.createBitmap(View.getWidth(), View.getHeight(), Bitmap.Config.ARGB_8888);
-            // 해당 Bitmap 으로 만든 이미지를 png 파일 형태로 만들기
-            bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos);
-            fos.flush();
-            fos.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-            Toast.makeText(getApplicationContext(), "스크린샷 저장 실패", Toast.LENGTH_SHORT).show();
-        }
-
-    }
     /**
      * 위조 대상의 서명 데이터를 가져올 메서드 - targetFile = 위조 대상의 서명 이미지 경로(String)
      */
@@ -296,78 +304,16 @@ public class ForgerySign_Unskilled extends AppCompatActivity {
         }
 
         for (int i = 0; i < targetPathFolderList.size(); i++) {
-            if (targetPathFolderList.get(i).contains("unskilled") || targetPathFolderList.get(i).contains("skilled")) {
-                targetPathFolderList.remove(targetPathFolderList.get(i));   // 위조 대상의 실제 서명 디렉토리들만 남기기
+            if (targetPathFolderList.get(i).contains("unskilled") || targetPathFolderList.get(i).contains("skilled") ||targetPathFolderList.get(i).contains("mp4") ) {
+                targetPathFolderList.remove(targetPathFolderList.get(i));   // 위조 대상의 실제 서명 이미지들만 남기기
             }
         }
 
-        // 위조 대상의 실제 서명 디렉토리 중 랜덤 선택
+        // TODO 위조할 타겟 대상의 디렉토리 내 서명 - unskilled or skilled 문자열 미포함 -> png 파일 중 랜덤 선택
         int idx2 = new Random().nextInt(targetPathFolderList.size());
         targetSignature = targetPathFolderList.get(idx2);
         targetSignaturePath = targetPath + "/" + targetSignature;
 
-        // 위조할 서명 프레임들이 저장된 디렉토리 내에서 가장 마지막에서 두 번째 이미지 선택
-        File targetSignatureFiles = new File(targetSignaturePath);
-        File[] targetSignatureFrame = targetSignatureFiles.listFiles();
-        List<String> targetSignatureFrameList = new ArrayList<>();
-
-        for (int i = 0; i < targetSignatureFrame.length; i++) {
-            targetSignatureFrameList.add(targetSignatureFrame[i].getName());
-        }
-//        targetFile = targetSignatureFrameList.get(-1);   // Java 는 이렇게 안 쓴다,, Python 만 이렇게 쓴다,,
-        targetFile = targetSignatureFrameList.get(targetSignatureFrameList.size()-1);
-
-    }
-
-
-    /**
-     * 각 서명 하나의 프레임들이 저장될 디렉토리 생성 메서드
-     */
-    private void createSignatureDir() {
-        //TODO targetName 디렉토리 내에, unskilled 가 붙은 서명 디렉토리 개수 + 1 로 새로운 디렉토리 생성
-        File unskilledSignatureDir = new File(targetPath);
-        File[] files = unskilledSignatureDir.listFiles();
-        unskilledSignatureCnt = 0;
-        for (int i = 0; i < files.length; i++) {
-            if (files[i].getName().contains("unskilled")) {   // skilled 위조 서명의 경우, 이름에 skilled 포함 여부 체크 + unskilled 는 포함되지 않도록 => 2개 조건 검사
-                unskilledSignatureCnt++;
-            }
-        }
-        newUnskilledSignatureCnt = unskilledSignatureCnt + 1;
-        targetSignatureFolderPath = targetPath + "/" + targetName + "_unskilled_forgery_" + String.valueOf(newUnskilledSignatureCnt);
-        targetSignatureFolder = new File(targetSignatureFolderPath);
-        try {
-            targetSignatureFolder.mkdir();
-            Toast.makeText(getApplicationContext(), "위조 서명 폴더 생성", Toast.LENGTH_SHORT).show();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
-
-    /**
-     * captureView() 메서드를 반복해서 처리할 핸들러 구현
-     */
-    private void iterableCaptureView() {
-        iterableCaptureViewSave();
-        captureTimerTask = new TimerTask() {
-            @Override
-            public void run() {
-                signaturePad.post(new Runnable() {
-                    @Override
-                    public void run() {
-                        captureView(signaturePad);
-                    }
-                });
-            }
-        };
-        timer.schedule(captureTimerTask, 0, 100);
-    }
-
-    private void iterableCaptureViewSave() {
-        if (captureTimerTask != null) {
-            captureTimerTask.cancel();
-            captureTimerTask = null;
-        }
     }
 
     /**
@@ -399,7 +345,7 @@ public class ForgerySign_Unskilled extends AppCompatActivity {
 
     private void stopTimerTask() {
         if (timerTask != null) {
-            timeLimit = 10;
+            timeLimit = 60;
             timerText.setText("제한시간 : " + timeLimit + " 초");
             timerTask.cancel();
             timerTask = null;
@@ -412,10 +358,138 @@ public class ForgerySign_Unskilled extends AppCompatActivity {
             timerText.setText("제한시간 : " + timeLimit + " 초");
             timerTask.cancel();
             timerTask = null;
-            timeLimit = 10;
+            timeLimit = 60;
 
         }
 
+    }
+
+    @Override
+    public void HBRecorderOnStart() {
+        Toast.makeText(this, "Started", Toast.LENGTH_SHORT).show();
+    }
+
+    @Override
+    public void HBRecorderOnComplete() {
+        Toast.makeText(this, "Completed", Toast.LENGTH_SHORT).show();
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            //Update gallery depending on SDK Level
+            if (hbRecorder.wasUriSet()) {
+                updateGalleryUri();
+            } else{
+                refreshGalleryFile();
+            }
+        }
+    }
+
+    @Override
+    public void HBRecorderOnError(int errorCode, String reason) {
+        Toast.makeText(this, errorCode+": "+reason, Toast.LENGTH_SHORT).show();
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.M)
+    private void startRecordingScreen() {
+        MediaProjectionManager mediaProjectionManager = (MediaProjectionManager) getSystemService(Context.MEDIA_PROJECTION_SERVICE);
+        Intent permissionIntent = mediaProjectionManager != null ? mediaProjectionManager.createScreenCaptureIntent() : null;
+        startActivityForResult(permissionIntent, SCREEN_RECORD_REQUEST_CODE);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == SCREEN_RECORD_REQUEST_CODE) {
+            if (resultCode == RESULT_OK) {
+                //Start screen recording
+                hbRecorder.startScreenRecording(data, resultCode, this);
+
+            }
+        }
+    }
+
+    //For Android 10> we will pass a Uri to HBRecorder
+    //This is not necessary - You can still use getExternalStoragePublicDirectory
+    //But then you will have to add android:requestLegacyExternalStorage="true" in your Manifest
+    //IT IS IMPORTANT TO SET THE FILE NAME THE SAME AS THE NAME YOU USE FOR TITLE AND DISPLAY_NAME
+
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+    private void setOutputPath() {
+
+        String filename = generateFileName();
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+            resolver = getContentResolver();
+            contentValues = new ContentValues();
+            contentValues.put(MediaStore.Video.Media.RELATIVE_PATH, "SpeedTest/" + "SpeedTest");
+            contentValues.put(MediaStore.Video.Media.TITLE, filename);
+            contentValues.put(MediaStore.MediaColumns.DISPLAY_NAME, filename);
+            contentValues.put(MediaStore.MediaColumns.MIME_TYPE, "video/mp4");
+            mUri = resolver.insert(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, contentValues);
+            //FILE NAME SHOULD BE THE SAME
+            hbRecorder.setFileName(filename);
+            hbRecorder.setOutputUri(mUri);
+        } else{
+            createFolder();
+            hbRecorder.setOutputPath(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES) +"/HBRecorder");
+        }
+    }
+
+    //Check if permissions was granted
+    private boolean checkSelfPermission(String permission, int requestCode) {
+        if (ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
+            ActivityCompat.requestPermissions(this, new String[]{permission}, requestCode);
+            return false;
+        }
+        return true;
+    }
+
+    private void updateGalleryUri(){
+        contentValues.clear();
+        contentValues.put(MediaStore.Video.Media.IS_PENDING, 0);
+        getContentResolver().update(mUri, contentValues, null, null);
+    }
+
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
+    private void refreshGalleryFile() {
+        MediaScannerConnection.scanFile(this,
+                new String[]{hbRecorder.getFilePath()}, null,
+                new MediaScannerConnection.OnScanCompletedListener() {
+                    public void onScanCompleted(String path, Uri uri) {
+                        Log.i("ExternalStorage", "Scanned " + path + ":");
+                        Log.i("ExternalStorage", "-> uri=" + uri);
+                    }
+                });
+    }
+
+    // Generate a timestamp to be used as a file name
+    private String generateFileName() {
+
+        userFolderPath = rootPath + name;
+
+        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss", Locale.getDefault());
+        Date curDate = new Date(System.currentTimeMillis());
+
+        return formatter.format(curDate).replace(" ", "");
+
+    }
+
+    // drawable to byte[]
+    private byte[] drawable2ByteArray(@DrawableRes int drawableId) {
+        Bitmap icon = BitmapFactory.decodeResource(getResources(), drawableId);
+        ByteArrayOutputStream stream = new ByteArrayOutputStream();
+        icon.compress(Bitmap.CompressFormat.PNG, 100, stream);
+        return stream.toByteArray();
+    }
+
+    //Create Folder
+    //Only call this on Android 9 and lower (getExternalStoragePublicDirectory is deprecated)
+    //This can still be used on Android 10> but you will have to add android:requestLegacyExternalStorage="true" in your Manifest
+    private void createFolder() {
+        File f1 = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES), "SpeedTest");
+        if (!f1.exists()) {
+            if (f1.mkdirs()) {
+                Log.i("Folder ", "created");
+            }
+        }
     }
 
 }

@@ -39,6 +39,7 @@ import java.util.List;
 import java.util.Random;
 
 public class ForgerySign_Skilled_Practice extends AppCompatActivity {
+
     private TextView modeText;
     private SignaturePad signaturePad;
     ImageView iv;
@@ -46,12 +47,10 @@ public class ForgerySign_Skilled_Practice extends AppCompatActivity {
     public static String targetName;
     public static String targetFile;
 
-    private final String rootPath = Environment.getExternalStorageDirectory() + "/Pictures/Signature_ver2/";
+    private final String rootPath = Environment.getExternalStorageDirectory() + "/Movies/Signature_ver_Record/";
     private String targetPath;   // 위조할 대상의 디렉토리
-    private String targetSignature;   // 위조 대상의 실제 서명 디렉토리 중 랜덤 선택된 서명 디렉토리
-    private String targetSignaturePath;   // 위조 대상의 실제 서명 디렉토리 중 랜덤 선택된 서명 디렉토리 경로
-    private String targetSignatureFolderPath;   // 위조 대상의 실제 서명 디렉토리 중 랜덤 선택된 서명 파일(최종) 경로 => 기록 부분으로 넘겨주기
-
+    private String targetSignature;   // 위조 대상의 실제 서명 디렉토리 중 랜덤 선택된 서명
+    private String targetSignaturePath;   // 위조 대상의 실제 서명 디렉토리 중 랜덤 선택된 서명 이미지 경로 => 기록 부분으로 넘겨주기
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -147,17 +146,17 @@ public class ForgerySign_Skilled_Practice extends AppCompatActivity {
                 intent2.putExtra("text", name);
                 intent2.putExtra("targetName", targetName);
                 intent2.putExtra("targetPath", targetPath);
-                intent2.putExtra("targetSignatureFolderPath", targetSignatureFolderPath);
+                intent2.putExtra("targetSignaturePath", targetSignaturePath);
                 startActivity(intent2);
             }
         });
 
     }
+
     /**
-     * 위조 대상의 서명 데이터를 가져올 메서드 - targetSignaturePath(위조 대상의 서명 이미지 디렉토리) + targetFile(위조 대상의 서명 이미지 이름(String))
+     * 위조 대상의 서명 데이터를 가져올 메서드 - targetFile = 위조 대상의 서명 이미지 경로(String)
      */
     private void loadTargetSignature() {
-
         File directory = new File(rootPath);
         File[] files = directory.listFiles();   // ~/Signature_ver2 디렉토리 내 파일 목록
         List<String> filesDirList = new ArrayList<>();
@@ -183,28 +182,15 @@ public class ForgerySign_Skilled_Practice extends AppCompatActivity {
         }
 
         for (int i = 0; i < targetPathFolderList.size(); i++) {
-            if (targetPathFolderList.get(i).contains("unskilled") || targetPathFolderList.get(i).contains("skilled")) {
-                targetPathFolderList.remove(targetPathFolderList.get(i));   // 위조 대상의 실제 서명 디렉토리들만 남기기
+            if (targetPathFolderList.get(i).contains("unskilled") || targetPathFolderList.get(i).contains("skilled") ||targetPathFolderList.get(i).contains("mp4") ) {
+                targetPathFolderList.remove(targetPathFolderList.get(i));   // 위조 대상의 실제 서명 이미지들만 남기기
             }
         }
 
-        // 위조 대상의 실제 서명 디렉토리 중 랜덤 선택
+        // TODO 위조할 타겟 대상의 디렉토리 내 서명 - unskilled or skilled 문자열 미포함 -> png 파일 중 랜덤 선택
         int idx2 = new Random().nextInt(targetPathFolderList.size());
         targetSignature = targetPathFolderList.get(idx2);
         targetSignaturePath = targetPath + "/" + targetSignature;
-
-        // 위조할 서명 프레임들이 저장된 디렉토리 내에서 가장 마지막에서 두 번째 이미지 선택
-        File targetSignatureFiles = new File(targetSignaturePath);
-        File[] targetSignatureFrame = targetSignatureFiles.listFiles();
-        List<String> targetSignatureFrameList = new ArrayList<>();
-
-        for (int i = 0; i < targetSignatureFrame.length; i++) {
-            targetSignatureFrameList.add(targetSignatureFrame[i].getName());
-        }
-
-        targetFile = targetSignatureFrameList.get(targetSignatureFrameList.size()-1);
-
-        targetSignatureFolderPath = targetSignaturePath + "/" + targetFile;
 
     }
 

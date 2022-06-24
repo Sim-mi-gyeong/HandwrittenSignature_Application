@@ -161,7 +161,6 @@ public class RealSign_ver_Record extends AppCompatActivity implements HBRecorder
                         hasPermissions = true;
                     }
                     if (hasPermissions) {
-
                         startRecordingScreen();
 
                     }
