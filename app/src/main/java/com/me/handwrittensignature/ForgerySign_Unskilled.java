@@ -77,6 +77,7 @@ public class ForgerySign_Unskilled extends AppCompatActivity implements HBRecord
     private String pass_targetName;
 
     private final String rootPath = Environment.getExternalStorageDirectory() + "/Movies/Signature_ver_Record/";
+    private final String rootImagePath = Environment.getExternalStorageDirectory() + "/Pictures/Signature_ver_Record/";
     private String userFolderPath;
     private String strFilePath;
     private String targetSignature;

@@ -76,6 +76,7 @@ public class ForgerySign_Skilled extends AppCompatActivity implements HBRecorder
 
     private int checkInit = 0;
     private final String rootPath = Environment.getExternalStorageDirectory() + "/Movies/Signature_ver_Record/";
+    private final String rootImagePath = Environment.getExternalStorageDirectory() + "/Pictures/Signature_ver_Record/";
     private String strFilePath;
     private String targetPath;
     private String targetSignaturePath;   // intent 로 practice 에서 전달받기

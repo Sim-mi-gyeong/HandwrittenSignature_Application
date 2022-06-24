@@ -64,8 +64,8 @@ public class RealSign_ver_Record extends AppCompatActivity implements HBRecorder
     private TextView nameView;
     private Uri filePath;
 
-    private int checkInit = 0;
     private final String rootPath = Environment.getExternalStorageDirectory() + "/Movies/Signature_ver_Record/";
+    private final String rootImagePath = Environment.getExternalStorageDirectory() + "/Pictures/Signature_ver_Record/";
     private String userFolderPath;
     private String strFilePath;
     private int signatureCnt;
@@ -79,9 +79,6 @@ public class RealSign_ver_Record extends AppCompatActivity implements HBRecorder
     Timer timer = new Timer();
     private int timeLimit = 60;   // 제한 시간 설정
     TextView timerText;
-
-    TimerTask captureTimerTask;
-    TimerTask initTimerTask;
 
     Handler handler = new Handler();
 
@@ -261,8 +258,7 @@ public class RealSign_ver_Record extends AppCompatActivity implements HBRecorder
 
         FileOutputStream fos;
 
-        // TODO 위조 서명이 저장될 경로는, 위조 대상의 디렉토리 내 생성된 unskiiled 표시가 붙은 디렉토리 => targetSignaturePath
-        strFilePath = rootPath + "/" + name + System.currentTimeMillis() + ".png";
+        strFilePath = userFolderPath + "/" + name + "_" + System.currentTimeMillis() + ".png";
 
         File fileCacheItem = new File(strFilePath);
 
