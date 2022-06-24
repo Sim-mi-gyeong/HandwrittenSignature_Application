@@ -35,6 +35,8 @@ import com.hbisoft.hbrecorder.HBRecorderListener;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
@@ -88,9 +90,6 @@ public class RealSign_ver_Record extends AppCompatActivity implements HBRecorder
         super.onCreate(savedInstanceState);
         setContentView(R.layout.real_sign);
 
-        hbRecorder = new HBRecorder(this, this);
-        hbRecorder.enableCustomSettings();
-
         Button startButton = (Button)findViewById(R.id.button_start);
         Button saveButton = (Button)findViewById(R.id.button_save);
         Button clearButton = (Button)findViewById(R.id.button_clear);
@@ -104,15 +103,20 @@ public class RealSign_ver_Record extends AppCompatActivity implements HBRecorder
 
         Intent intent = getIntent(); // 전달한 데이터를 받을 Intent
         name = intent.getStringExtra("text");
+        nameView.setText(name);
+
+        signaturePad = (SignaturePad) findViewById(R.id.signaturePad);
+        signaturePad.setEnabled(false);
+
+        hbRecorder = new HBRecorder(this, this);
+        hbRecorder.enableCustomSettings();
+        hbRecorder.setScreenDimensions(signaturePad.getMeasuredHeight(), signaturePad.getMeasuredWidth());
+        Log.d("signaturePad Size : ", signaturePad.getHeight() + "  " + signaturePad.getWidth());
 
         userFolderPath = rootPath + name;
         hbRecorder.setOutputPath(userFolderPath);
         hbRecorder.setFileName(name + "_" + System.currentTimeMillis());
 
-        nameView.setText(name);
-
-        signaturePad = (SignaturePad) findViewById(R.id.signaturePad);
-        signaturePad.setEnabled(false);
 
         signaturePad.setOnSignedListener(new SignaturePad.OnSignedListener() {
 
@@ -174,6 +178,8 @@ public class RealSign_ver_Record extends AppCompatActivity implements HBRecorder
             @Override
             public void onClick(View v) {
 
+                captureView(signaturePad);
+
                 // 영상 저장
                 hbRecorder.setFileName(name + "_" + System.currentTimeMillis());
                 hbRecorder.stopScreenRecording();
@@ -232,9 +238,7 @@ public class RealSign_ver_Record extends AppCompatActivity implements HBRecorder
                         hasPermissions = true;
                     }
                     if (hasPermissions) {
-
                         startRecordingScreen();
-
                     }
                 } else {
                     //showLongToast("This library requires API 21>");
@@ -242,6 +246,38 @@ public class RealSign_ver_Record extends AppCompatActivity implements HBRecorder
 
             }
         });
+
+    }
+
+    public void captureView(View View) {
+
+        Intent intent = getIntent();   // 전달한 데이터를 받을 Intent
+        name = intent.getStringExtra("text");
+
+        // 저장소 영역  ->  위조하는 대상의 디렉토리에 해당 서명 캡처 이미지 저장!!!
+        View.destroyDrawingCache();
+        View.setDrawingCacheEnabled(true);
+        View.buildDrawingCache();
+        bitmap = signaturePad.getDrawingCache();   // Bitmap 가져오기
+
+        FileOutputStream fos;
+
+        // TODO 위조 서명이 저장될 경로는, 위조 대상의 디렉토리 내 생성된 unskiiled 표시가 붙은 디렉토리 => targetSignaturePath
+        strFilePath = rootPath + "/" + name + System.currentTimeMillis() + ".png";
+
+        File fileCacheItem = new File(strFilePath);
+
+        try {
+            fos = new FileOutputStream(fileCacheItem, false);
+            bitmap.createBitmap(View.getWidth(), View.getHeight(), Bitmap.Config.ARGB_8888);
+            // 해당 Bitmap 으로 만든 이미지를 png 파일 형태로 만들기
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos);
+            fos.flush();
+            fos.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+            Toast.makeText(getApplicationContext(), "스크린샷 저장 실패", Toast.LENGTH_SHORT).show();
+        }
 
     }
 
@@ -293,7 +329,6 @@ public class RealSign_ver_Record extends AppCompatActivity implements HBRecorder
         }
 
     }
-
 
     @Override
     public void HBRecorderOnStart() {
