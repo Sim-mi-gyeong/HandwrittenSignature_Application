@@ -56,22 +56,16 @@ public class RealSign_ver_Record extends AppCompatActivity implements HBRecorder
     ContentResolver resolver;
     Uri mUri;
 
-    public EditText nameText;
     private SignaturePad signaturePad;
     private int countNum = 0;   // 등록된 사용자 서명 횟수
     private int countComplete = 20;   // 실제 서명으로 등록할 횟수
     private String name;
     private TextView nameView;
-    private Uri filePath;
 
-    private final String rootPath = Environment.getExternalStorageDirectory() + "/Movies/Signature_ver_Record/";
-    private final String rootImagePath = Environment.getExternalStorageDirectory() + "/Pictures/Signature_ver_Record/";
-    private String userFolderPath;
-    private String strFilePath;
-    private int signatureCnt;
-    private int newSignatureCnt;
-    private String signatureFolderPath;
-    private File signatureFolder;
+    private final String videoRootPath = Environment.getExternalStorageDirectory() + "/Movies/Signature_ver_Record/";
+    private final String imageRootPath = Environment.getExternalStorageDirectory() + "/Pictures/Signature_ver_Record/";
+    private String userVideoFolderPath, userImageFolderPath;   // 각 사용자의 서명 녹화 영상/이미지 저장 경로
+    private String strFilePath;   // 각 사용자의 서명 이미지 저장 경로 + 파일명
     private Bitmap bitmap;
 
     // 타이머 관련 변수
@@ -87,14 +81,14 @@ public class RealSign_ver_Record extends AppCompatActivity implements HBRecorder
         super.onCreate(savedInstanceState);
         setContentView(R.layout.real_sign);
 
-        Button startButton = (Button)findViewById(R.id.button_start);
-        Button saveButton = (Button)findViewById(R.id.button_save);
-        Button clearButton = (Button)findViewById(R.id.button_clear);
+        Button startButton = findViewById(R.id.button_start);
+        Button saveButton = findViewById(R.id.button_save);
+        Button clearButton = findViewById(R.id.button_clear);
 
-        TextView countText = (TextView)findViewById(R.id.countText);
-        TextView finishText = (TextView)findViewById(R.id.finishText);
-        timerText = (TextView)findViewById(R.id.timerText);
-        TextView nameView = (TextView)findViewById(R.id.nameView);
+        TextView countText = findViewById(R.id.countText);
+        TextView finishText = findViewById(R.id.finishText);
+        timerText = findViewById(R.id.timerText);
+        nameView = findViewById(R.id.nameView);
 
         timerText.setText("제한시간 : " + timeLimit + " 초");
 
@@ -110,8 +104,9 @@ public class RealSign_ver_Record extends AppCompatActivity implements HBRecorder
         hbRecorder.setScreenDimensions(signaturePad.getMeasuredHeight(), signaturePad.getMeasuredWidth());
         Log.d("signaturePad Size : ", signaturePad.getHeight() + "  " + signaturePad.getWidth());
 
-        userFolderPath = rootPath + name;
-        hbRecorder.setOutputPath(userFolderPath);
+        userVideoFolderPath = videoRootPath + name;
+        userImageFolderPath = imageRootPath + name;
+        hbRecorder.setOutputPath(userVideoFolderPath);
         hbRecorder.setFileName(name + "_" + System.currentTimeMillis());
 
 
@@ -159,7 +154,6 @@ public class RealSign_ver_Record extends AppCompatActivity implements HBRecorder
                     }
                     if (hasPermissions) {
                         startRecordingScreen();
-
                     }
                 } else {
                     //showLongToast("This library requires API 21>");
@@ -171,6 +165,7 @@ public class RealSign_ver_Record extends AppCompatActivity implements HBRecorder
 
         // 기록 시작 버튼 누르고 -> 저장버튼 누르면 해당 영역 캡처 사진 저장
         saveButton.setOnClickListener(new View.OnClickListener() {
+
             @Override
             public void onClick(View v) {
 
@@ -213,8 +208,6 @@ public class RealSign_ver_Record extends AppCompatActivity implements HBRecorder
                         }
                     });
                 }
-
-
             }
         });
 
@@ -247,9 +240,6 @@ public class RealSign_ver_Record extends AppCompatActivity implements HBRecorder
 
     public void captureView(View View) {
 
-        Intent intent = getIntent();   // 전달한 데이터를 받을 Intent
-        name = intent.getStringExtra("text");
-
         // 저장소 영역  ->  위조하는 대상의 디렉토리에 해당 서명 캡처 이미지 저장!!!
         View.destroyDrawingCache();
         View.setDrawingCacheEnabled(true);
@@ -258,7 +248,7 @@ public class RealSign_ver_Record extends AppCompatActivity implements HBRecorder
 
         FileOutputStream fos;
 
-        strFilePath = userFolderPath + "/" + name + "_" + System.currentTimeMillis() + ".png";
+        strFilePath = userImageFolderPath + "/" + name + "_" + System.currentTimeMillis() + ".png";
 
         File fileCacheItem = new File(strFilePath);
 
@@ -362,7 +352,6 @@ public class RealSign_ver_Record extends AppCompatActivity implements HBRecorder
             if (resultCode == RESULT_OK) {
                 //Start screen recording
                 hbRecorder.startScreenRecording(data, resultCode, this);
-
             }
         }
     }
@@ -371,7 +360,6 @@ public class RealSign_ver_Record extends AppCompatActivity implements HBRecorder
     //This is not necessary - You can still use getExternalStoragePublicDirectory
     //But then you will have to add android:requestLegacyExternalStorage="true" in your Manifest
     //IT IS IMPORTANT TO SET THE FILE NAME THE SAME AS THE NAME YOU USE FOR TITLE AND DISPLAY_NAME
-
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     private void setOutputPath() {
 
@@ -424,7 +412,7 @@ public class RealSign_ver_Record extends AppCompatActivity implements HBRecorder
     // Generate a timestamp to be used as a file name
     private String generateFileName() {
 
-        userFolderPath = rootPath + name;
+        userVideoFolderPath = videoRootPath + name;
 
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss", Locale.getDefault());
         Date curDate = new Date(System.currentTimeMillis());
