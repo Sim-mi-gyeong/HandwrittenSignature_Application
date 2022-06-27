@@ -30,7 +30,9 @@ public class InputName extends AppCompatActivity {
     private Button start_button;
     private EditText nameText;
     private String pathName;
-    private List<String> filesDirList;   // 등록된 사용자 리스트
+    private List<String> videoFilesDirList, imageFilesDirList;   // 등록된 사용자 리스트
+    private static final String videoRootPath = Environment.getExternalStorageDirectory() + "/Movies/Signature_ver_Record/";
+    private static final String imageRootPath = Environment.getExternalStorageDirectory() + "/Pictures/Signature_ver_Record/";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -44,16 +46,20 @@ public class InputName extends AppCompatActivity {
 
         start_button.setEnabled(false);
 
-        // 내부 저장소 영역
-//        final String rootPath = Environment.getExternalStorageDirectory() + "/Pictures/Signature/";
-        final String rootPath = Environment.getExternalStorageDirectory() + "/Movies/Signature_ver_Record/";
+        File videoDirectory = new File(videoRootPath);
+        File imageDirectory = new File(imageRootPath);
 
-        File directory = new File(rootPath);
-//        File directory = new File(Environment.getExternalStorageDirectory(), "/Pictures");
-        File[] files = directory.listFiles();
-        filesDirList = new ArrayList<>();
-        for (int i=0; i< files.length; i++) {
-            filesDirList.add(files[i].getName());
+        File[] videoFiles = videoDirectory.listFiles();
+        File[] imageFiles = imageDirectory.listFiles();
+
+        videoFilesDirList = new ArrayList<>();
+        imageFilesDirList = new ArrayList<>();
+
+        for (int i = 0; i < videoFiles.length; i++) {
+            videoFilesDirList.add(videoFiles[i].getName());
+        }
+        for (int i = 0; i < imageFiles.length; i++) {
+            imageFilesDirList.add(imageFiles[i].getName());
         }
 
         confirm_button.setOnClickListener(new View.OnClickListener() {
@@ -70,7 +76,7 @@ public class InputName extends AppCompatActivity {
                     nameText.requestFocus();
                 }
                 else {
-                    if (filesDirList.contains(name)) {
+                    if (videoFilesDirList.contains(name) && imageFilesDirList.contains(name)) {
                         Toast.makeText(getApplicationContext(), "이미 등록된 사용자입니다.", Toast.LENGTH_SHORT).show();
                         start_button.setEnabled(true);
 
@@ -78,10 +84,15 @@ public class InputName extends AppCompatActivity {
                         // 아직 등록되지 않은 사용자인 경우
                         Toast.makeText(getApplicationContext(), "아직 등록되지 않은 사용자입니다.", Toast.LENGTH_SHORT).show();
                         // 디렉토리 생성
-                        String strFolderPath = rootPath + name;
-                        File folder = new File(strFolderPath);
+                        String strVideoFolderPath = videoRootPath + name;
+                        String strImageFolderPath = imageRootPath + name;
+
+                        File videoFolder = new File(strVideoFolderPath);
+                        File imageFolder = new File(strImageFolderPath);
+
                         try{
-                            folder.mkdir();   //폴더 생성
+                            videoFolder.mkdir();   //폴더 생성
+                            imageFolder.mkdir();
                             Toast.makeText(getApplicationContext(), "새 폴더 생성", Toast.LENGTH_SHORT).show();
                         }
                         catch(Exception e){
