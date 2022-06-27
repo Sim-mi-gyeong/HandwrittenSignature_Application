@@ -17,6 +17,9 @@ import java.util.List;
 public class MainActivity extends AppCompatActivity {
 
     private Button button;
+    private static final String videoTopRootPath = Environment.getExternalStorageDirectory() + "/Movies/";
+    private static final String imageTopRootPath = Environment.getExternalStorageDirectory() + "/Pictures/";
+    private static final String rootName = "Signature_ver_Record";;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,30 +34,58 @@ public class MainActivity extends AppCompatActivity {
 
                 // rootPath 를 Environment.getExternalStorageDirectory() + "/Pictures/"로 하고 이 안에 Signature 폴더가 있는지 확인 후 없으면 생성하도록!
                 // -> MainActivity 에 추가
-//                final String rootPath = Environment.getExternalStorageDirectory() + "/Pictures/";
-                final String rootPath = Environment.getExternalStorageDirectory() + "/Movies/";
-                File directory = new File(rootPath);
-                File[] files = directory.listFiles();
-                List<String> filesDirList = new ArrayList<>();
+                File videoDirectory = new File(videoTopRootPath);
+                File imageDirectory = new File(imageTopRootPath);
 
-                for (int i=0; i< files.length; i++) {
-                    filesDirList.add(files[i].getName());
+                File[] videoFiles = videoDirectory.listFiles();
+                File[] imageFiles = imageDirectory.listFiles();
+
+                List<String> videoFilesDirList = new ArrayList<>();
+                List<String> imageFilesDirList = new ArrayList<>();
+
+                for (int i = 0; i < videoFiles.length; i++) {
+                    videoFilesDirList.add(videoFiles[i].getName());
+                }
+                for (int i = 0; i < imageFiles.length; i++) {
+                    imageFilesDirList.add(imageFiles[i].getName());
                 }
 
-                final String rootName = "Signature_ver_Record";
-//                if (filesDirList.contains(rootName)) {
-//                    Toast.makeText(getApplicationContext(), "이미 Signature 폴더가 존재합니.", Toast.LENGTH_SHORT).show();
-//                }
-                if (filesDirList.contains(rootName)) {
+                if (videoFilesDirList.contains(rootName) && imageFilesDirList.contains(rootName)) {
                     Toast.makeText(getApplicationContext(), "이미 Signature_ver_Record 폴더가 존재합니다.", Toast.LENGTH_SHORT).show();
-                }
-                else {
-                    // Signature 디렉토리 생성
-                    String strFolderPath = rootPath + rootName;
-                    File folder = new File(strFolderPath);
+
+                } else if (!videoFilesDirList.contains(rootName) && imageFilesDirList.contains(rootName)) {
+
+                    String strVideoFolderPath = videoTopRootPath + rootName;
+                    File videoFolder = new File(strVideoFolderPath);
+
                     try {
-                        folder.mkdir();   //폴더 생성
-//                        Toast.makeText(getApplicationContext(), "Signature 폴더 생성", Toast.LENGTH_SHORT).show();
+                        videoFolder.mkdir();
+                    } catch (Exception e) {
+                        e.getStackTrace();
+                    }
+
+                } else if (videoFilesDirList.contains(rootName) && !imageFilesDirList.contains(rootName)) {
+
+                    String strImageFolderPath = imageTopRootPath + rootName;
+                    File imageFolder = new File(strImageFolderPath);
+
+                    try {
+                        imageFolder.mkdir();
+                    } catch (Exception e) {
+                        e.getStackTrace();
+                    }
+
+                } else {
+
+                    String strVideoFolderPath = videoTopRootPath + rootName;
+                    String strImageFolderPath = imageTopRootPath + rootName;
+
+                    File videoFolder = new File(strVideoFolderPath);
+                    File imageFolder = new File(strImageFolderPath);
+
+                    try {
+                        videoFolder.mkdir();
+                        imageFolder.mkdir();
                         Toast.makeText(getApplicationContext(), "Signature_ver_Record 폴더 생성", Toast.LENGTH_SHORT).show();
                     } catch (Exception e) {
                         e.getStackTrace();
