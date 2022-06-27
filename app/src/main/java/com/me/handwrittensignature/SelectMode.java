@@ -9,6 +9,9 @@ import android.widget.Button;
 import androidx.appcompat.app.AppCompatActivity;
 
 public class SelectMode extends AppCompatActivity {
+
+    private Button button1, button2;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -17,11 +20,10 @@ public class SelectMode extends AppCompatActivity {
         Intent intent = getIntent(); // 전달한 데이터를 받을 Intent
         String name = intent.getStringExtra("text");
 
-        Button button1 = (Button) findViewById(R.id.button1);
+        button1 = findViewById(R.id.button1);
         button1.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-//                Intent intent2 = new Intent(getApplicationContext(), RealSign_ver_Frame.class);
                 Intent intent2 = new Intent(getApplicationContext(), RealSign_ver_Record.class);
 
                 intent2.putExtra("text", name);
@@ -29,7 +31,7 @@ public class SelectMode extends AppCompatActivity {
             }
         });
 
-        Button button2 = (Button) findViewById(R.id.button2);
+        button2 = findViewById(R.id.button2);
         button2.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -38,8 +40,6 @@ public class SelectMode extends AppCompatActivity {
                 startActivity(intent3);
 
             }
-
         });
     }
-
 }

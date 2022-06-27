@@ -1,24 +1,14 @@
 package com.me.handwrittensignature;
 
 import android.content.Intent;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
-
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.ListResult;
-import com.google.firebase.storage.StorageReference;
-
-import org.w3c.dom.Text;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -29,7 +19,6 @@ public class InputName extends AppCompatActivity {
     private Button confirm_button;
     private Button start_button;
     private EditText nameText;
-    private String pathName;
     private List<String> videoFilesDirList, imageFilesDirList;   // 등록된 사용자 리스트
     private static final String videoRootPath = Environment.getExternalStorageDirectory() + "/Movies/Signature_ver_Record/";
     private static final String imageRootPath = Environment.getExternalStorageDirectory() + "/Pictures/Signature_ver_Record/";
@@ -78,12 +67,35 @@ public class InputName extends AppCompatActivity {
                 else {
                     if (videoFilesDirList.contains(name) && imageFilesDirList.contains(name)) {
                         Toast.makeText(getApplicationContext(), "이미 등록된 사용자입니다.", Toast.LENGTH_SHORT).show();
-                        start_button.setEnabled(true);
+
+                    } else if (!videoFilesDirList.contains(name) && imageFilesDirList.contains(name)) {
+
+                        String strVideoFolderPath = videoRootPath + name;
+                        File videoFolder = new File(strVideoFolderPath);
+
+                        try{
+                            videoFolder.mkdir();
+                        }
+                        catch(Exception e){
+                            e.getStackTrace();
+                        }
+
+                    } else if (videoFilesDirList.contains(name) && !imageFilesDirList.contains(name)) {
+
+                        String strImageFolderPath = imageRootPath + name;
+                        File imageFolder = new File(strImageFolderPath);
+
+                        try{
+                            imageFolder.mkdir();
+                        }
+                        catch(Exception e){
+                            e.getStackTrace();
+                        }
 
                     } else {
                         // 아직 등록되지 않은 사용자인 경우
                         Toast.makeText(getApplicationContext(), "아직 등록되지 않은 사용자입니다.", Toast.LENGTH_SHORT).show();
-                        // 디렉토리 생성
+
                         String strVideoFolderPath = videoRootPath + name;
                         String strImageFolderPath = imageRootPath + name;
 
@@ -91,20 +103,18 @@ public class InputName extends AppCompatActivity {
                         File imageFolder = new File(strImageFolderPath);
 
                         try{
-                            videoFolder.mkdir();   //폴더 생성
+                            // 사용자 디렉토리 생성
+                            videoFolder.mkdir();
                             imageFolder.mkdir();
                             Toast.makeText(getApplicationContext(), "새 폴더 생성", Toast.LENGTH_SHORT).show();
                         }
                         catch(Exception e){
                             e.getStackTrace();
                         }
-
-                        start_button.setEnabled(true);
                         Toast.makeText(getApplicationContext(), "등록되었습니다.", Toast.LENGTH_SHORT).show();
                     }
-
+                    start_button.setEnabled(true);
                 }
-
             }
 
         });
@@ -114,15 +124,9 @@ public class InputName extends AppCompatActivity {
             public void onClick(View v) {
                 String name = nameText.getText().toString();
 
-                // 이미 등록된 사용자인 경우
-                // 사용자 이름을 입력하지 않은 경우 인텐트 비활성화 하기
-//                Intent intent1 = new Intent(getApplicationContext(), SelectStatus.class);
-//                startActivity(intent1);
-
-                // 사용자 이름을 입력하지 않은 경우 인텐트 비활성화 하기
-                Intent intent2 = new Intent(getApplicationContext(), SelectMode.class);
-                intent2.putExtra("text", name);
-                startActivity(intent2);
+                Intent intent = new Intent(getApplicationContext(), SelectMode.class);
+                intent.putExtra("text", name);
+                startActivity(intent);
             }
         });
     }
