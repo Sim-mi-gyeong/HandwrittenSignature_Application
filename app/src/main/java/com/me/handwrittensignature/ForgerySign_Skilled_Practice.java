@@ -143,8 +143,8 @@ public class ForgerySign_Skilled_Practice extends AppCompatActivity {
                 Intent intent2 = new Intent(getApplicationContext(), ForgerySign_Skilled.class);
                 intent2.putExtra("text", name);
                 intent2.putExtra("targetName", targetName);
-                intent2.putExtra("targetPath", targetImageDirPath);
-                intent2.putExtra("targetSignaturePath", targetImageSignaturePath);
+                intent2.putExtra("targetImageDirPath", targetImageDirPath);
+                intent2.putExtra("targetImageSignaturePath", targetImageSignaturePath);
                 startActivity(intent2);
             }
         });

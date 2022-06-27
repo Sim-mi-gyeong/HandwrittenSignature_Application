@@ -72,27 +72,19 @@ public class ForgerySign_Skilled extends AppCompatActivity implements HBRecorder
     private int countComplete = 20;   // 실제 서명으로 등록할 횟수
     public static String name;
     public static String targetName;
-    public static String targetFile;
 
-    private int checkInit = 0;
-    private final String rootPath = Environment.getExternalStorageDirectory() + "/Movies/Signature_ver_Record/";
-    private final String rootImagePath = Environment.getExternalStorageDirectory() + "/Pictures/Signature_ver_Record/";
-    private String strFilePath;
-    private String targetPath;
-    private String targetSignaturePath;   // intent 로 practice 에서 전달받기
-    private int skilledSignatureCnt;
-    private int newSkilledSignatureCnt;
-    private File targetSignatureFolder;
-    private Bitmap bitmap;
-
+    private final String videoRootPath = Environment.getExternalStorageDirectory() + "/Movies/Signature_ver_Record/";
+    private final String imageRootPath = Environment.getExternalStorageDirectory() + "/Pictures/Signature_ver_Record/";
+    private String targetImageDirPath;   // 위조할 대상의 디렉토리
+    private String targetImageSignature;   // 위조 대상의 실제 서명 디렉토리 중 랜덤 선택된 서명
+    private String targetImageSignaturePath;   // 위조 대상의 실제 서명 디렉토리 중 랜덤 선택된 서명 이미지 경로
+    private String targetVideoSignaturePath;   // 위조한 서명 녹화 영상이 저장될 경로
 
     // 타이머 관련 변수
     TimerTask timerTask;
     Timer timer = new Timer();
-    private int timeLimit = 10;   // 제한 시간 설정
+    private int timeLimit = 60;
     TextView timerText;
-
-    TimerTask captureTimerTask;
 
     ImageView iv;
 
@@ -101,15 +93,15 @@ public class ForgerySign_Skilled extends AppCompatActivity implements HBRecorder
         super.onCreate(savedInstanceState);
         setContentView(R.layout.skilled_forgery_sign);
 
-        Button loadButton = (Button)findViewById(R.id.loadButton);
-        Button startButton = (Button)findViewById(R.id.button_start);
-        Button saveButton = (Button)findViewById(R.id.button_save);
-        Button clearButton = (Button)findViewById(R.id.button_restart);
+        Button loadButton = findViewById(R.id.loadButton);
+        Button startButton = findViewById(R.id.button_start);
+        Button saveButton = findViewById(R.id.button_save);
+        Button clearButton = findViewById(R.id.button_restart);
 
-        TextView modeText = (TextView)findViewById(R.id.modeText);
-        TextView countText = (TextView)findViewById(R.id.countText);
-        TextView finishText = (TextView)findViewById(R.id.finishText);
-        timerText = (TextView)findViewById(R.id.timerText);
+        modeText = findViewById(R.id.modeText);
+        TextView countText = findViewById(R.id.countText);
+        TextView finishText = findViewById(R.id.finishText);
+        timerText = findViewById(R.id.timerText);
 
         modeText.setVisibility(View.VISIBLE);
 
@@ -119,8 +111,8 @@ public class ForgerySign_Skilled extends AppCompatActivity implements HBRecorder
         Intent intent = getIntent(); // 전달한 데이터를 받을 Intent
         name = intent.getStringExtra("text");
         targetName = intent.getStringExtra("targetName");
-        targetPath = intent.getStringExtra("targetPath");
-        targetSignaturePath = intent.getStringExtra("targetSignaturePath");
+        targetImageDirPath = intent.getStringExtra("targetImageDirPath");
+        targetImageSignaturePath = intent.getStringExtra("targetImageSignaturePath");
 
         signaturePad = (SignaturePad) findViewById(R.id.signaturePad);
         signaturePad.setEnabled(false);
@@ -130,7 +122,9 @@ public class ForgerySign_Skilled extends AppCompatActivity implements HBRecorder
         hbRecorder.setScreenDimensions(signaturePad.getMeasuredHeight(), signaturePad.getMeasuredWidth());
         Log.d("signaturePad Size : ", signaturePad.getHeight() + "  " + signaturePad.getWidth());
 
-        hbRecorder.setOutputPath(targetSignaturePath);
+        // 위조 서명이 등록될 경로는 Movies/Signature_ver_Record/targetName/..
+        targetVideoSignaturePath = videoRootPath + targetName;
+        hbRecorder.setOutputPath(targetVideoSignaturePath);
         hbRecorder.setFileName(targetName + "_skilled_forgery_"  + System.currentTimeMillis());
 
         signaturePad.setOnSignedListener(new SignaturePad.OnSignedListener() {
@@ -163,7 +157,7 @@ public class ForgerySign_Skilled extends AppCompatActivity implements HBRecorder
                 loadButton.setEnabled(false);
                 // Practice 모드에서 랜덤으로 불러온 이미지를 띄우기
                 try {
-                    File file = new File(targetSignaturePath);
+                    File file = new File(targetImageSignaturePath);
                     Bitmap bitmap = BitmapFactory.decodeStream(new FileInputStream(file));
                     iv.setImageBitmap(bitmap);
 
@@ -179,6 +173,7 @@ public class ForgerySign_Skilled extends AppCompatActivity implements HBRecorder
             @RequiresApi(api = Build.VERSION_CODES.M)
             @Override
             public void onClick(View v) {
+
                 signaturePad.setEnabled(true);
 
                 loadButton.setVisibility(View.GONE);
@@ -188,12 +183,9 @@ public class ForgerySign_Skilled extends AppCompatActivity implements HBRecorder
 
                 startButton.setEnabled(false);
 
-                createSignatureDir();
-
                 startTimerTask();
 
-                // 권한 체크
-                // 녹화 시작
+                // 권한 체크 + 녹화 시작
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                     //first check if permissions was granted
                     if (checkSelfPermission(Manifest.permission.RECORD_AUDIO, PERMISSION_REQ_ID_RECORD_AUDIO) && checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE, PERMISSION_REQ_ID_WRITE_EXTERNAL_STORAGE)) {
@@ -224,14 +216,11 @@ public class ForgerySign_Skilled extends AppCompatActivity implements HBRecorder
                 countText.setText((countNum + "/" + countComplete).toString());
                 Toast.makeText(ForgerySign_Skilled.this, "Signature Saved", Toast.LENGTH_SHORT).show();
 
-
-                // 기록 저장 후에도 서명 패드 초기화 실행
                 signaturePad.clear();
                 signaturePad.setEnabled(false);
 
                 sleep(1000);
 
-                // 타이머 세팅
                 saveStopTimerTask();
                 timerText.setText("제한시간 : " + timeLimit + " 초");
 
@@ -283,26 +272,6 @@ public class ForgerySign_Skilled extends AppCompatActivity implements HBRecorder
 
     }
 
-    private void createSignatureDir() {
-        //TODO targetName 디렉토리 내에, skilled 가 붙은 서명 디렉토리 개수 + 1 로 새로운 디렉토리 생성
-        File unskilledSignatureDir = new File(targetPath);
-        File[] files = unskilledSignatureDir.listFiles();
-        skilledSignatureCnt = 0;
-        for (int i = 0; i < files.length; i++) {
-            if (files[i].getName().contains("skilled") && !files[i].getName().contains("unskilled")) {   // skilled 위조 서명의 경우, 이름에 skilled 포함 여부 체크 + unskilled 는 포함되지 않도록 => 2개 조건 검사
-                skilledSignatureCnt++;
-            }
-        }
-        newSkilledSignatureCnt = skilledSignatureCnt + 1;
-        targetSignaturePath = targetPath + "/" + targetName + "_skilled_forgery_" + String.valueOf(newSkilledSignatureCnt);
-        targetSignatureFolder = new File(targetSignaturePath);
-        try {
-            targetSignatureFolder.mkdir();
-            Toast.makeText(getApplicationContext(), "위조 서명 폴더 생성", Toast.LENGTH_SHORT).show();
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
 
     /**
      * 서명 기록 시작 / 초기화 / 저장 / 제한 시간 종료 시 타이머 설정 메서드
@@ -334,7 +303,7 @@ public class ForgerySign_Skilled extends AppCompatActivity implements HBRecorder
 
     private void stopTimerTask() {
         if (timerTask != null) {
-            timeLimit = 10;
+            timeLimit = 60;
             timerText.setText("제한시간 : " + timeLimit + " 초");
             timerTask.cancel();
             timerTask = null;
@@ -347,10 +316,9 @@ public class ForgerySign_Skilled extends AppCompatActivity implements HBRecorder
             timerText.setText("제한시간 : " + timeLimit + " 초");
             timerTask.cancel();
             timerTask = null;
-            timeLimit = 10;
+            timeLimit = 60;
 
         }
-
     }
 
     @Override
@@ -399,7 +367,6 @@ public class ForgerySign_Skilled extends AppCompatActivity implements HBRecorder
     //This is not necessary - You can still use getExternalStoragePublicDirectory
     //But then you will have to add android:requestLegacyExternalStorage="true" in your Manifest
     //IT IS IMPORTANT TO SET THE FILE NAME THE SAME AS THE NAME YOU USE FOR TITLE AND DISPLAY_NAME
-
     @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     private void setOutputPath() {
 
