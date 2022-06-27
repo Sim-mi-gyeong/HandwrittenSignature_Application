@@ -68,22 +68,19 @@ public class ForgerySign_Unskilled extends AppCompatActivity implements HBRecord
     ContentResolver resolver;
     Uri mUri;
 
+    private TextView modeText;
     private SignaturePad signaturePad;
     private int countNum = 0;   // 등록된 사용자 서명 횟수
     private int countComplete = 20;   // 실제 서명으로 등록할 횟수
     public static String name;
-    private String targetName;
-    private String targetFile;
-    private String pass_targetName;
+    public static String targetName;
 
-    private final String rootPath = Environment.getExternalStorageDirectory() + "/Movies/Signature_ver_Record/";
-    private final String rootImagePath = Environment.getExternalStorageDirectory() + "/Pictures/Signature_ver_Record/";
-    private String userFolderPath;
-    private String strFilePath;
-    private String targetSignature;
-    private String targetSignaturePath;
-    private String targetPath;
-    private Bitmap bitmap;
+    private final String videoRootPath = Environment.getExternalStorageDirectory() + "/Movies/Signature_ver_Record/";
+    private final String imageRootPath = Environment.getExternalStorageDirectory() + "/Pictures/Signature_ver_Record/";
+    private String targetImageDirPath;   // 위조할 대상의 디렉토리
+    private String targetImageSignature;   // 위조 대상의 실제 서명 디렉토리 중 랜덤 선택된 서명
+    private String targetImageSignaturePath;   // 위조 대상의 실제 서명 디렉토리 중 랜덤 선택된 서명 이미지 경로
+    private String targetVideoSignaturePath;   // 위조한 서명 녹화 영상이 저장될 경로
 
     // 타이머 관련 변수
     TimerTask timerTask;
@@ -98,17 +95,19 @@ public class ForgerySign_Unskilled extends AppCompatActivity implements HBRecord
         super.onCreate(savedInstanceState);
         setContentView(R.layout.unskilled_forgery_sign);
 
-        Button loadButton = (Button)findViewById(R.id.loadButton);
-        Button startButton = (Button)findViewById(R.id.button_start);
-        Button saveButton = (Button)findViewById(R.id.button_save);
-        Button clearButton = (Button)findViewById(R.id.button_clear);
+        Button loadButton = findViewById(R.id.loadButton);
+        Button startButton = findViewById(R.id.button_start);
+        Button saveButton = findViewById(R.id.button_save);
+        Button clearButton = findViewById(R.id.button_clear);
 
-        TextView countText = (TextView)findViewById(R.id.countText);
-        TextView finishText = (TextView)findViewById(R.id.finishText);
-        timerText = (TextView)findViewById(R.id.timerText);
+        modeText = findViewById(R.id.modeText);
+        TextView countText = findViewById(R.id.countText);
+        TextView finishText = findViewById(R.id.finishText);
+        timerText = findViewById(R.id.timerText);
+
+        modeText.setVisibility(View.VISIBLE);
 
         iv = findViewById(R.id.image1);
-
         timerText.setText("제한시간 : " + timeLimit + " 초");
 
         Intent intent = getIntent(); // 전달한 데이터를 받을 Intent
@@ -122,8 +121,9 @@ public class ForgerySign_Unskilled extends AppCompatActivity implements HBRecord
         hbRecorder.setScreenDimensions(signaturePad.getMeasuredHeight(), signaturePad.getMeasuredWidth());
         Log.d("signaturePad Size : ", signaturePad.getHeight() + "  " + signaturePad.getWidth());
 
-        hbRecorder.setOutputPath(targetSignaturePath);
-        hbRecorder.setFileName(targetName + "_skilled_forgery_"  + System.currentTimeMillis());
+//        targetVideoSignaturePath = videoRootPath + targetName;
+//        hbRecorder.setOutputPath(targetVideoSignaturePath);
+//        hbRecorder.setFileName(targetName + "_skilled_forgery_"  + System.currentTimeMillis());
 
         signaturePad.setOnSignedListener(new SignaturePad.OnSignedListener() {
 
@@ -151,13 +151,10 @@ public class ForgerySign_Unskilled extends AppCompatActivity implements HBRecord
 
             @Override
             public void onClick(View v) {
-                loadButton.setEnabled(false);
 
                 try {
-                    loadTargetSignature();
-                    File storageDir = new File(targetSignaturePath);   // 위조할 대상의 위조할 서명 디렉토리 path
-                    String loadImgName = targetFile;   // 위조할 대상의 위조할 서명 디렉토리 path 내 보여줄 이미지(-1번째)
-                    File file = new File(storageDir, loadImgName);
+                    targetImageSignaturePath = loadTargetSignature();
+                    File file = new File(targetImageSignaturePath);
                     Bitmap bitmap = BitmapFactory.decodeStream(new FileInputStream(file));
                     iv.setImageBitmap(bitmap);
 
@@ -165,6 +162,11 @@ public class ForgerySign_Unskilled extends AppCompatActivity implements HBRecord
                     Toast.makeText(getApplicationContext(), "이미지 로드 실패", Toast.LENGTH_SHORT).show();
                 }
 
+                targetVideoSignaturePath = videoRootPath + targetName;
+                hbRecorder.setOutputPath(targetVideoSignaturePath);
+                hbRecorder.setFileName(targetName + "_skilled_forgery_"  + System.currentTimeMillis());
+
+                loadButton.setEnabled(false);
             }
         });
 
@@ -193,7 +195,6 @@ public class ForgerySign_Unskilled extends AppCompatActivity implements HBRecord
                         hasPermissions = true;
                     }
                     if (hasPermissions) {
-
                         startRecordingScreen();
 
                     }
@@ -244,7 +245,6 @@ public class ForgerySign_Unskilled extends AppCompatActivity implements HBRecord
                         }
                     });
                 }
-
             }
 
         });
@@ -279,41 +279,43 @@ public class ForgerySign_Unskilled extends AppCompatActivity implements HBRecord
     /**
      * 위조 대상의 서명 데이터를 가져올 메서드 - targetFile = 위조 대상의 서명 이미지 경로(String)
      */
-    private void loadTargetSignature() {
-        File directory = new File(rootPath);
-        File[] files = directory.listFiles();   // ~/Signature_ver2 디렉토리 내 파일 목록
-        List<String> filesDirList = new ArrayList<>();
+    public String loadTargetSignature() {
+        File directory = new File(imageRootPath);
+        File[] files = directory.listFiles();   // 디렉토리 내 파일 목록
+        List<String> imageFilesDirList = new ArrayList<>();
 
         for (int i = 0; i < files.length; i++) {
-            filesDirList.add(files[i].getName());
+            imageFilesDirList.add(files[i].getName());
         }
 
-        filesDirList.remove(name);   // 본인의 디렉토리(서명은)는 위조 대상에서 제외
+        imageFilesDirList.remove(name);   // 본인의 디렉토리(서명은)는 위조 대상에서 제외
 
         // 위조할 타겟 대상의 디렉토리 랜덤 선택
-        int idx1 = new Random().nextInt(filesDirList.size());
-        targetName = filesDirList.get(idx1);
+        int idx1 = new Random().nextInt(imageFilesDirList.size());
+        targetName = imageFilesDirList.get(idx1);
 
         // TODO 위조할 타켓 대상의 디렉토리 내 서명 선택 - 각 서명 디렉토리 이름 중 unskilled or skilled 문자열 미포함 디렉토리 선택
-        targetPath = rootPath + targetName;
-        File targetPathFiles = new File(targetPath);
-        File[] targetPathFileList = targetPathFiles.listFiles();   // 위조할 타켓 대상 디렉토리 내의 목록
+        targetImageDirPath = imageRootPath + targetName;
+        File targetImagePathFiles = new File(targetImageDirPath);
+        File[] targetImagePathFileList = targetImagePathFiles.listFiles();   // 위조할 타켓 대상 디렉토리 내의 목록
         List<String> targetPathFolderList = new ArrayList<>();
 
-        for (int i = 0; i < targetPathFileList.length; i++) {
-            targetPathFolderList.add(targetPathFileList[i].getName());
+        for (int i = 0; i < targetImagePathFileList.length; i++) {
+            targetPathFolderList.add(targetImagePathFileList[i].getName());
         }
 
         for (int i = 0; i < targetPathFolderList.size(); i++) {
-            if (targetPathFolderList.get(i).contains("unskilled") || targetPathFolderList.get(i).contains("skilled") ||targetPathFolderList.get(i).contains("mp4") ) {
+            if (targetPathFolderList.get(i).contains("unskilled") || targetPathFolderList.get(i).contains("skilled") || targetPathFolderList.get(i).contains("mp4") ) {
                 targetPathFolderList.remove(targetPathFolderList.get(i));   // 위조 대상의 실제 서명 이미지들만 남기기
             }
         }
 
         // TODO 위조할 타겟 대상의 디렉토리 내 서명 - unskilled or skilled 문자열 미포함 -> png 파일 중 랜덤 선택
         int idx2 = new Random().nextInt(targetPathFolderList.size());
-        targetSignature = targetPathFolderList.get(idx2);
-        targetSignaturePath = targetPath + "/" + targetSignature;
+        targetImageSignature = targetPathFolderList.get(idx2);
+        targetImageSignaturePath = targetImageDirPath + "/" + targetImageSignature;
+
+        return targetImageSignaturePath;
 
     }
 
@@ -463,8 +465,6 @@ public class ForgerySign_Unskilled extends AppCompatActivity implements HBRecord
 
     // Generate a timestamp to be used as a file name
     private String generateFileName() {
-
-        userFolderPath = rootPath + name;
 
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss", Locale.getDefault());
         Date curDate = new Date(System.currentTimeMillis());

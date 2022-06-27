@@ -109,7 +109,6 @@ public class RealSign_ver_Record extends AppCompatActivity implements HBRecorder
         hbRecorder.setOutputPath(userVideoFolderPath);
         hbRecorder.setFileName(name + "_" + System.currentTimeMillis());
 
-
         signaturePad.setOnSignedListener(new SignaturePad.OnSignedListener() {
 
             @Override
@@ -145,8 +144,7 @@ public class RealSign_ver_Record extends AppCompatActivity implements HBRecorder
 
                 startTimerTask();
 
-                // 권한 체크
-                // 녹화 시작
+                // 권한 체크 + 녹화 시작
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                     //first check if permissions was granted
                     if (checkSelfPermission(Manifest.permission.RECORD_AUDIO, PERMISSION_REQ_ID_RECORD_AUDIO) && checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE, PERMISSION_REQ_ID_WRITE_EXTERNAL_STORAGE)) {

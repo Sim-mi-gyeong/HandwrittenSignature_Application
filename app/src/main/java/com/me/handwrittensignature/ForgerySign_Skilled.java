@@ -1,7 +1,5 @@
 package com.me.handwrittensignature;
-// RealSign
 
-//import android.support.v7.app.AppCompatActivity;
 import android.Manifest;
 import android.content.ContentResolver;
 import android.content.ContentValues;
@@ -16,8 +14,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
-import android.os.Handler;
-import android.os.Message;
+
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
@@ -31,22 +28,15 @@ import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
-
-import com.bumptech.glide.Glide;
+;
 import com.github.gcacace.signaturepad.views.SignaturePad;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.StorageReference;
+
 import com.hbisoft.hbrecorder.HBRecorder;
 import com.hbisoft.hbrecorder.HBRecorderListener;
-
-import org.w3c.dom.Text;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
