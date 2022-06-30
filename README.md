@@ -10,6 +10,11 @@
 
 </br></br>
 
+## 시연 영상
+[구글 드라이브 연결](https://drive.google.com/file/d/1-82cTcEN5uWbL43na9Al50JxedXsoVd_/view?usp=sharing)
+
+</br></br>
+
 ## 🛠 사용 기술 및 라이브러리
 
 - Java, Android </br>
@@ -41,6 +46,7 @@
 ![전체 수집 아키텍처.png](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/ac248e64-0352-42bc-9044-02b57ab9e4e4/전체_수집_아키텍처.png)
 
 - 각 등록 서명 종류에 따른 프로세스 아키텍처
+
     - 실제 서명
         
         ![실제 서명 수집 아키텍처.png](https://s3-us-west-2.amazonaws.com/secure.notion-static.com/9f872196-8fe7-4ac9-8405-e2438dbc01bc/실제_서명_수집_아키텍처.png)
