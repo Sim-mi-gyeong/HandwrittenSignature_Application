@@ -6,46 +6,25 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
-import android.content.res.Resources;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.graphics.Matrix;
 import android.media.MediaRecorder;
-import android.media.MediaScannerConnection;
-import android.media.projection.MediaProjectionManager;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.HandlerThread;
-import android.provider.MediaStore;
-import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.annotation.DrawableRes;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
-
 import com.github.gcacace.signaturepad.views.SignaturePad;
-import com.hbisoft.hbrecorder.HBRecorder;
-import com.hbisoft.hbrecorder.HBRecorderCodecInfo;
-import com.hbisoft.hbrecorder.HBRecorderListener;
-
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
-import java.util.Locale;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -55,25 +34,10 @@ public class RealSign_ver_Record extends AppCompatActivity {
 
     private static final String TAG = "RealSign_ver_Record";
     private Context mAppContext;
-    private View mRootView;
-    private Button mButtonRecord;
-    private Button mButtonSwitch;
-    private TextView mTextView;
     private Handler mMainHandler;
     private Handler mWorkerHandler;
     private ViewRecorder mViewRecorder;
-    private static int mNumber = 0;
     private boolean mRecording = false;
-    private boolean mFullscreen = false;
-
-    private static final int SCREEN_RECORD_REQUEST_CODE = 100;
-    private static final int PERMISSION_REQ_ID_RECORD_AUDIO = 101;
-    private static final int PERMISSION_REQ_ID_WRITE_EXTERNAL_STORAGE = 102;
-    HBRecorder hbRecorder;
-    boolean hasPermissions;
-    ContentValues contentValues;
-    ContentResolver resolver;
-    Uri mUri;
 
     private SignaturePad signaturePad;
     private int countNum = 0;   // 등록된 사용자 서명 횟수
@@ -333,7 +297,6 @@ public class RealSign_ver_Record extends AppCompatActivity {
         @Override
         public void onClick(View v) {
             mViewRecorder.setRecordedView(signaturePad);
-            mButtonRecord.setEnabled(false);
             mWorkerHandler.post(new Runnable() {
                 @Override
                 public void run() {

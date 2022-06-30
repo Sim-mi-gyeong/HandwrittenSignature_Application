@@ -8,6 +8,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.media.MediaRecorder;
 import android.media.MediaScannerConnection;
 import android.media.projection.MediaProjectionManager;
 import android.net.Uri;
@@ -15,6 +16,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.Message;
 import android.provider.MediaStore;
 import android.util.Log;
@@ -39,6 +41,7 @@ import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.StorageReference;
 import com.hbisoft.hbrecorder.HBRecorder;
+import com.hbisoft.hbrecorder.HBRecorderCodecInfo;
 import com.hbisoft.hbrecorder.HBRecorderListener;
 
 import java.io.ByteArrayOutputStream;
@@ -57,16 +60,14 @@ import java.util.TimerTask;
 
 import static android.os.SystemClock.sleep;
 
-public class ForgerySign_Unskilled extends AppCompatActivity implements HBRecorderListener {
+public class ForgerySign_Unskilled extends AppCompatActivity {
 
-    private static final int SCREEN_RECORD_REQUEST_CODE = 100;
-    private static final int PERMISSION_REQ_ID_RECORD_AUDIO = 101;
-    private static final int PERMISSION_REQ_ID_WRITE_EXTERNAL_STORAGE = 102;
-    HBRecorder hbRecorder;
-    boolean hasPermissions;
-    ContentValues contentValues;
-    ContentResolver resolver;
-    Uri mUri;
+    private static final String TAG = "RealSign_ver_Record";
+    private Context mAppContext;
+    private Handler mMainHandler;
+    private Handler mWorkerHandler;
+    private ViewRecorder mViewRecorder;
+    private boolean mRecording = false;
 
     private TextView modeText;
     private SignaturePad signaturePad;
@@ -95,6 +96,8 @@ public class ForgerySign_Unskilled extends AppCompatActivity implements HBRecord
         super.onCreate(savedInstanceState);
         setContentView(R.layout.unskilled_forgery_sign);
 
+        mAppContext = getApplicationContext();
+
         Button loadButton = findViewById(R.id.loadButton);
         Button startButton = findViewById(R.id.button_start);
         Button saveButton = findViewById(R.id.button_save);
@@ -116,14 +119,14 @@ public class ForgerySign_Unskilled extends AppCompatActivity implements HBRecord
         signaturePad = (SignaturePad) findViewById(R.id.signaturePad);
         signaturePad.setEnabled(false);
 
-        hbRecorder = new HBRecorder(this, this);
-        hbRecorder.enableCustomSettings();
-        hbRecorder.setScreenDimensions(signaturePad.getMeasuredHeight(), signaturePad.getMeasuredWidth());
-        Log.d("signaturePad Size : ", signaturePad.getHeight() + "  " + signaturePad.getWidth());
+        checkPermission();
 
-//        targetVideoSignaturePath = videoRootPath + targetName;
-//        hbRecorder.setOutputPath(targetVideoSignaturePath);
-//        hbRecorder.setFileName(targetName + "_skilled_forgery_"  + System.currentTimeMillis());
+        mMainHandler = new Handler();
+        HandlerThread ht = new HandlerThread("bg_view_recorder");
+        ht.start();
+        mWorkerHandler = new Handler(ht.getLooper());
+
+        startButton.setOnClickListener(mRecordOnClickListener);
 
         signaturePad.setOnSignedListener(new SignaturePad.OnSignedListener() {
 
@@ -163,8 +166,6 @@ public class ForgerySign_Unskilled extends AppCompatActivity implements HBRecord
                 }
 
                 targetVideoSignaturePath = videoRootPath + targetName;
-                hbRecorder.setOutputPath(targetVideoSignaturePath);
-                hbRecorder.setFileName(targetName + "_skilled_forgery_"  + System.currentTimeMillis());
 
                 loadButton.setEnabled(false);
             }
@@ -187,20 +188,7 @@ public class ForgerySign_Unskilled extends AppCompatActivity implements HBRecord
 
                 startTimerTask();
 
-                // 권한 체크
-                // 녹화 시작
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    //first check if permissions was granted
-                    if (checkSelfPermission(Manifest.permission.RECORD_AUDIO, PERMISSION_REQ_ID_RECORD_AUDIO) && checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE, PERMISSION_REQ_ID_WRITE_EXTERNAL_STORAGE)) {
-                        hasPermissions = true;
-                    }
-                    if (hasPermissions) {
-                        startRecordingScreen();
-
-                    }
-                } else {
-                    //showLongToast("This library requires API 21>");
-                }
+                startRecord();
 
             }
 
@@ -210,9 +198,7 @@ public class ForgerySign_Unskilled extends AppCompatActivity implements HBRecord
             @Override
             public void onClick(View v) {
 
-                // 영상 저장
-                hbRecorder.setFileName(targetName + "_unskilled_forgery_" + System.currentTimeMillis());
-                hbRecorder.stopScreenRecording();
+                stopRecord();
 
                 countNum += 1;
 
@@ -259,17 +245,7 @@ public class ForgerySign_Unskilled extends AppCompatActivity implements HBRecord
                 clearButton.setEnabled(true);
 
                 // TODO 초기화 시 이전 녹화 영상을 저장하지 않고 다시 녹화 시작
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-                    //first check if permissions was granted
-                    if (checkSelfPermission(Manifest.permission.RECORD_AUDIO, PERMISSION_REQ_ID_RECORD_AUDIO) && checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE, PERMISSION_REQ_ID_WRITE_EXTERNAL_STORAGE)) {
-                        hasPermissions = true;
-                    }
-                    if (hasPermissions) {
-                        startRecordingScreen();
-                    }
-                } else {
-                    //showLongToast("This library requires API 21>");
-                }
+                startRecord();
 
             }
         });
@@ -340,7 +316,6 @@ public class ForgerySign_Unskilled extends AppCompatActivity implements HBRecord
                         timerText.setText("제한시간 : " + timeLimit + " 초");
                     }
                 });
-
             }
         };
         timer.schedule(timerTask, 0, 1000);
@@ -367,130 +342,120 @@ public class ForgerySign_Unskilled extends AppCompatActivity implements HBRecord
 
     }
 
-    @Override
-    public void HBRecorderOnStart() {
-        Toast.makeText(this, "Started", Toast.LENGTH_SHORT).show();
-    }
+    private void checkPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED
+                    || checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                if (shouldShowRequestPermissionRationale(Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+                    Toast.makeText(this, "권한 체크 필요", Toast.LENGTH_SHORT).show();
 
-    @Override
-    public void HBRecorderOnComplete() {
-        Toast.makeText(this, "Completed", Toast.LENGTH_SHORT).show();
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
-            //Update gallery depending on SDK Level
-            if (hbRecorder.wasUriSet()) {
-                updateGalleryUri();
-            } else{
-                refreshGalleryFile();
-            }
-        }
-    }
+                }
+                requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE}, 2);
 
-    @Override
-    public void HBRecorderOnError(int errorCode, String reason) {
-        Toast.makeText(this, errorCode+": "+reason, Toast.LENGTH_SHORT).show();
-    }
-
-    @RequiresApi(api = Build.VERSION_CODES.M)
-    private void startRecordingScreen() {
-        MediaProjectionManager mediaProjectionManager = (MediaProjectionManager) getSystemService(Context.MEDIA_PROJECTION_SERVICE);
-        Intent permissionIntent = mediaProjectionManager != null ? mediaProjectionManager.createScreenCaptureIntent() : null;
-        startActivityForResult(permissionIntent, SCREEN_RECORD_REQUEST_CODE);
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == SCREEN_RECORD_REQUEST_CODE) {
-            if (resultCode == RESULT_OK) {
-                //Start screen recording
-                hbRecorder.startScreenRecording(data, resultCode, this);
+            } else {
 
             }
         }
+
     }
 
-    //For Android 10> we will pass a Uri to HBRecorder
-    //This is not necessary - You can still use getExternalStoragePublicDirectory
-    //But then you will have to add android:requestLegacyExternalStorage="true" in your Manifest
-    //IT IS IMPORTANT TO SET THE FILE NAME THE SAME AS THE NAME YOU USE FOR TITLE AND DISPLAY_NAME
+    private final View.OnClickListener mRecordOnClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            mViewRecorder.setRecordedView(signaturePad);
+            mWorkerHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    startRecord();
+                }
+            });
+        }
+    };
 
-    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-    private void setOutputPath() {
+    private final MediaRecorder.OnErrorListener mOnErrorListener = new MediaRecorder.OnErrorListener() {
 
-        String filename = generateFileName();
+        @Override
+        public void onError(MediaRecorder mr, int what, int extra) {
+            Log.e(TAG, "MediaRecorder error: type = " + what + ", code = " + extra);
+            mViewRecorder.reset();
+            mViewRecorder.release();
+        }
+    };
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-            resolver = getContentResolver();
-            contentValues = new ContentValues();
-            contentValues.put(MediaStore.Video.Media.RELATIVE_PATH, "SpeedTest/" + "SpeedTest");
-            contentValues.put(MediaStore.Video.Media.TITLE, filename);
-            contentValues.put(MediaStore.MediaColumns.DISPLAY_NAME, filename);
-            contentValues.put(MediaStore.MediaColumns.MIME_TYPE, "video/mp4");
-            mUri = resolver.insert(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, contentValues);
-            //FILE NAME SHOULD BE THE SAME
-            hbRecorder.setFileName(filename);
-            hbRecorder.setOutputUri(mUri);
-        } else{
-            createFolder();
-            hbRecorder.setOutputPath(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES) +"/HBRecorder");
+    @Override
+    protected void onPause() {
+        super.onPause();
+//        mMainHandler.removeCallbacks(mUpdateTextRunnable);
+        if (mRecording) {
+            mMainHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    stopRecord();
+//                    updateRecordButtonText();
+                }
+            });
         }
     }
 
-    //Check if permissions was granted
-    private boolean checkSelfPermission(String permission, int requestCode) {
-        if (ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
-            ActivityCompat.requestPermissions(this, new String[]{permission}, requestCode);
-            return false;
-        }
-        return true;
+    @Override
+    protected void onResume() {
+        super.onResume();
+//        mMainHandler.post(mUpdateTextRunnable);
+//        updateRecordButtonText();
     }
 
-    private void updateGalleryUri(){
-        contentValues.clear();
-        contentValues.put(MediaStore.Video.Media.IS_PENDING, 0);
-        getContentResolver().update(mUri, contentValues, null, null);
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+//        mWorkerHandler.getLooper().quit();
     }
 
-    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
-    private void refreshGalleryFile() {
-        MediaScannerConnection.scanFile(this,
-                new String[]{hbRecorder.getFilePath()}, null,
-                new MediaScannerConnection.OnScanCompletedListener() {
-                    public void onScanCompleted(String path, Uri uri) {
-                        Log.i("ExternalStorage", "Scanned " + path + ":");
-                        Log.i("ExternalStorage", "-> uri=" + uri);
-                    }
-                });
-    }
-
-    // Generate a timestamp to be used as a file name
-    private String generateFileName() {
-
-        SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss", Locale.getDefault());
-        Date curDate = new Date(System.currentTimeMillis());
-
-        return formatter.format(curDate).replace(" ", "");
-
-    }
-
-    // drawable to byte[]
-    private byte[] drawable2ByteArray(@DrawableRes int drawableId) {
-        Bitmap icon = BitmapFactory.decodeResource(getResources(), drawableId);
-        ByteArrayOutputStream stream = new ByteArrayOutputStream();
-        icon.compress(Bitmap.CompressFormat.PNG, 100, stream);
-        return stream.toByteArray();
-    }
-
-    //Create Folder
-    //Only call this on Android 9 and lower (getExternalStoragePublicDirectory is deprecated)
-    //This can still be used on Android 10> but you will have to add android:requestLegacyExternalStorage="true" in your Manifest
-    private void createFolder() {
-        File f1 = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_MOVIES), "SpeedTest");
-        if (!f1.exists()) {
-            if (f1.mkdirs()) {
-                Log.i("Folder ", "created");
+    private void startRecord() {
+        File directory = mAppContext.getExternalCacheDir();
+        if (directory != null) {
+            directory.mkdirs();
+            if (!directory.exists()) {
+                Log.w(TAG, "startRecord failed: " + directory + " does not exist!");
+                return;
             }
         }
+
+        mViewRecorder = new ViewRecorder();
+//        mViewRecorder.setAudioSource(MediaRecorder.AudioSource.MIC); // uncomment this line if audio required
+        mViewRecorder.setVideoSource(MediaRecorder.VideoSource.SURFACE);
+        mViewRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
+//        mViewRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
+        mViewRecorder.setVideoFrameRate(60); // 60fps
+        mViewRecorder.setVideoEncoder(MediaRecorder.VideoEncoder.H264);
+        mViewRecorder.setVideoSize(720, 1280);
+        mViewRecorder.setVideoEncodingBitRate(2000 * 1000);
+        mViewRecorder.setOutputFile(targetVideoSignaturePath  + "/" + targetName + "_unskilled_forgery_" + + System.currentTimeMillis() + ".mp4");
+        mViewRecorder.setOnErrorListener(mOnErrorListener);
+
+        mViewRecorder.setRecordedView(signaturePad);
+
+        try {
+            mViewRecorder.prepare();
+            mViewRecorder.start();
+        } catch (IOException e) {
+            Log.e(TAG, "startRecord failed", e);
+            return;
+        }
+
+        Log.d(TAG, "startRecord successfully!");
+        mRecording = true;
+    }
+
+    private void stopRecord() {
+        try {
+            mViewRecorder.stop();
+            mViewRecorder.reset();
+            mViewRecorder.release();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        mRecording = false;
+        Log.d(TAG, "stopRecord successfully!");
     }
 
 }
