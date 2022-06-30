@@ -1,24 +1,17 @@
 package com.me.handwrittensignature;
 // ForgerySign_Unskilled
 import android.Manifest;
-import android.content.ContentResolver;
-import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.MediaRecorder;
-import android.media.MediaScannerConnection;
-import android.media.projection.MediaProjectionManager;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
 import android.os.HandlerThread;
-import android.os.Message;
-import android.provider.MediaStore;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -26,34 +19,16 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import androidx.annotation.DrawableRes;
-import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.app.ActivityCompat;
-import androidx.core.content.ContextCompat;
 
-import com.bumptech.glide.Glide;
 import com.github.gcacace.signaturepad.views.SignaturePad;
-import com.google.android.gms.tasks.OnFailureListener;
-import com.google.android.gms.tasks.OnSuccessListener;
-import com.google.firebase.storage.FirebaseStorage;
-import com.google.firebase.storage.StorageReference;
-import com.hbisoft.hbrecorder.HBRecorder;
-import com.hbisoft.hbrecorder.HBRecorderCodecInfo;
-import com.hbisoft.hbrecorder.HBRecorderListener;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
-import java.util.Locale;
 import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
@@ -62,13 +37,14 @@ import static android.os.SystemClock.sleep;
 
 public class ForgerySign_Unskilled extends AppCompatActivity {
 
-    private static final String TAG = "RealSign_ver_Record";
+    private static final String TAG = "ForgerySign_Unskilled";
     private Context mAppContext;
     private Handler mMainHandler;
     private Handler mWorkerHandler;
     private ViewRecorder mViewRecorder;
     private boolean mRecording = false;
 
+    private Button loadButton, startButton, saveButton, clearButton;
     private TextView modeText;
     private SignaturePad signaturePad;
     private int countNum = 0;   // 등록된 사용자 서명 횟수
@@ -98,10 +74,10 @@ public class ForgerySign_Unskilled extends AppCompatActivity {
 
         mAppContext = getApplicationContext();
 
-        Button loadButton = findViewById(R.id.loadButton);
-        Button startButton = findViewById(R.id.button_start);
-        Button saveButton = findViewById(R.id.button_save);
-        Button clearButton = findViewById(R.id.button_clear);
+        loadButton = findViewById(R.id.loadButton);
+        startButton = findViewById(R.id.button_start);
+        saveButton = findViewById(R.id.button_save);
+        clearButton = findViewById(R.id.button_clear);
 
         modeText = findViewById(R.id.modeText);
         TextView countText = findViewById(R.id.countText);
