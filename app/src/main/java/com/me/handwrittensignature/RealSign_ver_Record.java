@@ -90,7 +90,7 @@ public class RealSign_ver_Record extends AppCompatActivity {
         checkPermission();
 
         mMainHandler = new Handler();
-        HandlerThread ht = new HandlerThread("bg_view_recorder");
+        HandlerThread ht = new HandlerThread("viewRecorder");
         ht.start();
         mWorkerHandler = new Handler(ht.getLooper());
 
@@ -310,7 +310,7 @@ public class RealSign_ver_Record extends AppCompatActivity {
 
         @Override
         public void onError(MediaRecorder mr, int what, int extra) {
-            Log.e(TAG, "MediaRecorder error: type = " + what + ", code = " + extra);
+            Log.e(TAG, "MediaRecorder Error: Type = " + what + ", Code = " + extra);
             mViewRecorder.reset();
             mViewRecorder.release();
         }
@@ -319,13 +319,11 @@ public class RealSign_ver_Record extends AppCompatActivity {
     @Override
     protected void onPause() {
         super.onPause();
-//        mMainHandler.removeCallbacks(mUpdateTextRunnable);
         if (mRecording) {
             mMainHandler.post(new Runnable() {
                 @Override
                 public void run() {
                     stopRecord();
-//                    updateRecordButtonText();
                 }
             });
         }
@@ -334,14 +332,11 @@ public class RealSign_ver_Record extends AppCompatActivity {
     @Override
     protected void onResume() {
         super.onResume();
-//        mMainHandler.post(mUpdateTextRunnable);
-//        updateRecordButtonText();
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-//        mWorkerHandler.getLooper().quit();
     }
 
     private void startRecord() {
@@ -349,7 +344,7 @@ public class RealSign_ver_Record extends AppCompatActivity {
         if (directory != null) {
             directory.mkdirs();
             if (!directory.exists()) {
-                Log.w(TAG, "startRecord failed: " + directory + " does not exist!");
+                Log.w(TAG, "StartRecord Failed: " + directory + " Does Not Exist!");
                 return;
             }
         }
@@ -372,11 +367,11 @@ public class RealSign_ver_Record extends AppCompatActivity {
             mViewRecorder.prepare();
             mViewRecorder.start();
         } catch (IOException e) {
-            Log.e(TAG, "startRecord failed", e);
+            Log.e(TAG, "StartRecord Failed", e);
             return;
         }
 
-        Log.d(TAG, "startRecord successfully!");
+        Log.d(TAG, "StartRecord Successfully!");
         mRecording = true;
     }
 
@@ -389,6 +384,6 @@ public class RealSign_ver_Record extends AppCompatActivity {
             e.printStackTrace();
         }
         mRecording = false;
-        Log.d(TAG, "stopRecord successfully!");
+        Log.d(TAG, "StopRecord Successfully!");
     }
 }
