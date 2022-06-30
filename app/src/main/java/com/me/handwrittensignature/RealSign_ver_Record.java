@@ -6,8 +6,11 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Matrix;
+import android.media.MediaRecorder;
 import android.media.MediaScannerConnection;
 import android.media.projection.MediaProjectionManager;
 import android.net.Uri;
@@ -15,7 +18,9 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
+import android.os.HandlerThread;
 import android.provider.MediaStore;
+import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
@@ -31,6 +36,7 @@ import androidx.core.content.ContextCompat;
 
 import com.github.gcacace.signaturepad.views.SignaturePad;
 import com.hbisoft.hbrecorder.HBRecorder;
+import com.hbisoft.hbrecorder.HBRecorderCodecInfo;
 import com.hbisoft.hbrecorder.HBRecorderListener;
 
 import java.io.ByteArrayOutputStream;
@@ -46,6 +52,19 @@ import java.util.TimerTask;
 import static android.os.SystemClock.sleep;
 
 public class RealSign_ver_Record extends AppCompatActivity implements HBRecorderListener {
+
+    private static final String TAG = "RealSign_ver_Record";
+    private Context mAppContext;
+    private View mRootView;
+    private Button mButtonRecord;
+    private Button mButtonSwitch;
+    private TextView mTextView;
+    private Handler mMainHandler;
+    private Handler mWorkerHandler;
+    private ViewRecorder mViewRecorder;
+    private static int mNumber = 0;
+    private boolean mRecording = false;
+    private boolean mFullscreen = false;
 
     private static final int SCREEN_RECORD_REQUEST_CODE = 100;
     private static final int PERMISSION_REQ_ID_RECORD_AUDIO = 101;
@@ -81,6 +100,8 @@ public class RealSign_ver_Record extends AppCompatActivity implements HBRecorder
         super.onCreate(savedInstanceState);
         setContentView(R.layout.real_sign);
 
+        mAppContext = getApplicationContext();
+
         Button startButton = findViewById(R.id.button_start);
         Button saveButton = findViewById(R.id.button_save);
         Button clearButton = findViewById(R.id.button_clear);
@@ -101,13 +122,24 @@ public class RealSign_ver_Record extends AppCompatActivity implements HBRecorder
 
         hbRecorder = new HBRecorder(this, this);
         hbRecorder.enableCustomSettings();
-        hbRecorder.setScreenDimensions(signaturePad.getMeasuredHeight(), signaturePad.getMeasuredWidth());
+        hbRecorder.setScreenDimensions(signaturePad.getHeight(), signaturePad.getWidth());
+
         Log.d("signaturePad Size : ", signaturePad.getHeight() + "  " + signaturePad.getWidth());
+        HBRecorderCodecInfo hbRecorderCodecInfo = new HBRecorderCodecInfo();
+        hbRecorderCodecInfo.setContext(signaturePad.getContext());
 
         userVideoFolderPath = videoRootPath + name;
         userImageFolderPath = imageRootPath + name;
         hbRecorder.setOutputPath(userVideoFolderPath);
         hbRecorder.setFileName(name + "_" + System.currentTimeMillis());
+
+        checkPermission();
+        mMainHandler = new Handler();
+        HandlerThread ht = new HandlerThread("bg_view_recorder");
+        ht.start();
+        mWorkerHandler = new Handler(ht.getLooper());
+
+        startButton.setOnClickListener(mRecordOnClickListener);
 
         signaturePad.setOnSignedListener(new SignaturePad.OnSignedListener() {
 
@@ -144,6 +176,8 @@ public class RealSign_ver_Record extends AppCompatActivity implements HBRecorder
 
                 startTimerTask();
 
+                startRecord();
+
                 // 권한 체크 + 녹화 시작
                 if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
                     //first check if permissions was granted
@@ -168,6 +202,8 @@ public class RealSign_ver_Record extends AppCompatActivity implements HBRecorder
             public void onClick(View v) {
 
                 captureView(signaturePad);
+
+                stopRecord();
 
                 // 영상 저장
                 hbRecorder.setFileName(name + "_" + System.currentTimeMillis());
@@ -242,7 +278,7 @@ public class RealSign_ver_Record extends AppCompatActivity implements HBRecorder
         View.destroyDrawingCache();
         View.setDrawingCacheEnabled(true);
         View.buildDrawingCache();
-        bitmap = signaturePad.getDrawingCache();   // Bitmap 가져오기
+        bitmap = View.getDrawingCache();   // Bitmap 가져오기
 
         FileOutputStream fos;
 
@@ -309,6 +345,23 @@ public class RealSign_ver_Record extends AppCompatActivity implements HBRecorder
             timerTask.cancel();
             timerTask = null;
             timeLimit = 60;
+        }
+
+    }
+
+    private void checkPermission() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            if (checkSelfPermission(Manifest.permission.WRITE_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED
+                    || checkSelfPermission(Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED) {
+                if (shouldShowRequestPermissionRationale(Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+                    Toast.makeText(this, "외부 저장소 사용을 위해 읽기/쓰기 필요", Toast.LENGTH_SHORT).show();
+
+                }
+                requestPermissions(new String[]{Manifest.permission.WRITE_EXTERNAL_STORAGE, Manifest.permission.READ_EXTERNAL_STORAGE}, 2);
+
+            } else {
+
+            }
         }
 
     }
@@ -380,6 +433,63 @@ public class RealSign_ver_Record extends AppCompatActivity implements HBRecorder
         }
     }
 
+//    private final Runnable mUpdateTextRunnable = new Runnable() {
+//        @Override
+//        public void run() {
+//            mTextView.setText(String.valueOf(mNumber++));
+//            mMainHandler.postDelayed(this, 500);
+//        }
+//    };
+
+    private static final int REQUEST_EXTERNAL_STORAGE = 1;
+    private static String[] PERMISSIONS_STORAGE = {
+            Manifest.permission.READ_EXTERNAL_STORAGE,
+            Manifest.permission.WRITE_EXTERNAL_STORAGE
+    };
+
+    private final View.OnClickListener mRecordOnClickListener = new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+            mViewRecorder.setRecordedView(signaturePad);
+            mButtonRecord.setEnabled(false);
+            mWorkerHandler.post(new Runnable() {
+                @Override
+                public void run() {
+                    startRecord();
+//                    if (mRecording) {
+//                        stopRecord();
+//                    } else {
+//                        startRecord();
+//                    }
+//                    updateRecordButtonText();
+                }
+            });
+        }
+    };
+
+//    private final View.OnClickListener mSwitchOnClickListener = new View.OnClickListener() {
+//        @Override
+//        public void onClick(View v) {
+//            mButtonSwitch.setEnabled(false);
+//            if (mRecording) {
+//                mViewRecorder.setRecordedView(mFullscreen ? mTextView : mRootView);
+//                mFullscreen = !mFullscreen;
+//                mButtonSwitch.setText(mFullscreen ? R.string.center_view : R.string.full_screen);
+//                mButtonSwitch.setEnabled(true);
+//            }
+//        }
+//    };
+
+    private final MediaRecorder.OnErrorListener mOnErrorListener = new MediaRecorder.OnErrorListener() {
+
+        @Override
+        public void onError(MediaRecorder mr, int what, int extra) {
+            Log.e(TAG, "MediaRecorder error: type = " + what + ", code = " + extra);
+            mViewRecorder.reset();
+            mViewRecorder.release();
+        }
+    };
+
     //Check if permissions was granted
     private boolean checkSelfPermission(String permission, int requestCode) {
         if (ContextCompat.checkSelfPermission(this, permission) != PackageManager.PERMISSION_GRANTED) {
@@ -411,7 +521,6 @@ public class RealSign_ver_Record extends AppCompatActivity implements HBRecorder
     private String generateFileName() {
 
         userVideoFolderPath = videoRootPath + name;
-
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd-HH-mm-ss", Locale.getDefault());
         Date curDate = new Date(System.currentTimeMillis());
 
@@ -421,9 +530,12 @@ public class RealSign_ver_Record extends AppCompatActivity implements HBRecorder
 
     // drawable to byte[]
     private byte[] drawable2ByteArray(@DrawableRes int drawableId) {
+
         Bitmap icon = BitmapFactory.decodeResource(getResources(), drawableId);
+//        Bitmap icon = BitmapFactory.decodeResource(signaturePad.getResources(), drawableId);
         ByteArrayOutputStream stream = new ByteArrayOutputStream();
         icon.compress(Bitmap.CompressFormat.PNG, 100, stream);
+
         return stream.toByteArray();
     }
 
@@ -437,5 +549,100 @@ public class RealSign_ver_Record extends AppCompatActivity implements HBRecorder
                 Log.i("Folder ", "created");
             }
         }
+    }
+
+//    @Override
+//    protected void onPause() {
+//        super.onPause();
+////        mMainHandler.removeCallbacks(mUpdateTextRunnable);
+//        if (mRecording) {
+//            mMainHandler.post(new Runnable() {
+//                @Override
+//                public void run() {
+//                    stopRecord();
+////                    updateRecordButtonText();
+//                }
+//            });
+//        }
+//    }
+
+//    @Override
+//    protected void onResume() {
+//        super.onResume();
+////        mMainHandler.post(mUpdateTextRunnable);
+////        updateRecordButtonText();
+//    }
+
+//    @Override
+//    protected void onDestroy() {
+//        super.onDestroy();
+////        mWorkerHandler.getLooper().quit();
+//    }
+
+//    private void updateRecordButtonText() {
+//        mMainHandler.post(new Runnable() {
+//            @Override
+//            public void run() {
+//                mButtonRecord.setText(mRecording ? R.string.stop_record : R.string.start_record);
+//                mButtonRecord.setEnabled(true);
+//
+//                mButtonSwitch.setEnabled(mRecording);
+//                if (mRecording) {
+//                    mFullscreen = false;
+//                    mButtonSwitch.setText(R.string.full_screen);
+//                }
+//            }
+//        });
+//    }
+
+    private void startRecord() {
+        File directory = mAppContext.getExternalCacheDir();
+        if (directory != null) {
+            directory.mkdirs();
+            if (!directory.exists()) {
+                Log.w(TAG, "startRecord failed: " + directory + " does not exist!");
+                return;
+            }
+        }
+
+        mViewRecorder = new ViewRecorder();
+//        mViewRecorder.setAudioSource(MediaRecorder.AudioSource.MIC); // uncomment this line if audio required
+        mViewRecorder.setVideoSource(MediaRecorder.VideoSource.SURFACE);
+        mViewRecorder.setOutputFormat(MediaRecorder.OutputFormat.MPEG_4);
+//        mViewRecorder.setAudioEncoder(MediaRecorder.AudioEncoder.AAC);
+        mViewRecorder.setVideoFrameRate(60); // 5fps
+        mViewRecorder.setVideoEncoder(MediaRecorder.VideoEncoder.H264);
+        mViewRecorder.setVideoSize(720, 1280);
+        mViewRecorder.setVideoEncodingBitRate(2000 * 1000);
+        Log.d(TAG, getCacheDir() + "/" + System.currentTimeMillis() + ".mp4");
+//        mViewRecorder.setOutputFile(getCacheDir() + "/" + System.currentTimeMillis() + ".mp4");
+        mViewRecorder.setOutputFile(Environment.getExternalStorageDirectory() + "/Movies" + "/" + System.currentTimeMillis() + ".mp4");
+        mViewRecorder.setOnErrorListener(mOnErrorListener);
+
+        mViewRecorder.setRecordedView(signaturePad);
+
+//        mViewRecorder.setRecordedView(mTextView);
+        try {
+            mViewRecorder.prepare();
+            mViewRecorder.start();
+        } catch (IOException e) {
+            Log.e(TAG, "startRecord failed", e);
+            return;
+        }
+
+        Log.d(TAG, "startRecord successfully!");
+        mRecording = true;
+    }
+
+    private void stopRecord() {
+        try {
+            mViewRecorder.stop();
+            mViewRecorder.reset();
+            mViewRecorder.release();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        mRecording = false;
+        Log.d(TAG, "stopRecord successfully!");
     }
 }

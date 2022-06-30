@@ -4,6 +4,11 @@
     <string name="notify_stop">Stop</string>
     <string name="notify_shutdown">Shutdown</string>
 
+    <string name="default_display">0</string>
+    <string name="start_record">Start Record</string>
+    <string name="stop_record">Stop Record</string>
+    <string name="full_screen">Full Screen</string>
+    <string name="center_view">Center View</string>
 
     <string-array name="options_format_keys">
         <item>H264</item>
@@ -21,9 +26,6 @@
         <item>640x360 @ 96</item>
     </string-array>
 
-
-
-    '
     <string-array name="options_resolution_values">
         <item>1280,720,320</item>
         <item>800,480,160</item>
