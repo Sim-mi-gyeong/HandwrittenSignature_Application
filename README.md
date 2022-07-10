@@ -31,7 +31,7 @@
             - Virtual Device: Pixel 2 API 29
             - Test Device: Galaxy Tab S7
             - JDK 15.0.2
-            - 
+           
         - Library
             - Signature-pad: 1.2.1
 - Firebase
